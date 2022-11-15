@@ -1,0 +1,127 @@
+<?php
+
+namespace App\Http\Repository;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
+class bAppointmentRepositoryImpl implements bAppointmentRepositoryInterface
+{
+    public function AmbilAntrian($request,$JenisBoking,$idbooking,$nouruttrx,$TglLahir,$JnsKelamin,
+                                $StatusNikahPasien,$IdGrupPerawatan,$NamaGrupPerawatan,$IdDokter,
+                                $NamaDokter,$NamaSesion,$idno_urutantrian,
+                                $fixNoAntrian,$NamaPasien,$tglbookingfix,$nobokingreal,
+                                $xres,$MrExist,$Company,$kodejenispayment,$NoTlp,$NoHp,$Alamat,$datenowcreate,
+                                $noteall,$txEmail,$NoMrfix,$ID_Penjamin,$ID_JadwalPraktek)
+    {
+        return  DB::connection('sqlsrv3')->table("Apointment")->insert([
+            'CodeReservasi' => $idbooking,
+            'CategoriReservasi' => $JenisBoking,
+            'NoUrut' =>  $nouruttrx,
+            'NoMR' => $NoMrfix,
+            'TglLahir' =>  $TglLahir,
+            'JenisKelamin' => $JnsKelamin,
+            'StatusMenikah' =>  $StatusNikahPasien,
+            'IdPoli' => $IdGrupPerawatan,
+            'Poli' =>  $NamaGrupPerawatan,
+            'DoctorID' => $IdDokter,
+            'NamaDokter' => $NamaDokter, 
+            'Status' => '1', 
+            'JamPraktek' => $NamaSesion, 
+            'Antrian' => $idno_urutantrian, 
+            'NoAntrianAll' => $fixNoAntrian, 
+            'NamaPasien' => $NamaPasien, 
+            'ApmDate' => $tglbookingfix, 
+            'NoBooking' => $nobokingreal, 
+            'NoReservasi' => $xres, 
+            'MrExist' => $MrExist, 
+            'Company' => $Company, 
+            'JenisPembayaran' => $kodejenispayment, 
+            'Telephone' => $NoTlp, 
+            'HP' => $NoHp, 
+            'Alamat' => $Alamat, 
+            'DateCreate' => $datenowcreate, 
+            'Description' => $noteall, 
+            'Email' => $txEmail,
+            'ID_JadwalPraktek' => $ID_JadwalPraktek,
+            'ID_Penjamin' => $ID_Penjamin
+        ]);
+    } 
+    public function SisaStatusAntrian($request)
+    {
+         
+    } 
+    public function StatusAntrian($request)
+    {
+         
+    } 
+    public function BatalAntrian($nobooking)
+    {
+        return DB::connection('sqlsrv3')->table('Apointment')
+            ->where('NoBooking', $nobooking)
+            ->update([
+            'batal' => '1',
+            'jam_batal' => Carbon::now()
+        ]);
+      
+    } 
+    public function CheckIn($request)
+    {
+         
+    } 
+    public function UpdateTaskID($request)
+    {
+         
+    } 
+    public function ViewBookingbyId($nobooking)
+    {
+        return  DB::connection('sqlsrv3')->table("Apointment")
+        ->select( 'DoctorID','JamPraktek','NamaDokter','IdPoli','Poli','JamPraktek','JenisPembayaran','ID_Penjamin',
+                    'NoAntrianAll','Antrian','NoBooking','NamaPasien','batal', 'Datang','NoMR','Company','ID_JadwalPraktek',
+                    DB::raw("replace(CONVERT(VARCHAR(11), ApmDate, 111), '/','-') ApmDate") )
+        ->where('NoBooking', $nobooking)
+        ->where('batal', '0')
+        ->get();
+    } 
+    public function viewAppointmentbyMedrec($NoMR)
+    {
+        return  DB::connection('sqlsrv3')->table("Apointment")
+        ->select(  'DoctorID','JamPraktek','NamaDokter','IdPoli','Poli','JamPraktek','JenisPembayaran','ID_Penjamin',
+        'NoAntrianAll','Antrian','NoBooking','NamaPasien','batal', 'Datang','NoMR','Company','ID_JadwalPraktek',
+                    DB::raw("replace(CONVERT(VARCHAR(11), ApmDate, 111), '/','-') ApmDate") )
+        ->where('NoMR', $NoMR)
+        ->where('batal', '0')
+        ->orderBy('ID','desc')
+        ->get();
+    } 
+    public function getMaxAppointmentNumber(){
+        return  DB::connection('sqlsrv3')->table("Apointment")->find(DB::connection('sqlsrv3')->table("Apointment")->max('ID'));
+    }
+
+    public function getBookingCurrentTIme($tglbookingfix,$IdGrupPerawatan,$IdDokter,$NoMrfix)
+    {
+        return  DB::connection('sqlsrv3')->table("Apointment")
+        ->select( 'NoBooking',  'NoAntrianAll')
+        ->where(DB::raw("replace(CONVERT(VARCHAR(11), ApmDate, 111), '/','-')"),$tglbookingfix)   
+        ->where('idPoli', $IdGrupPerawatan)
+        ->where('NoMR', $NoMrfix)
+        ->where('DoctorID', $IdDokter)
+        ->where('Batal', '0')
+        ->get();
+    }
+    public function generateNoBookingTrs($tglbookingfix)
+    {
+        return  DB::connection('sqlsrv3')->table("Apointment")
+        ->select( 'NoBooking','NoUrut',DB::raw('right(NoBooking,3) as urut ') )
+        ->where(DB::raw("replace(CONVERT(VARCHAR(11), ApmDate, 111), '/','-')"),$tglbookingfix)   
+        ->orderBy('nourut', 'desc')->first();
+    }
+    public function updateDatangAppointment($NoBooking,$NoRegistrasi){
+        $updatesatuan =  DB::connection('sqlsrv3')->table('Apointment')
+        ->where('NoBooking', $NoBooking) 
+            ->update([
+                'datang' => '1',
+                'NoRegistrasi' =>  $NoRegistrasi
+            ]);
+        return $updatesatuan;
+    }
+}
