@@ -259,4 +259,78 @@ trait AutoNumberTrait
                     $data = array($nourutfixReg,$nofixReg,$idReg,$nofixOp,$nourutfixEps,$ideps);
                     return $data;
     }
+    public function genNumberOrderLab($tglOrder)
+    {
+        $getMaxData = $this->trsLaboratorium->getMaxTblLab();
+        if($getMaxData){
+            $RecID = $getMaxData->RecID;
+            $LabID = $getMaxData->LabID;
+            $RecID++;
+            $LabID++;
+        }else{
+            $RecID = "0";
+            $LabID = "0"; 
+            $RecID++;
+            $LabID++;
+        } 
+
+        $no_urutantbllablis = $this->trsLaboratorium->getMaxNOTrsOrderLab($tglOrder);
+        if($no_urutantbllablis->count() > 0 ){
+            $substringlis = substr($no_urutantbllablis->first()->NoLab,6);
+        }else{
+            $substringlis=0;
+        }
+            $substringlis++;
+            if(strlen($substringlis)==1)
+            {
+                                      $nourutfixLis = "000".$substringlis;
+            }
+            else if(strlen($substringlis)==2)
+            {
+                                      $nourutfixLis = "00".$substringlis;
+            }
+            else if(strlen($substringlis)==3)
+            {
+                                      $nourutfixLis = "0".$substringlis;
+            }else if(strlen($substringlis)==4)
+            { 
+                                    $nourutfixLis = $substringlis;
+            }
+            $idno_urutantbllablis = $tglOrder.$nourutfixLis;      
+        $data = array($RecID,$LabID,$substringlis,$nourutfixLis,$idno_urutantbllablis);
+        return $data;
+    }
+    public function genNumberOrderRad($TRIGGER_DTTM,$NoMR)
+    {
+        $getMaxData = $this->trsRadiologi->getMaxNoTrsOrderRad();
+        if($getMaxData){
+            $WOID = $getMaxData->WOID; 
+            $WOID++; 
+        }else{
+            $WOID = "0";  
+            $WOID++;
+        } 
+        $WOIDx=substr($WOID,-2);
+        $Accession_No=$TRIGGER_DTTM.$WOIDx;
+        $uid="1.2.410.2000010.82.111.".$Accession_No;
+        $nomrx = str_replace("-","",$NoMR);
+        if(strlen($nomrx)==6)
+        {
+           $nourutfixReg = "00".$nomrx;
+        }
+        else if(strlen($nomrx)==7)
+        {
+           $nourutfixReg = "0".$nomrx;
+        }
+        else if(strlen($nomrx)==8)
+        {
+           $nourutfixReg = $nomrx;
+        } 
+         
+
+
+
+        $data = array($WOID,$Accession_No,$nourutfixReg,$uid);
+        return $data;
+    }
 }

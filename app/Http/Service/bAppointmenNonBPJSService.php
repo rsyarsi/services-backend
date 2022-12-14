@@ -64,12 +64,11 @@ class bAppointmenNonBPJSService extends Controller {
             $JenisBayar=$request->JenisBayar;
             $Company=$request->Company;
             $JenisBoking =$request->JenisBoking;
-            $MrExist = $request->MrExist;
             $datenowcreate = Carbon::now();
             $ID_Penjamin = $request->ID_Penjamin;
             $txNamaPenjamin = $request->Nama_Penjamin;
             $noteall = $txNamaPenjamin . " - " . $Company;
-            
+            $Userid_Mobile = $request->Userid_Mobile;
 
             if ($JenisBayar == "1") {
                 $kodejenispayment = "PRIBADI";
@@ -129,7 +128,16 @@ class bAppointmenNonBPJSService extends Controller {
             $dataMedicalrecord = $this->medrecRepository->getMedrecbyNoMR($request->NoMr);
       
             if ($this->medrecRepository->getMedrecbyNoMR($request->NoMr)->count() < 1 ) { 
-                return $this->sendError("Data pasien ini tidak ditemukan, silahkan Melakukan Registrasi Pasien Baru.", [],202);
+                $NamaPasien = $request->NamaPasien;
+                $TglLahir ="";
+                $JnsKelamin = "";
+                $StatusNikahPasien = "";
+                $Alamat = "";
+                $txEmail = "";
+                $NoTlp =$request->nohp;
+                $NoHp = $request->nohp;
+                $norm = $request->NoMr; 
+                $MrExist = "0";
             }else{
                $dtMr = $dataMedicalrecord->first();
                $NamaPasien = $dtMr->PatientName;
@@ -142,6 +150,7 @@ class bAppointmenNonBPJSService extends Controller {
                $NoHp = $dtMr->Hp;
                $NoHp = $dtMr->Hp;
                $norm = $dtMr->NoMR; 
+               $MrExist = "1";
             }
             $NoMrfix = $norm;
             
@@ -166,18 +175,10 @@ class bAppointmenNonBPJSService extends Controller {
                $NamaGrupPerawatan = $dtdr->NamaUnit; 
             }
 
-            // cek udah pernah booking belum
-            if ($NoMrfix <> "") {
-                $datanow = $this->appointmenRepository->getBookingCurrentTIme($tglbookingfix,$IdGrupPerawatan,$IdDokter,$NoMrfix);
-                $dtnboking = $datanow->first();
-                if ( $datanow->count() > 0 ) { 
-                    return $this->sendError('Nomor Antrean Hanya Dapat Diambil 1 Kali Pada Tanggal Yang Sama. No. Reservasi anda : ' . $dtnboking->NoBooking, []);  
-                }
-            }
+            
 
             //cek dokternya cuti engga
-            $dtCuti = $this->scheduleRepository->getCutiDokter($IdDokter,$tglbookingfix);
-            $dtnboking = $dtCuti->first();
+            $dtCuti = $this->scheduleRepository->getCutiDokter($IdDokter,$tglbookingfix); 
             if ( $dtCuti->count() > 0 ) { 
                 return $this->sendError("Dokter Yang Anda Pilih sedang Cuti.", []);  
             }
@@ -218,13 +219,41 @@ class bAppointmenNonBPJSService extends Controller {
             }
            
             $dt = Carbon::now()->toTimeString();
+            $dmyreal =  date("Y-m-d",strtotime($dt));
             $waktureal = date("H:i",strtotime($dt));
             $waktupoliakhir = date("H:i", strtotime($JamAkhir));
-            
-            if($waktureal > $waktupoliakhir){ 
-                return $this->sendError("Pendaftaran Ke Poli ".$NamaGrupPerawatan." Sudah Tutup Jam ". $JamAkhir, []);  
+            $Fixwaktureal = date("Y-m-d H:i",strtotime($tglbookingfix.' '. $waktureal));
+            $Fixwaktupoliakhir = date("Y-m-d H:i",strtotime($tglbookingfix.' '. $waktupoliakhir));
+            // cari selisih
+            $createdApp = new Carbon($tglbookingfix);
+            $now = Carbon::now();
+            $difference = $createdApp->diff($now)->days;
+            //Booking di bawah tgl skrg g bisa
+            if($tglbookingfix < $dmyreal){
+                return $this->sendError("Tanggal Booking : ".$tglbookingfix." Lebih Kecil dari tanggal Hari ini : ".$dmyreal, []);  
             }
-
+            // Booking Harus harus H+1
+            if($tglbookingfix == $dmyreal){
+                return $this->sendError("Appointment hanya bisa dilakukan H+1 dari Hari ini.", []);  
+            }
+            // Poli Sudah Tutup
+            // if($Fixwaktureal > $Fixwaktupoliakhir){ 
+            //     return $this->sendError("Pendaftaran Ke Poli ".$NamaGrupPerawatan." Sudah Tutup Jam ". $JamAkhir
+            //                     . "Waktu Booking : ".$Fixwaktureal." Waktu Akhir Poli : ". $Fixwaktupoliakhir, []);  
+            // }
+            if($difference > 30){
+                return $this->sendError("Appointment dilakukan maksimal 30 hari.", []);
+            }
+             
+            // cek udah pernah booking belum
+            if ($NoMrfix <> "" && $NoMrfix <> "-") {
+                $datanow = $this->appointmenRepository->getBookingCurrentTIme($tglbookingfix,$IdGrupPerawatan,$IdDokter,$NoMrfix);
+                $dtnboking = $datanow->first();
+                if ( $datanow->count() > 0 ) { 
+                    return $this->sendError('Nomor Antrean Hanya Dapat Diambil 1 Kali Pada Tanggal Yang Sama. No. Reservasi anda : ' . $dtnboking->NoBooking. " - " .$NoMrfix, []);  
+                }
+            }
+            
             // get max id Apointment
             $maxnumber = $this->appointmenRepository->getMaxAppointmentNumber();
             $appMaxNumber = $maxnumber->ID;
@@ -259,7 +288,7 @@ class bAppointmenNonBPJSService extends Controller {
              $NamaDokter,$NamaSesion,$idno_urutantrian,
              $fixNoAntrian,$NamaPasien,$tglbookingfix,$nobokingreal,
              $xres,$MrExist,$Company,$kodejenispayment,$NoTlp,$NoHp,$Alamat,$datenowcreate,
-             $noteall,$txEmail,$NoMrfix,$ID_Penjamin,$ID_JadwalPraktek);
+             $noteall,$txEmail,$NoMrfix,$ID_Penjamin,$ID_JadwalPraktek,$Userid_Mobile);
 
              // INSERT TABEL ANTRIAN
              $this->antrianRepository->insertAntrian($nobokingreal,$IdDokter,$NamaSesion,$idno_urutantrian,$fixNoAntrian,$tglbookingfix,$Company);
@@ -749,5 +778,23 @@ class bAppointmenNonBPJSService extends Controller {
               return  $this->sendErrorTrsNew($e->getMessage(),$metadata);
           }  
       }  
-     
+      public function viewAppointmentbyUserid_Mobile(Request $request){
+        try{
+              $data = $this->appointmenRepository->viewAppointmentbyUserid_Mobile($request->Userid_Mobile);
+               
+              if($data->count() < 1){ 
+                  return $this->sendError("Anda belum melakukan Reservasi apapun.", []);
+              }
+              
+              return $this->sendResponse( $data,"Data ditemukan.");  
+          }catch (Exception $e) { 
+              DB::connection('sqlsrv3')->rollBack();
+              Log::info($e->getMessage());
+              $metadata = array(
+                  'message' => 'Gagal', // Set array status dengan success     
+                  'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
+              );
+              return  $this->sendErrorTrsNew($e->getMessage(),$metadata);
+          }  
+      }  
 }

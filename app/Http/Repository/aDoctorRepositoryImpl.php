@@ -17,11 +17,11 @@ class aDoctorRepositoryImpl implements aDoctorRepositoryInterface
          
     }
    
-    public function getDoctorbyId($id)
+    public function getDoctorbyId($id) // akan dirubah
     {
         return  DB::connection('sqlsrv2')->table("View_Dokter")
         ->where('ID', $id)
-        ->select('ID','NamaDokter','NamaUnit','CodeAntrian')
+        ->select('ID','NamaDokter','NamaUnit','CodeAntrian','foto','Pendidikan','Description','Pelatihan')
         ->get();
     }
   
@@ -30,7 +30,23 @@ class aDoctorRepositoryImpl implements aDoctorRepositoryInterface
         return  DB::connection('sqlsrv2')->table("View_Dokter")
         ->where('active', '1')
         ->where('IdLayanan',$id) 
-        ->select('ID','NamaDokter','NamaUnit')
+        ->select('ID','NamaDokter','NamaUnit','foto','Pendidikan','Description','Pelatihan')
+        ->get();
+    }
+    public function getDoctorbyUnitAll()
+    {
+        return  DB::connection('sqlsrv2')->table("View_Dokter")
+        ->where('active', '1')
+        ->select('ID','NamaDokter','NamaUnit','foto','Pendidikan','Description','Pelatihan')
+        ->get();
+    }
+    public function getDoctorbyUnitAllTop() //data
+    {
+        return  DB::connection('sqlsrv2')->table("View_Dokter")
+        ->where('active', '1')
+        ->select('ID','NamaDokter','NamaUnit','foto','Pendidikan','Description','Pelatihan')
+        ->skip(15)->take(12)
+        ->orderBy('ID','desc')
         ->get();
     }
     public function getDoctorbyIDBPJS($id)

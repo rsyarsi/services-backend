@@ -37,4 +37,10 @@ class UserController extends Controller
         $user =  $userService->goViewUsersbyAksesID($request);
         return $user;
     }
+    public function getLoginSimrs(Request $request){  
+        $userRepository = new UserRepositoryImpl();
+        $userService = new UserService($userRepository);
+        $user =  $userService->getLoginSimrs($request);
+        return $user;
+    }
 }

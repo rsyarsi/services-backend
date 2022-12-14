@@ -78,6 +78,7 @@ class UserService extends Controller {
     {
         // validator 
         $headers = apache_request_headers();
+     
         $username = $headers['x-username'];
         $password = $headers['x-password'];
 
@@ -111,6 +112,26 @@ class UserService extends Controller {
             return $this->sendResponse($data, "Data User ditemukan.");
         } else {
             return $this->sendError("Data User Not Found.", [], 400);
+        }
+    }
+    public function getLoginSimrs(Request $request)
+    {
+        // validator  
+        $request->validate([
+            "username" => "required",
+            "password" => "required" 
+        ]);
+
+        //login
+        $loginUser = $this->userRepository->getLoginSimrs($request);
+        if ($loginUser) {
+        
+            return $this->sendResponse($loginUser ,"Login berhasil.");  
+
+
+        } else {
+            //response
+            return $this->sendError("login Gagal.", []);
         }
     }
 }

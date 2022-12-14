@@ -21,4 +21,16 @@ class DoctorController extends Controller
         $getDoctorbyUnit =  $Service->getDoctorbyId($id);
         return $getDoctorbyUnit;
     }
+    public function getDoctorbyUnitAll(){
+        $Repository = new aDoctorRepositoryImpl();
+        $Service = new aDoctorService($Repository);
+        $getDoctorbyUnit =  $Service->getDoctorbyUnitAll();
+        return $getDoctorbyUnit;
+    }
+    public function getDoctorbyUnitAllTop(){
+        $Repository = new aDoctorRepositoryImpl();
+        $Service = new aDoctorService($Repository);
+        $getDoctorbyUnit =  $Service->getDoctorbyUnitAllTop();
+        return $getDoctorbyUnit;
+    }
 }

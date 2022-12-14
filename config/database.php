@@ -150,6 +150,63 @@ return [
             'encrypt' => 'yes',
             'trust_server_certificate' => true,
         ],
+        # 6rd Database - DashboardData
+        'sqlsrv6' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HOST_6', '127.0.0.1'),
+            'port' => env('DB_PORT_6', '1433'),
+            'database' => env('DB_DATABASE_6', 'forge'),
+            'username' => env('DB_USERNAME_6', 'forge'),
+            'password' => env('DB_PASSWORD_6', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'encrypt' => 'yes',
+            'trust_server_certificate' => true,
+        ],
+
+         # 7rd Database - LaboratoriumSQL
+         'sqlsrv7' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HOST_7', '127.0.0.1'),
+            'port' => env('DB_PORT_7', '1433'),
+            'database' => env('DB_DATABASE_7', 'forge'),
+            'username' => env('DB_USERNAME_7', 'forge'),
+            'password' => env('DB_PASSWORD_7', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'encrypt' => 'yes',
+            'trust_server_certificate' => true,
+        ],
+         # 8rd Database - RadiologiSQL
+         'sqlsrv8' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HOST_8', '127.0.0.1'),
+            'port' => env('DB_PORT_8', '1433'),
+            'database' => env('DB_DATABASE_8', 'forge'),
+            'username' => env('DB_USERNAME_8', 'forge'),
+            'password' => env('DB_PASSWORD_8', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'encrypt' => 'yes',
+            'trust_server_certificate' => true,
+        ],
+         # 6rd Database - RawatInapSQL
+         'sqlsrv9' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HOST_9', '127.0.0.1'),
+            'port' => env('DB_PORT_9', '1433'),
+            'database' => env('DB_DATABASE_9', 'forge'),
+            'username' => env('DB_USERNAME_9', 'forge'),
+            'password' => env('DB_PASSWORD_9', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'encrypt' => 'yes',
+            'trust_server_certificate' => true,
+        ],
     ],
 
     /*

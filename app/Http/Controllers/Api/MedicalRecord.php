@@ -10,10 +10,10 @@ use Illuminate\Http\Request;
 class MedicalRecord extends Controller
 {
     // 
-    public function create(Request $request){
+    public function createNonWalkin(Request $request){
         $userRepository = new bMedicalRecordRepositoryImpl();
         $userService = new bMedicalRecordService($userRepository);
-        $user =  $userService->create($request);
+        $user =  $userService->createNonWalkin($request);
         return $user;
     }
     public function createwalkin(Request $request){
@@ -32,6 +32,18 @@ class MedicalRecord extends Controller
         $userRepository = new bMedicalRecordRepositoryImpl();
         $userService = new bMedicalRecordService($userRepository);
         $user =  $userService->walkin($id);
+        return $user;
+    }
+    public function viewbymedrecNonWakinbyDob(Request $request){
+        $userRepository = new bMedicalRecordRepositoryImpl();
+        $userService = new bMedicalRecordService($userRepository);
+        $user =  $userService->viewbymedrecNonWakinbyDob($request);
+        return $user;
+    }
+    public function viewbyverify(Request $request){
+        $userRepository = new bMedicalRecordRepositoryImpl();
+        $userService = new bMedicalRecordService($userRepository);
+        $user =  $userService->viewbyverify($request);
         return $user;
     }
 }

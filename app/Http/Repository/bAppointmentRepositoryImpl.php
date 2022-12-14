@@ -11,7 +11,7 @@ class bAppointmentRepositoryImpl implements bAppointmentRepositoryInterface
                                 $NamaDokter,$NamaSesion,$idno_urutantrian,
                                 $fixNoAntrian,$NamaPasien,$tglbookingfix,$nobokingreal,
                                 $xres,$MrExist,$Company,$kodejenispayment,$NoTlp,$NoHp,$Alamat,$datenowcreate,
-                                $noteall,$txEmail,$NoMrfix,$ID_Penjamin,$ID_JadwalPraktek)
+                                $noteall,$txEmail,$NoMrfix,$ID_Penjamin,$ID_JadwalPraktek,$Userid_Mobile)
     {
         return  DB::connection('sqlsrv3')->table("Apointment")->insert([
             'CodeReservasi' => $idbooking,
@@ -43,7 +43,8 @@ class bAppointmentRepositoryImpl implements bAppointmentRepositoryInterface
             'Description' => $noteall, 
             'Email' => $txEmail,
             'ID_JadwalPraktek' => $ID_JadwalPraktek,
-            'ID_Penjamin' => $ID_Penjamin
+            'ID_Penjamin' => $ID_Penjamin,
+            'Userid_Mobile' => $Userid_Mobile
         ]);
     } 
     public function SisaStatusAntrian($request)
@@ -90,9 +91,22 @@ class bAppointmentRepositoryImpl implements bAppointmentRepositoryInterface
                     DB::raw("replace(CONVERT(VARCHAR(11), ApmDate, 111), '/','-') ApmDate") )
         ->where('NoMR', $NoMR)
         ->where('batal', '0')
-        ->orderBy('ID','desc')
+        ->where('Datang', '0')
+        ->orderBy('ApmDate','desc')
         ->get();
     } 
+    public function viewAppointmentbyUserid_Mobile($Userid_Mobile)
+    {
+        return  DB::connection('sqlsrv3')->table("Apointment")
+        ->select(  'DoctorID','JamPraktek','NamaDokter','IdPoli','Poli','JamPraktek','JenisPembayaran','ID_Penjamin',
+        'NoAntrianAll','Antrian','NoBooking','NamaPasien','batal', 'Datang','NoMR','Company','ID_JadwalPraktek',
+                    DB::raw("replace(CONVERT(VARCHAR(11), ApmDate, 111), '/','-') ApmDate") )
+        ->where('Userid_Mobile', $Userid_Mobile)
+        ->where('batal', '0')
+        ->where('Datang', '0')
+        ->orderBy('ApmDate','desc')
+        ->get();
+    }
     public function getMaxAppointmentNumber(){
         return  DB::connection('sqlsrv3')->table("Apointment")->find(DB::connection('sqlsrv3')->table("Apointment")->max('ID'));
     }
@@ -106,6 +120,7 @@ class bAppointmentRepositoryImpl implements bAppointmentRepositoryInterface
         ->where('NoMR', $NoMrfix)
         ->where('DoctorID', $IdDokter)
         ->where('Batal', '0')
+        ->where('Datang', '0')
         ->get();
     }
     public function generateNoBookingTrs($tglbookingfix)
@@ -124,4 +139,5 @@ class bAppointmentRepositoryImpl implements bAppointmentRepositoryInterface
             ]);
         return $updatesatuan;
     }
+   
 }

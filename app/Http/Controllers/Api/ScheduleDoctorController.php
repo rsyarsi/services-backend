@@ -2,29 +2,49 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Http\Repository\aScheduleDoctorRepositoryImpl;
-use App\Http\Service\aScheduleDoctorService;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Service\aScheduleDoctorService;
+use App\Http\Repository\aDoctorRepositoryImpl;
+use App\Http\Repository\aScheduleDoctorRepositoryImpl;
 
 class ScheduleDoctorController extends Controller
 {
     public function getScheduleDoctorbyUnitDay(Request $request){
-        $Repository = new aScheduleDoctorRepositoryImpl();
-        $Service = new aScheduleDoctorService($Repository);
+         $Repository = new aScheduleDoctorRepositoryImpl();
+        $doctorRepository = new aDoctorRepositoryImpl();
+        $doctorRepository = new aDoctorRepositoryImpl();
+        $Service = new aScheduleDoctorService($Repository,$doctorRepository);
         $getScheduleDoctorbyUnitDay =  $Service->getScheduleDoctorbyUnitDay($request);
         return $getScheduleDoctorbyUnitDay;
     }
     public function getScheduleDoctorAll(){
         $Repository = new aScheduleDoctorRepositoryImpl();
-        $Service = new aScheduleDoctorService($Repository);
+        $doctorRepository = new aDoctorRepositoryImpl();
+        $Service = new aScheduleDoctorService($Repository,$doctorRepository);
         $getScheduleDoctorbyUnitDay =  $Service->getScheduleDoctorAll();
         return $getScheduleDoctorbyUnitDay;
     }
     public function getScheduleDoctorbyIdDoctor(Request $request){
         $Repository = new aScheduleDoctorRepositoryImpl();
-        $Service = new aScheduleDoctorService($Repository);
+        $doctorRepository = new aDoctorRepositoryImpl();
+        $Service = new aScheduleDoctorService($Repository,$doctorRepository);
         $getScheduleDoctorbyUnitDay =  $Service->getScheduleDoctorbyIdDoctor($request);
         return $getScheduleDoctorbyUnitDay;
     }
+    public function getScheduleDoctorDetilbyId(Request $request){
+         $Repository = new aScheduleDoctorRepositoryImpl();
+        $doctorRepository = new aDoctorRepositoryImpl();
+        $Service = new aScheduleDoctorService($Repository,$doctorRepository);
+        $getScheduleDoctorbyUnitDay =  $Service->getScheduleDoctorDetilbyId($request);
+        return $getScheduleDoctorbyUnitDay;
+    }
+    public function getScheduleSelectedDay(Request $request){
+        $Repository = new aScheduleDoctorRepositoryImpl();
+       $doctorRepository = new aDoctorRepositoryImpl();
+       $doctorRepository = new aDoctorRepositoryImpl();
+       $Service = new aScheduleDoctorService($Repository,$doctorRepository);
+       $getScheduleDoctorbyUnitDay =  $Service->getScheduleSelectedDay($request);
+       return $getScheduleDoctorbyUnitDay;
+   }
 }

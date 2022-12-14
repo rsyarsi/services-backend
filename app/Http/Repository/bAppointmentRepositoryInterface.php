@@ -7,7 +7,7 @@ interface bAppointmentRepositoryInterface
     $NamaDokter,$NamaSesion,$idno_urutantrian,
     $fixNoAntrian,$NamaPasien,$tglbookingfix,$nobokingreal,
     $xres,$MrExist,$Company,$kodejenispayment,$NoTlp,$NoHp,$Alamat,$datenowcreate,
-    $noteall,$txEmail,$NoMrfix,$ID_Penjamin,$ID_JadwalPraktek); 
+    $noteall,$txEmail,$NoMrfix,$ID_Penjamin,$ID_JadwalPraktek,$Userid_Mobile); 
     public function SisaStatusAntrian($request); 
     public function StatusAntrian($request); 
     public function BatalAntrian($request); 

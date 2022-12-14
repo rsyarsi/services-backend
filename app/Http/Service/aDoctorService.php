@@ -46,6 +46,36 @@ class aDoctorService extends Controller
             return $this->sendError('Data Gagal Di Tampilkan !', $e->getMessage());
         }
     }
+    public function getDoctorbyUnitAll()
+    {
+        try {   
+            $count = $this->Repository->getDoctorbyUnitAll()->count();
+            if ($count > 0) {
+                $data = $this->Repository->getDoctorbyUnitAll();
+                return $this->sendResponse($data, "Data Unit Poliklinik ditemukan.");
+            } else {
+                return $this->sendError("Data Unit Poliklinik Not Found.", [], 400);
+            }
+        }catch (Exception $e) { 
+            Log::info($e->getMessage());
+            return $this->sendError('Data Gagal Di Tampilkan !', $e->getMessage());
+        }
+    }
+    public function getDoctorbyUnitAllTop()
+    {
+        try {   
+            $count = $this->Repository->getDoctorbyUnitAllTop()->count();
+            if ($count > 0) {
+                $data = $this->Repository->getDoctorbyUnitAllTop();
+                return $this->sendResponse($data, "Data Unit Poliklinik ditemukan.");
+            } else {
+                return $this->sendError("Data Unit Poliklinik Not Found.", [], 400);
+            }
+        }catch (Exception $e) { 
+            Log::info($e->getMessage());
+            return $this->sendError('Data Gagal Di Tampilkan !', $e->getMessage());
+        }
+    }
     public function getDoctorbyId($id)
     {
         try {   

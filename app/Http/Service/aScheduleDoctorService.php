@@ -17,10 +17,12 @@ class aScheduleDoctorService extends Controller
 {
 
     private $Repository;
+    private $doctorRepository;
 
-    public function __construct(aScheduleDoctorRepositoryImpl $Repository)
+    public function __construct(aScheduleDoctorRepositoryImpl $Repository,aDoctorRepositoryImpl $doctorRepository)
     {
         $this->Repository = $Repository;
+        $this->doctorRepository = $doctorRepository;
     }
 
     public function getScheduleDoctorbyUnitDay(Request $request)
@@ -45,7 +47,7 @@ class aScheduleDoctorService extends Controller
         ],
         [
          'IdUnit.required'=> 'Your First Name is Required', // custom message
-         'Day.required'=> 'First Name Should be Minimum of 8 Character', // custom message 
+         'Day.required'=> 'Hari harus Diisi', // custom message 
         ]
      );
 
@@ -70,7 +72,7 @@ class aScheduleDoctorService extends Controller
             if ($count > 0) { 
                 return $this->sendResponse($data, "Data Jadwal Dokter ditemukan.");
             } else {
-                return $this->sendError("Data Jadwal Dokter Found.", [], 400);
+                return $this->sendError("Data Jadwal Dokter not Found.", [], 400);
             }
         }catch (Exception $e) { 
             Log::info($e->getMessage());
@@ -88,6 +90,22 @@ class aScheduleDoctorService extends Controller
             } else {
                 return $this->sendError("Data Unit Poliklinik Not Found.", [], 400);
             }
+        }catch (Exception $e) { 
+            Log::info($e->getMessage());
+            return $this->sendError('Data Gagal Di Tampilkan !', $e->getMessage());
+        }
+    }
+    public function getScheduleDoctorDetilbyId($request)
+    {
+        try {   
+            $datadokter = [];
+            $dataschedule = $this->Repository->getScheduleDoctorDetilbyId($request->IdDokter);
+            $datadokter = $this->doctorRepository->getDoctorbyId($request->IdDokter)->first();
+            $response = [
+                'dokter' => $datadokter, 
+                'schedule' => $dataschedule , 
+            ];
+            return $this->sendResponse($response, "Data Schedule ditemukan.");
         }catch (Exception $e) { 
             Log::info($e->getMessage());
             return $this->sendError('Data Gagal Di Tampilkan !', $e->getMessage());
@@ -122,6 +140,37 @@ class aScheduleDoctorService extends Controller
                 return $this->sendResponse($data, "Data Jadwal Dokter ditemukan.");
             } else {
                 return $this->sendError("Data Jadwal Dokter Found.", [], 400);
+            }
+        }catch (Exception $e) { 
+            Log::info($e->getMessage());
+            return $this->sendError('Data Gagal Di Tampilkan !', $e->getMessage());
+        }
+    }
+    public function getScheduleSelectedDay(Request $request)
+    {   
+
+        try {   
+            if ($request->Day === "Minggu") {
+                $data = $this->Repository->getScheduleDoctorForTRSMinggu($request->IdDokter,$request->IdUnit,$request->jampraktek,$request->Group_Jadwal);
+            } elseif ($request->Day === "Senin") {
+                $data = $this->Repository->getScheduleDoctorForTRSSenin($request->IdDokter,$request->IdUnit,$request->jampraktek,$request->Group_Jadwal);
+            } elseif ($request->Day === "Selasa") {
+                $data = $this->Repository->getScheduleDoctorForTRSSelasa($request->IdDokter,$request->IdUnit,$request->jampraktek,$request->Group_Jadwal);
+            } elseif ($request->Day === "Rabu") {
+                $data = $this->Repository->getScheduleDoctorForTRSRabu($request->IdDokter,$request->IdUnit,$request->jampraktek,$request->Group_Jadwal);
+            } elseif ($request->Day === "Kamis") {
+                $data = $this->Repository->getScheduleDoctorForTRSKamis($request->IdDokter,$request->IdUnit,$request->jampraktek,$request->Group_Jadwal);
+            } elseif ($request->Day === "Jumat") {
+                $data = $this->Repository->getScheduleDoctorForTRSJumat($request->IdDokter,$request->IdUnit,$request->jampraktek,$request->Group_Jadwal);
+            } elseif ($request->Day === "Sabtu") {
+                $data = $this->Repository->getScheduleDoctorForTRSSabtu($request->IdDokter,$request->IdUnit,$request->jampraktek,$request->Group_Jadwal);
+            }
+
+            $count = $data->count();
+            if ($count > 0) { 
+                return $this->sendResponse($data, "Data Jadwal Dokter ditemukan.");
+            } else {
+                return $this->sendError("Data Jadwal Dokter not Found.", [], 400);
             }
         }catch (Exception $e) { 
             Log::info($e->getMessage());
