@@ -16,7 +16,7 @@ class UserRepositoryImpl  implements UserRepositoryInterface
             'email' => $request->email, 
             'name' => $request->name,
             'email' => $request->email,
-            'api' => "$request->api", 
+            'api' => $request->api, 
             'password'  => bcrypt($request->password)
         ]);
     }

@@ -31,7 +31,9 @@ use App\Http\Controllers\Api\ScheduleDoctorController;
 use App\Http\Controllers\Api\PurchaseRequisitionController;
 use App\Http\Controllers\Api\RadiologiController;
 use App\Http\Controllers\Api\TarifController;
-use App\Http\Controllers\Api\VisitController; 
+use App\Http\Controllers\Api\VisitController;
+use App\Http\Controllers\Api\Wilayah;
+use App\Http\Controllers\Api\WilayahController;
 
 /*
 |--------------------------------------------------------------------------
@@ -227,7 +229,7 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::get("getDoctorbyUnitAllTop", [DoctorController::class, "getDoctorbyUnitAllTop"]);
         Route::get("getDoctorbyId/{id}", [DoctorController::class, "getDoctorbyId"]);  
 
-        // unit 
+        // UNIT 
         Route::get("getUnitPoliklinik", [UnitController::class, "getUnitPoliklinik"]);
         Route::get("getUnitPoliklinikbyId/{id}", [UnitController::class, "getUnitPoliklinikbyId"]);  
 
@@ -238,8 +240,20 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("getScheduleDoctorDetilbyId/", [ScheduleDoctorController::class, "getScheduleDoctorDetilbyId"]);  
         Route::post("getScheduleSelectedDay/", [ScheduleDoctorController::class, "getScheduleSelectedDay"]);  
 
-        // jaminan
+        // JAMINAN
         Route::get("jaminan/view/{idgroupjaminan}", [MasterJaminanController::class, "getJaminanAllAktif"]);
+
+        // PROVINSI, KABUPATEN, KECAMATAN, KELURAHAN
+        Route::get("Provinsi", [WilayahController::class, "Provinsi"]);  
+        Route::get("Kabupaten/{provinsiId}", [WilayahController::class, "Kabupaten"]); 
+        Route::get("Kecamatan/{kabupatenId}", [WilayahController::class, "Kecamatan"]);   
+        Route::get("Kelurahan/{kecamatanId}", [WilayahController::class, "Kelurahan"]);   
+        
+        Route::get("Provinsi/detail/{provinsiId}", [WilayahController::class, "detailProvinsi"]);  
+        Route::get("Kabupaten/detail/{kabupatenId}", [WilayahController::class, "detailKabupaten"]); 
+        Route::get("Kecamatan/detail/{kecamatanId}", [WilayahController::class, "detailKecamatan"]);   
+        Route::get("Kelurahan/detail/{kelurahanId}", [WilayahController::class, "detailKelurahan"]);   
+
    });  
 
     // For Registration and appointment 
@@ -265,6 +279,7 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("getRegistrationRajalbyDoctorActive", [VisitController::class, "getRegistrationRajalbyDoctorActive"]); 
         Route::post("getRegistrationRajalbyDoctorHistory", [VisitController::class, "getRegistrationRajalbyDoctorHistory"]);
         Route::post("create/onsite", [VisitController::class, "createRegistrasiOnsite"]);
+        Route::post("viewByNoBooking", [VisitController::class, "viewByNoBooking"]); 
 
     });  
     Route::group(['prefix' => 'medicalrecords/'], function () {
@@ -282,6 +297,7 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("rajal/create", [AssesmentController::class, "CreateAssesmentRajal"]);
         Route::post("rajal/update", [AssesmentController::class, "UpdateAssesmentRajal"]);
         Route::post("rajal/view/cppt", [AssesmentController::class, "ViewCppt"]);
+        Route::post("rajal/view/cppt/periode", [AssesmentController::class, "ViewCpptPeriode"]);
         Route::post("{noregistrasi}/viewAssesmentRajal", [AssesmentController::class, "viewAssesmentRajal"]);
         Route::post("{noregistrasi}/viewAssesmentRajalPerawat", [AssesmentController::class, "viewAssesmentRajalPerawat"]);
     });
@@ -305,13 +321,12 @@ Route::group(["middleware"=>["auth:api"]], function(){
     }); 
 
     // For Entri Billing
-    Route::group(['prefix' => 'LaboratoriumTransactions/'], function () {
-        Route::post("createheader", [LaboratoriumController::class, "createheader"]);
-        Route::post("createdetil", [LaboratoriumController::class, "createdetil"]);
-        Route::post("sendLis", [LaboratoriumController::class, "sendLis"]);
+    Route::group(['prefix' => 'LaboratoriumTransactions/'], function () { 
         Route::post("viewOrderLabbyTrs", [LaboratoriumController::class, "viewOrderLabbyTrs"]);
         Route::post("viewOrderLabbyMedrec", [LaboratoriumController::class, "viewOrderLabbyMedrec"]);
-
+        Route::post("createLaboratoriumOrder", [LaboratoriumController::class, "createLaboratoriumOrder"]);
+        Route::post("deleteOrderLaboratoriumDetail", [LaboratoriumController::class, "deleteOrderLaboratoriumDetail"]);
+        Route::post("deleteOrderLaboratorium", [LaboratoriumController::class, "deleteOrderLaboratorium"]);
     });  
 
     Route::group(['prefix' => 'RadiologiTransactions/'], function () {
@@ -319,6 +334,7 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("void", [RadiologiController::class, "void"]);
         Route::post("viewOrderRadbyTrs", [RadiologiController::class, "viewOrderRadbyTrs"]);
         Route::post("viewOrderRadbyMedrec", [RadiologiController::class, "viewOrderRadbyMedrec"]);
+        Route::post("viewOrderRadbyMedrecPeriode", [RadiologiController::class, "viewOrderRadbyMedrecPeriode"]);
     });
 
     Route::group(['prefix' => 'Payments/'], function () {
@@ -331,6 +347,14 @@ Route::group(["middleware"=>["auth:api"]], function(){
         
     });
 
+    
+});
+ 
+
+ 
+
+//semua route API yang membutuhkan authentication sekarang didaftarkan dalam grup middleware sesuai dengan nama yang sudah dibuat di kernel
+Route::group(['middleware' => 'check-token-bpjs'], function(){
     // DISCLAIMER
     // UNTUK BRIDGING BPJS KESEHATAN
     // KHUSUS BPJS - JANGAN DI APA-APAIN 
@@ -346,5 +370,4 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("AntrianOperasiRS", [BPJSKesehatanController::class, "AntrianOperasiRS"]);  
         Route::post("AntrianOperasiPasien", [BPJSKesehatanController::class, "AntrianOperasiPasien"]);  
     });  
-});
- 
+}); 

@@ -179,13 +179,13 @@ class bAppointmentService extends Controller {
                 $MrExist = "0";
             }
             //cek data dokter udh maping bpjs belum
-            $dataDoctorbpjs = $this->doctorRepository->getDoctorbyIDBPJS($request->kodedokter);
+            $dataDoctorbpjs = $this->doctorRepository->getDoctorbyIDBPJS((string)$request->kodedokter);
             if ( $dataDoctorbpjs->count() < 1 ) {
                 $response = array(
                     'message' => 'Data ID Dokter BPJS Belum di Maping dalam SIMRS.', // Set array status dengan success     
                 );
                 $metadata = array(
-                    'message' => 'failed', // Set array status dengan success    
+                    'message' => 'Data ID Dokter BPJS Belum di Maping dalam SIMRS.', // Set array status dengan success    
                     'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
                 );
                 return  $this->sendErrorTrsNew($response,$metadata);
@@ -203,7 +203,7 @@ class bAppointmentService extends Controller {
                     'message' => 'Data ID Poliklinik BPJS Belum di Maping dalam SIMRS.' . $dataunitbpjs->count(), // Set array status dengan success     
                 );
                 $metadata = array(
-                    'message' => 'failed', // Set array status dengan success    
+                    'message' => 'Data ID Poliklinik BPJS Belum di Maping dalam SIMRS.' . $dataunitbpjs->count(), // Set array status dengan success    
                     'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
                 );
                 return  $this->sendErrorTrsNew($response,$metadata);
@@ -224,7 +224,7 @@ class bAppointmentService extends Controller {
                         'message' => 'Nomor Antrean Hanya Dapat Diambil 1 Kali Pada Tanggal Yang Sama. No. Antrian anda : ' . $dtnboking->NoBooking, // Set array status dengan success     
                     );
                     $metadata = array(
-                        'message' => 'failed', // Set array status dengan success    
+                        'message' => 'Nomor Antrean Hanya Dapat Diambil 1 Kali Pada Tanggal Yang Sama. No. Antrian anda : ' . $dtnboking->NoBooking, // Set array status dengan success      
                         'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
                     );
                     return  $this->sendErrorTrsNew($response,$metadata);
@@ -239,7 +239,7 @@ class bAppointmentService extends Controller {
                     'message' => 'Dokter Yang Anda Pilih sedang Cuti.', // Set array status dengan success     
                 );
                 $metadata = array(
-                    'message' => 'failed', // Set array status dengan success    
+                    'message' => 'Dokter Yang Anda Pilih sedang Cuti.',  // Set array status dengan success    
                     'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
                 );
                 return  $this->sendErrorTrsNew($response,$metadata);
@@ -268,7 +268,7 @@ class bAppointmentService extends Controller {
                     'message' => 'Jam Praktek Tidak Ditemukan.',  // Set array status dengan success     
                 );
                 $metadata = array(
-                    'message' => 'failed', // Set array status dengan success    
+                    'message' => 'Jam Praktek Tidak Ditemukan.', // Set array status dengan success    
                     'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
                 );
                 return  $this->sendErrorTrsNew($response,$metadata);
@@ -290,17 +290,17 @@ class bAppointmentService extends Controller {
             $waktureal = date("H:i",strtotime($dt));
             $waktupoliakhir = date("H:i", strtotime($JamAkhir));
          
-            if($waktureal > $waktupoliakhir){
-                $metadata = array(
-                    'message' => 'failed',
-                    'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
-                );
-                $response = array(
-                    'message' => 'Pendaftaran Ke Poli '.$NamaGrupPerawatan.' Sudah Tutup Jam '. $JamAkhir,  // Set array status dengan success     
-                );
+            // if($waktureal > $waktupoliakhir){
+            //     $metadata = array(
+            //         'message' => 'failed',
+            //         'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
+            //     );
+            //     $response = array(
+            //         'message' => 'Pendaftaran Ke Poli '.$NamaGrupPerawatan.' Sudah Tutup Jam '. $JamAkhir,  // Set array status dengan success     
+            //     );
                  
-                return  $this->sendErrorTrsNew($response,$metadata);
-            }
+            //     return  $this->sendErrorTrsNew($response,$metadata);
+            // }
 
             // get max id Apointment
             $maxnumber = $this->appointmenRepository->getMaxAppointmentNumber();
@@ -325,7 +325,7 @@ class bAppointmentService extends Controller {
              $NamaDokter,$NamaSesion,$idno_urutantrian,
              $fixNoAntrian,$NamaPasien,$tglbookingfix,$nobokingreal,
              $xres,$MrExist,$Company,$kodejenispayment,$NoTlp,$NoHp,$Alamat,$datenowcreate,
-             $noteall,$txEmail,$NoMrfix,$ID_Penjamin,$ID_JadwalPraktek);
+             $noteall,$txEmail,$NoMrfix,$ID_Penjamin,$ID_JadwalPraktek,'');
 
              // INSERT TABEL ANTRIAN
              $this->antrianRepository->insertAntrian($nobokingreal,$IdDokter,$NamaSesion,$idno_urutantrian,$fixNoAntrian,$tglbookingfix,$Company);
@@ -360,7 +360,7 @@ class bAppointmentService extends Controller {
             DB::rollBack();
             Log::info($e->getMessage());
             $metadata = array(
-                'message' => 'Gagal', // Set array status dengan success     
+                'message' => $e->getMessage(), // Set array status dengan success     
                 'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
             );
             return  $this->sendErrorTrsNew($e->getMessage(),$metadata);
@@ -381,7 +381,7 @@ class bAppointmentService extends Controller {
                 $JamPraktek = $datano->JamPraktek;
             }else{
                 $metadata = array(
-                    'message' => 'failed',
+                    'message' => 'Antrean Tidak Ditemukan.',
                     'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
                 );
                 $response = array(
@@ -426,7 +426,7 @@ class bAppointmentService extends Controller {
             DB::rollBack();
             Log::info($e->getMessage());
             $metadata = array(
-                'message' => 'Gagal', // Set array status dengan success     
+                'message' => $e->getMessage(), // Set array status dengan success     
                 'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
             );
             return  $this->sendErrorTrsNew($e->getMessage(),$metadata);
@@ -437,7 +437,7 @@ class bAppointmentService extends Controller {
     public function StatusAntrian(Request $request){
         try {
             $kodepoli = $request->kodepoli;
-            $kodedokter = $request->kodedokter;
+            $kodedokter = (string)$request->kodedokter;
             $tanggalperiksa = $request->tanggalperiksa;
             $datename = date("l", strtotime(trim(strip_tags( $request->tanggalperiksa))));
             $jampraktek = $request->jampraktek;
@@ -489,7 +489,7 @@ class bAppointmentService extends Controller {
             }
 
             //cek data dokter udh maping bpjs belum
-            $dataDoctorbpjs = $this->doctorRepository->getDoctorbyIDBPJS($request->kodedokter);
+            $dataDoctorbpjs = $this->doctorRepository->getDoctorbyIDBPJS((string)$request->kodedokter);
             if ( $dataDoctorbpjs->count() < 1 ) {
                 $response = array(
                     'message' => 'Data ID Dokter BPJS Belum di Maping dalam SIMRS.', // Set array status dengan success     
@@ -710,7 +710,7 @@ class bAppointmentService extends Controller {
                     'message' => 'No. Antrian Tidak Ditemukan.', // Set array status dengan success     
                 );
                 $metadata = array(
-                    'message' => 'failed', // Set array status dengan success    
+                    'message' => 'No. Antrian Tidak Ditemukan.', // Set array status dengan success    
                     'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
                 );
                 return  $this->sendErrorTrsNew($response,$metadata);
@@ -737,7 +737,7 @@ class bAppointmentService extends Controller {
                         'message' => 'Antrean Sudah Checkin, No. Booking tidak berlaku.', // Set array status dengan success     
                     );
                     $metadata = array(
-                        'message' => 'failed', // Set array status dengan success    
+                        'message' => 'Antrean Sudah Checkin, No. Booking tidak berlaku.',  // Set array status dengan success    
                         'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
                     );
                     return  $this->sendErrorTrsNew($response,$metadata);
@@ -749,7 +749,7 @@ class bAppointmentService extends Controller {
             $kodeRegAwalXX = "RJJP";
             $operator = "2852"; 
             $CaraBayar = "5";
-            $Perusahaan = "315";
+            $Perusahaan = "313";
             $idCaraMasuk = "1";
             $idAdmin = "5";
             $TelemedicineIs="0";
@@ -779,7 +779,7 @@ class bAppointmentService extends Controller {
                         'message' => 'Pasien Sudah mendaftar di Poli dan Dokter yang sama !', // Set array status dengan success     
                     );
                     $metadata = array(
-                        'message' => 'failed', // Set array status dengan success    
+                        'message' => 'Pasien Sudah mendaftar di Poli dan Dokter yang sama !',// Set array status dengan success    
                         'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
                     );
                     return  $this->sendErrorTrsNew($response,$metadata);
@@ -793,33 +793,34 @@ class bAppointmentService extends Controller {
                 $id_eps = $NoregistrationRajal[5];
                 $nofixReg = $NoregistrationRajal[1];
 
-                
-
-
-                 
+            
             }
-                // INSERT REGISTRATION
+                // // INSERT REGISTRATION
                 $this->visitRepository->addRegistrationRajal($maxVisit->ID,$NoEpisode,$nofixReg,$NamaGrupPerawatan,$NoMrfix,
                                                             $JenisBayar,$IdGrupPerawatan,$IdDokter,$Antrian,$NoAntrianAll,
                                                             $Company,$shift,$TelemedicineIs,$ApmDate,
                                                             $ApmDate,$operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
                                                             $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek);
 
-                //  UPDATE DATANG RESERVASI
+                // //  UPDATE DATANG RESERVASI
                 $this->appointmenRepository->updateDatangAppointment($kodebooking,$nofixReg); 
 
-
+                // DATA 
+                $jenispasien = "JKN";
+                
                 // SEND DATA KE TASK ID
                 $taskid = "1";
-                $conId = "32182";
-                $secId = "9aS44257A4";
-                $userkey = "8148437a6c38631820bd2cb64561d1af";
+                $conId = "13384";
+                $secId = "4eA130B116";
+                $userkey = "2ddc17e0903dfe63e07bf37d602106d6";
                 date_default_timezone_set('UTC');
                 $tStamp = strval(time() - strtotime('1970-01-01 00:00:00'));
                 $signature = base64_encode(hash_hmac('sha256', $conId . "&" . $tStamp, $secId, true));
+
                 $curl = curl_init();
                 curl_setopt_array($curl, array(
-                    CURLOPT_URL =>  'https://apijkn-dev.bpjs-kesehatan.go.id/antreanrs_dev/antrean/updatewaktu',
+                    CURLOPT_URL =>  'https://apijkn.bpjs-kesehatan.go.id/antreanrs/antrean/updatewaktu',
+                    // CURLOPT_URL =>  'https://apijkn-dev.bpjs-kesehatan.go.id/antreanrs_dev/antrean/updatewaktu',
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_ENCODING => '',
                     CURLOPT_MAXREDIRS => 10,
@@ -829,12 +830,11 @@ class bAppointmentService extends Controller {
                     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                     CURLOPT_CUSTOMREQUEST => 'POST',
                     CURLOPT_POSTFIELDS => '                                                
-                                {
-                                "kodebooking": "' . $kodebooking . '",
-                                "taskid":  "' . $taskid . '",
-                                "waktu": "' . $waktu . '"
-                                }
-                                    ',
+                        {
+                            "kodebooking": "' . $kodebooking . '",
+                            "taskid":  "' . $taskid . '",
+                            "waktu": "' . $waktu . '"
+                        }',
                     CURLOPT_HTTPHEADER => array(
                         'x-cons-id: ' . $conId,
                         'x-timestamp: ' . $tStamp,
@@ -848,33 +848,39 @@ class bAppointmentService extends Controller {
                 curl_close($curl); 
                 $waktu2=$waktu/1000;
                 $tgl_input =  date('Y-m-d H:i:s', $waktu2);
-                // ubah string JSON menjadi array
-                $JsonData = json_decode($outputx, TRUE);
-                    if ($JsonData['metaData']['code'] == "200") {
-                        $this->visitRepository->addTaskOneBPJS($kodebooking,$waktu,$taskid,$tgl_input);
-                    }
-
-
-                DB::connection('sqlsrv3')->commit();
-                $response = array(
-                    'message' => 'Checkin Berhasil.', // Set array status dengan success     
-                );
-                $metadata = array(
-                    'message' => 'Ok', // Set array status dengan success    
-                    'code' => 200, // Set array nama dengan isi kolom nama pada tabel siswa 
-                ); 
-                return $this->sendResponseNew($response, $metadata); 
-
-
+                // // ubah string JSON menjadi array
+                $JsonData = json_decode($outputx, TRUE);  
+                       if ($JsonData['metadata']['code'] == "200") {
+                            $this->visitRepository->addTaskOneBPJS($kodebooking,$waktu,$taskid,$tgl_input);
+                            DB::connection('sqlsrv3')->commit();
+                            $response = array(
+                                'message' => 'Checkin Berhasil.', // Set array status dengan success     
+                            );
+                            $metadata = array(
+                                'message' => 'Ok', // Set array status dengan success    
+                                'code' => 200, // Set array nama dengan isi kolom nama pada tabel siswa 
+                            ); 
+                            return $this->sendResponseNew($response, $metadata);
+                       } else if ($JsonData['metadata']['code'] == "201") {  
+                            DB::connection('sqlsrv3')->rollBack();
+                            $response = array(
+                                'message' => 'Kode Booking Tidak Ditemukan.', // Set array status dengan success     
+                            );
+                            $metadata = array(
+                                'message' => "Kode Booking Tidak Ditemukan.", // Set array status dengan success    
+                                'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
+                            ); 
+                            return $this->sendResponseNew($JsonData, $metadata);
+                        }     
         }catch (Exception $e) { 
             DB::connection('sqlsrv3')->rollBack();
             Log::info($e->getMessage());
             $metadata = array(
-                'message' => 'Gagal', // Set array status dengan success     
+                'message' => $e->getMessage(), // Set array status dengan success     
                 'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
             );
             return  $this->sendErrorTrsNew($e->getMessage(),$metadata);
-        }  
+        }   
     }  
     public function UpdateTaskID(Request $request){
       

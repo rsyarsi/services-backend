@@ -21,7 +21,7 @@ class aDoctorRepositoryImpl implements aDoctorRepositoryInterface
     {
         return  DB::connection('sqlsrv2')->table("View_Dokter")
         ->where('ID', $id)
-        ->select('ID','NamaDokter','NamaUnit','CodeAntrian','foto','Pendidikan','Description','Pelatihan')
+        ->select('ID','NamaDokter','NamaUnit','CodeAntrian','foto','Pendidikan','Description','Pelatihan','IdLayanan')
         ->get();
     }
   
@@ -30,21 +30,26 @@ class aDoctorRepositoryImpl implements aDoctorRepositoryInterface
         return  DB::connection('sqlsrv2')->table("View_Dokter")
         ->where('active', '1')
         ->where('IdLayanan',$id) 
-        ->select('ID','NamaDokter','NamaUnit','foto','Pendidikan','Description','Pelatihan')
+        ->select('ID','NamaDokter','NamaUnit','foto','Pendidikan','Description','Pelatihan','IdLayanan')
         ->get();
     }
     public function getDoctorbyUnitAll()
     {
         return  DB::connection('sqlsrv2')->table("View_Dokter")
         ->where('active', '1')
-        ->select('ID','NamaDokter','NamaUnit','foto','Pendidikan','Description','Pelatihan')
+        ->select('ID','NamaDokter','NamaUnit','foto','Pendidikan','Description','Pelatihan','IdLayanan')
         ->get();
     }
     public function getDoctorbyUnitAllTop() //data
     {
         return  DB::connection('sqlsrv2')->table("View_Dokter")
         ->where('active', '1')
-        ->select('ID','NamaDokter','NamaUnit','foto','Pendidikan','Description','Pelatihan')
+        ->where('IdLayanan','<>', '1')
+        ->where('IdLayanan','<>', '39')
+        ->where('IdLayanan','<>', '9')
+        ->where('IdLayanan','<>', '10')
+        ->where('IdLayanan','<>', '47')
+        ->select('ID','NamaDokter','NamaUnit','foto','Pendidikan','Description','Pelatihan','IdLayanan')
         ->skip(15)->take(12)
         ->orderBy('ID','desc')
         ->get();

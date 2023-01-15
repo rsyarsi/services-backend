@@ -247,7 +247,44 @@ class bAssesmentRajalService extends Controller {
         }
     }   
     public function ViewCppt(Request $request){
+        if ($request->NoRegistrasi === "" || $request->NoRegistrasi === null) {
+            $metadata = array(
+                'message' => "No. Registrasi Kosong/Invalid !", // Set array status dengan success     
+                'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
+            ); 
+            return  $this->sendErrorNew($metadata,null);
+        }
         $data = $this->assesmentRajal->getCPPT($request);
+            if ($data->count() > 0) {
+                $assesment = $data->first();
+                return $this->sendResponse($assesment, "Data Cppt ditemukan.");
+            } else {
+                return $this->sendError("Data Cppt Not Found.", [], 400);
+            }
+    }
+    public function ViewCpptPeriode(Request $request){
+        if ($request->NoMR === "" || $request->NoMR === null) {
+            $metadata = array(
+                'message' => "No. Medrec Kosong/Invalid !", // Set array status dengan success     
+                'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
+            ); 
+            return  $this->sendErrorNew($metadata,null);
+        }
+        if ($request->PeriodeAwal === "" || $request->PeriodeAwal === null) {
+            $metadata = array(
+                'message' => "Periode Awal Kosong/Invalid !", // Set array status dengan success     
+                'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
+            ); 
+            return  $this->sendErrorNew($metadata,null);
+        }
+        if ($request->PeriodeAkhir === "" || $request->PeriodeAkhir === null) {
+            $metadata = array(
+                'message' => "Periode Akhir Kosong/Invalid !", // Set array status dengan success     
+                'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
+            ); 
+            return  $this->sendErrorNew($metadata,null);
+        }
+        $data = $this->assesmentRajal->ViewCpptPeriode($request);
             if ($data->count() > 0) {
                 $assesment = $data->first();
                 return $this->sendResponse($assesment, "Data Cppt ditemukan.");

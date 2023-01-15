@@ -29,7 +29,7 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
         DB::raw("replace(CONVERT(VARCHAR(11), DateOfBirth, 111), '/','-') as Date_of_birth") , 
         'Address',   'IdUnit', DB::raw("[Visit Date] AS Visit_Date"), 'NamaUnit',   'IdDokter', 'NamaDokter','NoMR','NoEpisode','NoRegistrasi',
         DB::raw("case when TipePasien='1' THEN 'PRIBADI' WHEN TipePasien='2' THEN 'ASURANSI' WHEN TipePasien='5' THEN 'PERUSAHAAN' END 
-        AS  PatientType"))
+        AS  PatientType"),'StatusID')
         ->where('NoMR',$medrec)
          ->where('StatusID','<',4)
         ->orderBy('Visit Date', 'desc')
@@ -43,7 +43,7 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
         DB::raw("replace(CONVERT(VARCHAR(11), DateOfBirth, 111), '/','-') as Date_of_birth") , 
         'Address',   'IdUnit', DB::raw("[Visit Date] AS Visit_Date"), 'NamaUnit',   'IdDokter', 'NamaDokter','NoMR','NoEpisode','NoRegistrasi',
         DB::raw("case when TipePasien='1' THEN 'PRIBADI' WHEN TipePasien='2' THEN 'ASURANSI' WHEN TipePasien='5' THEN 'PERUSAHAAN' END 
-        AS  PatientType"))
+        AS  PatientType"),'StatusID')
         ->where('NoMR',$request->medrec)
          ->where('StatusID','4')
          ->whereBetween(DB::raw("replace(CONVERT(VARCHAR(11), [Visit Date], 111), '/','-')"),
@@ -59,7 +59,7 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
         DB::raw("replace(CONVERT(VARCHAR(11), DateOfBirth, 111), '/','-') as Date_of_birth") , 
         'Address',   'IdUnit', DB::raw("[Visit Date] AS Visit_Date"), 'NamaUnit',   'IdDokter', 'NamaDokter','NoMR','NoEpisode','NoRegistrasi',
         DB::raw("case when TipePasien='1' THEN 'PRIBADI' WHEN TipePasien='2' THEN 'ASURANSI' WHEN TipePasien='5' THEN 'PERUSAHAAN' END 
-        AS  PatientType"))
+        AS  PatientType"),'StatusID')
         ->where('NamaDokter',$NamaDokter)
          ->where('StatusID','<',4)
         ->orderBy('Visit Date', 'desc')
@@ -73,7 +73,7 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
         DB::raw("replace(CONVERT(VARCHAR(11), DateOfBirth, 111), '/','-') as Date_of_birth") , 
         'Address',   'IdUnit',  DB::raw("[Visit Date] AS Visit_Date"), 'NamaUnit',   'IdDokter', 'NamaDokter','NoMR','NoEpisode','NoRegistrasi',
         DB::raw("case when TipePasien='1' THEN 'PRIBADI' WHEN TipePasien='2' THEN 'ASURANSI' WHEN TipePasien='5' THEN 'PERUSAHAAN' END 
-        AS  PatientType"))
+        AS  PatientType"),'StatusID')
         ->where('NamaDokter',$request->NamaDokter)
         ->where('StatusID','4')
         ->whereBetween(DB::raw("replace(CONVERT(VARCHAR(11), [Visit Date], 111), '/','-')"),
@@ -89,7 +89,7 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
         DB::raw("replace(CONVERT(VARCHAR(11), DateOfBirth, 111), '/','-') as Date_of_birth") , 
         'Address',   'IdUnit',  DB::raw("[Visit Date] AS Visit_Date"), 'NamaUnit',   'IdDokter', 'NamaDokter','NoMR','NoEpisode','NoRegistrasi',
         DB::raw("case when TipePasien='1' THEN 'PRIBADI' WHEN TipePasien='2' THEN 'ASURANSI' WHEN TipePasien='5' THEN 'PERUSAHAAN' END 
-        AS  PatientType"))
+        AS  PatientType"),'StatusID')
         ->where('NoRegistrasi', $NoRegistrasi) 
         ->orderBy('Visit Date', 'desc')
         ->get();
@@ -109,6 +109,7 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
         ->select('Status ID','NoEpisode','NoRegistrasi')
         ->where(DB::raw("replace(CONVERT(VARCHAR(11), TglKunjungan, 111), '/','-')"),$ApmDate)  
         ->where('NoMR',$NoMR)   
+        ->where('Batal','0')
         ->where('Status ID','<>','4')   
         ->where('unit',$IdGrupPerawatan)   
         ->where('Doctor_1',$IdDokter)   
@@ -146,13 +147,52 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
             'ID_JadwalPraktek' => $ID_JadwalPraktek
         ]);
     }
-    public function addTaskOneBPJS($KODE_TRANSAKSI,$WAKTU,$TASK_ID,$DATE_CREATE)
+    public function  addRegistrationRajalAsuransi($ID,$NoEpisode,$NoRegistrasi,$LokasiPasien,$NoMR,
+                                            $PatientType,$Unit,$Doctor_1,$Antrian,$NoAntrianAll,
+                                            $Company,$JamPraktek,$TelemedicineIs,$TglKunjungan,
+                                            $visitdate,$Operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
+                                            $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek)
     {
         return  DB::connection('sqlsrv3')->table("Visit")->insert([
+            'ID' => $ID,
+            'NoEpisode' => $NoEpisode,
+            'NoRegistrasi' =>  $NoRegistrasi,
+            'LokasiPasien' => $LokasiPasien,
+            'NoMR' =>  $NoMR,
+            'PatientType' => $PatientType,
+            'Unit' =>  $Unit,
+            'Doctor_1' => $Doctor_1,
+            'Antrian' =>  $Antrian,
+            'NoAntrianAll' => $NoAntrianAll,
+            'Company' => $Company, 
+            'JamPraktek' => $JamPraktek, 
+            'TelemedicineIs' => $TelemedicineIs, 
+            'TglKunjungan' => $TglKunjungan, 
+            'Visit Date' => $visitdate, 
+            'Operator' => $Operator, 
+            'CaraBayar' => $CaraBayar, 
+            'Asuransi' => $Perusahaan, 
+            'idCaraMasuk' => $idCaraMasuk, 
+            'idAdmin' => $idAdmin, 
+            'Tipe_Registrasi' => $Tipe_Registrasi, 
+            'ID_JadwalPraktek' => $ID_JadwalPraktek
+        ]);
+    }
+    public function addTaskOneBPJS($KODE_TRANSAKSI,$WAKTU,$TASK_ID,$DATE_CREATE)
+    {
+        return  DB::connection('sqlsrv3')->table("BPJS_TASKID_LOG")->insert([
             'KODE_TRANSAKSI' => $KODE_TRANSAKSI,
             'WAKTU' => $WAKTU,
             'TASK_ID' =>  $TASK_ID,
             'DATE_CREATE' => $DATE_CREATE
         ]);
     }
+    public function viewByNoBooking($NoBooking)
+    {
+        //a
+        return  DB::connection('sqlsrv3')->table("View_Visit_by_Booking") 
+        ->where('NoBooking', $NoBooking)  
+        ->get();
+    }
 }
+

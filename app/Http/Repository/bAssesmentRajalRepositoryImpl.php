@@ -250,4 +250,12 @@ class bAssesmentRajalRepositoryImpl implements bAssesmentRepositoryInterface
         ->orderBy('ID','desc')
         ->get();
     }
+    public function ViewCpptPeriode($request)
+    {
+        return  DB::connection('sqlsrv5')->table("View_CPPT_New")   
+        ->where('NoMR', $request->NoMR)
+        ->whereBetween(DB::raw("replace(CONVERT(VARCHAR(11), Tgl, 111), '/','-')"),[$request->PeriodeAwal, $request->PeriodeAkhir] )
+        ->orderBy('ID','desc')
+        ->get();
+    }
 }

@@ -11,7 +11,7 @@ class bAntrianRepositoryImpl implements bAntrianRepositoryInterface
         ->select('Antrian')
         ->where(DB::raw("replace(CONVERT(VARCHAR(11), TglKunjungan, 111), '/','-')"),$tglbookingfix)   
         ->where('JamPraktek', $NamaSesion)
-        ->where('Doctor_1', $IdDokter) 
+        ->where('Doctor_1', $IdDokter)  
         ->orderBy('Antrian', 'desc')->first();
     }
     public function insertAntrian($nobokingreal,$IdDokter,$NamaSesion,$idno_urutantrian,$fixNoAntrian,$tglbookingfix,$Company)

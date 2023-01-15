@@ -151,6 +151,18 @@ trait AutoNumberTrait
         }
         return $nourutfixMR;
     }
+    public function MedrecRadiologiNumber($medrec)
+    {
+        $nomrx = str_replace("-", "", $medrec);
+                if (strlen($nomrx) == 6) {
+                    $nourutfixReg = "00" . $nomrx;
+                } else if (strlen($nomrx) == 7) {
+                    $nourutfixReg = "0" . $nomrx;
+                } else if (strlen($nomrx) == 8) {
+                    $nourutfixReg = $nomrx;
+                }
+        return $nourutfixReg;
+    }
     public function MedrecWalkinNumber()
     {
         $maxnumber = $this->medrecRepository->getMedrecWalkinNumberMax();

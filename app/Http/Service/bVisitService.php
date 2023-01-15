@@ -302,11 +302,20 @@ class bVisitService extends Controller {
                 }
 
             // INSERT REGISTRATION
-            $this->visitRepository->addRegistrationRajal($maxVisit->ID,$NoEpisode,$nofixReg,$NamaGrupPerawatan,$request->NoMR,
-            $request->CaraBayar,$IdGrupPerawatan,$IdDokter,$idno_urutantrian,$NoAntrianAll,
-            $request->Company,$NamaSesion,$TelemedicineIs,$request->TglRegistrasi,
-            $request->TglRegistrasi,$operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
-            $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek);
+            if($CaraBayar == "2"){
+                $this->visitRepository->addRegistrationRajalAsuransi($maxVisit->ID,$NoEpisode,$nofixReg,$NamaGrupPerawatan,$request->NoMR,
+                $request->CaraBayar,$IdGrupPerawatan,$IdDokter,$idno_urutantrian,$NoAntrianAll,
+                $request->Company,$NamaSesion,$TelemedicineIs,$request->TglRegistrasi,
+                $request->TglRegistrasi,$operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
+                $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek);
+            }else{
+                $this->visitRepository->addRegistrationRajal($maxVisit->ID,$NoEpisode,$nofixReg,$NamaGrupPerawatan,$request->NoMR,
+                $request->CaraBayar,$IdGrupPerawatan,$IdDokter,$idno_urutantrian,$NoAntrianAll,
+                $request->Company,$NamaSesion,$TelemedicineIs,$request->TglRegistrasi,
+                $request->TglRegistrasi,$operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
+                $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek);
+            }
+           
 
             $response = array(
             'NoEpisode' => $NoEpisode, // Set array status dengan success     
@@ -326,5 +335,13 @@ class bVisitService extends Controller {
             Log::info($e->getMessage()); 
             return $this->sendError($e->getMessage(), []); 
         }  
+    }
+    public function viewByNoBooking(Request $request){
+        $data = $this->visitRepository->viewByNoBooking($request->NoBooking);
+        if ($data->count() > 0) { 
+            return $this->sendResponse($data->first(), "Data ditemukan.");
+        } else {
+            return $this->sendError("Data Not Found.", [],200);
+        }
     }
 }

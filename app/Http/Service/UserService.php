@@ -74,13 +74,13 @@ class UserService extends Controller {
             ]);
         }
     }
-    public function token(Request $request)
+    public function token()
     {
         // validator 
         $headers = apache_request_headers();
      
-        $username = $headers['x-username'];
-        $password = $headers['x-password'];
+        $username = $headers['X-Username'];
+        $password = $headers['X-Password'];
 
         //login
         $loginUser = $this->userRepository->token($username,$password);

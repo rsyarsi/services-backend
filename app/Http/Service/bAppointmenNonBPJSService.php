@@ -607,7 +607,7 @@ class bAppointmenNonBPJSService extends Controller {
     }  
     public function CheckIn(Request $request){ 
         DB::connection('sqlsrv3')->beginTransaction();
-        try{
+        try{ 
             
             $kodebooking = $request->kodebooking; 
             $waktu = $request->waktu;
@@ -655,7 +655,7 @@ class bAppointmenNonBPJSService extends Controller {
                 $ID_JadwalPraktek = $databooking->ID_JadwalPraktek;
 
                 if($Datang > 0){ 
-                    return $this->sendError("No. Reservasi Sudah Checkin, No. Reservasi tidak berlaku.", []); 
+                    return $this->sendError("No. Reservasi Sudah Checkin, No. Reservasi tidak berlaku." , []); 
                 }
 
             //get max visit
@@ -689,7 +689,7 @@ class bAppointmenNonBPJSService extends Controller {
                                         $IdDokter,$shift,$ApmDate);
 
                 if($cekActiverRegistrasi){ 
-                    return $this->sendError("Pasien Sudah mendaftar di Poli dan Dokter yang sama !", []); 
+                    return $this->sendError("Pasien Sudah mendaftar di Poli dan Dokter yang sama !" , []); 
                 } 
                
             }else{ // JIKA TIDAK ADA REG AKTIF
@@ -701,13 +701,19 @@ class bAppointmenNonBPJSService extends Controller {
                  
             }
                 // INSERT REGISTRATION
-                $this->visitRepository->addRegistrationRajal($maxVisit->ID,$NoEpisode,$nofixReg,$NamaGrupPerawatan,$NoMrfix,
-                                                            $JenisBayar,$IdGrupPerawatan,$IdDokter,$Antrian,$NoAntrianAll,
-                                                            $Company,$shift,$TelemedicineIs,$ApmDate,
-                                                            $ApmDate,$operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
-                                                            $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek);
-
-                                                            
+                if($JenisPembayaran == "ASURANSI"){
+                    $this->visitRepository->addRegistrationRajalAsuransi($maxVisit->ID,$NoEpisode,$nofixReg,$NamaGrupPerawatan,$NoMrfix,
+                    $JenisBayar,$IdGrupPerawatan,$IdDokter,$Antrian,$NoAntrianAll,
+                    $Company,$shift,$TelemedicineIs,$ApmDate,
+                    $ApmDate,$operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
+                    $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek);
+                }else {
+                    $this->visitRepository->addRegistrationRajal($maxVisit->ID,$NoEpisode,$nofixReg,$NamaGrupPerawatan,$NoMrfix,
+                    $JenisBayar,$IdGrupPerawatan,$IdDokter,$Antrian,$NoAntrianAll,
+                    $Company,$shift,$TelemedicineIs,$ApmDate,
+                    $ApmDate,$operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
+                    $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek);
+                }                                          
                 //  UPDATE DATANG RESERVASI
                 $this->appointmenRepository->updateDatangAppointment($kodebooking,$nofixReg);  
 

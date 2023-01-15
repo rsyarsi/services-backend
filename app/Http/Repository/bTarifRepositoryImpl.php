@@ -9,21 +9,21 @@ class bTarifRepositoryImpl implements bTarifRepositoryInterface
     public function getTarifRadiologi($request){
         return  DB::connection('sqlsrv8')->table("View_Tarif_New") 
         ->where('Group_Jaminan', $request->Group_Jaminan) 
-        ->where('Proc_Description', 'like', '%' . $request->descTarif . '%') 
+       // ->where('Proc_Description', 'like', '%' . $request->descTarif . '%') 
         ->orderBy('ID','desc')
         ->get();
     }
     public function getTarifLaboratorium($request){
         return  DB::connection('sqlsrv7')->table("View_Tarif_New") 
         ->where('Group_Jaminan', $request->Group_Jaminan) 
-        ->where('NamaTes', 'like', '%' . $request->descTarif . '%') 
+      //  ->where('NamaTes', 'like', '%' . $request->descTarif . '%') 
         ->get();
     }
     public function getTarifRajal($request){
         return  DB::connection('sqlsrv3')->table("View_Tarif_New") 
         ->where('Group_Jaminan', $request->Group_Jaminan) 
         ->where('IdUnit', $request->IdUnit) 
-        ->where('Treatment', 'like', '%' . $request->descTarif . '%') 
+       // ->where('Treatment', 'like', '%' . $request->descTarif . '%') 
         ->get();
     }
     public function getTarifMCU($request){
@@ -48,7 +48,7 @@ class bTarifRepositoryImpl implements bTarifRepositoryInterface
     public function getTarifRanap($request){
         return  DB::connection('sqlsrv9')->table("View_Tarif_New") 
         ->where('Group_Jaminan', $request->Group_Jaminan) 
-        ->where('NamaTarif', 'like', '%' . $request->descTarif . '%')  
+      //  ->where('NamaTarif', 'like', '%' . $request->descTarif . '%')  
         ->get();
     }
     // DETIL TARIF

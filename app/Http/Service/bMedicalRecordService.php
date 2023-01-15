@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use SebastianBergmann\CodeUnit\Exception;
 use App\Http\Repository\UserRepositoryImpl;
 use App\Http\Repository\bMedicalRecordRepositoryImpl;
+use Carbon\Carbon;
 
 class bMedicalRecordService extends Controller {
     use AutoNumberTrait;
@@ -212,7 +213,8 @@ class bMedicalRecordService extends Controller {
          
         try {
             // Db Transaction
-            DB::beginTransaction();
+            DB::connection('sqlsrv2')->beginTransaction();
+            DB::connection('sqlsrv8')->beginTransaction();
             $autonumber = $this->MedrecNumber();
             //CONVERT No. Mr
             $idkanan = substr($autonumber, 4); // xx-xx-03 kanan
@@ -224,8 +226,20 @@ class bMedicalRecordService extends Controller {
             $jnsid="KTP";
             $hidden_tptlahir = "-";
             
+             // untuk radiologi
+             if ($request->jeniskelamin == "P") {
+                $Medical_JKel_R = "F";
+            } elseif ($request->jeniskelamin == "L") {
+                $Medical_JKel_R = "M";
+            }
+            $DOB = date('Ymd', strtotime($request->tanggallahir));
+            $noMRRad = $this->MedrecRadiologiNumber($NoMrfix);
+            $TRIGGER_DTTM = Carbon::now()->format('YmdHis'); 
+            $this->medrecRepository->patientwlRadiologi($request,$Medical_JKel_R,$DOB,$noMRRad, $TRIGGER_DTTM);
+            // 
             $this->medrecRepository->create($request, $aktif,$jnsid,$hidden_tptlahir,$NoMrfix,$nourutfixMR,$autonumber);
-            DB::commit();
+            DB::connection('sqlsrv2')->commit();
+            DB::connection('sqlsrv8')->commit();
             $response = array(
                 'norm' => $NoMrfix, 
             );
@@ -235,7 +249,8 @@ class bMedicalRecordService extends Controller {
             );
             return $this->sendResponseNew($response, $metadata);
         } catch (Exception $e) {
-            DB::rollBack();
+            DB::connection('sqlsrv2')->rollBack();
+            DB::connection('sqlsrv8')->rollBack();
             Log::info($e->getMessage());
             $metadata = array(
                     'message' => 'Gagal', // Set array status dengan success     
@@ -429,7 +444,8 @@ class bMedicalRecordService extends Controller {
          
         try {
             // Db Transaction
-            DB::beginTransaction();
+            DB::connection('sqlsrv2')->beginTransaction();
+            DB::connection('sqlsrv8')->beginTransaction();
 
             // create data disini
             if ($this->medrecRepository->getMedrecWalkinbyNIK($request->nik)->count() > 0 ) {
@@ -450,9 +466,21 @@ class bMedicalRecordService extends Controller {
             $aktif ="1";
             $jnsid="KTP";
             $hidden_tptlahir = "-";
-            
+
+             // untuk radiologi
+             if ($request->jeniskelamin == "P") {
+                $Medical_JKel_R = "F";
+            } elseif ($request->jeniskelamin == "L") {
+                $Medical_JKel_R = "M";
+            }
+            $DOB = date('Ymd', strtotime($request->tanggallahir));
+            $noMRRad = $this->MedrecRadiologiNumber($NoMrfix);
+            $TRIGGER_DTTM = Carbon::now()->format('YmdHis'); 
+            $this->medrecRepository->patientwlRadiologi($request,$Medical_JKel_R,$DOB,$noMRRad, $TRIGGER_DTTM);
+            // 
             $this->medrecRepository->createWalkin($request, $aktif,$jnsid,$hidden_tptlahir,$NoMrfix,$nourutfixMR,$autonumber);
-            DB::commit();
+            DB::connection('sqlsrv2')->commit();
+            DB::connection('sqlsrv8')->commit();
             $response = array(
                 'norm' => $NoMrfix, 
             );
@@ -462,7 +490,8 @@ class bMedicalRecordService extends Controller {
             );
             return $this->sendResponseNew($response, $metadata);
         } catch (Exception $e) {
-            DB::rollBack();
+            DB::connection('sqlsrv2')->rollBack();
+            DB::connection('sqlsrv8')->rollBack();
             Log::info($e->getMessage());
             $metadata = array(
                     'message' => 'Gagal', // Set array status dengan success     
@@ -512,9 +541,26 @@ class bMedicalRecordService extends Controller {
         if ($request->statusnikah === "" || $request->statusnikah === null) {
             return $this->sendError("Status Nikah belum diisi.",[]);
         }
+
+        if ($request->provinsi === "" || $request->provinsi === null) {
+            return $this->sendError("Provinsi belum diisi.",[]);
+        }
+        if ($request->kabupaten === "" || $request->kabupaten === null) {
+            return $this->sendError("Kabupaten belum diisi.",[]);
+        }
+        if ($request->kecamatan === "" || $request->kecamatan === null) {
+            return $this->sendError("Kecamatan belum diisi.",[]);
+        }
+        if ($request->kelurahan === "" || $request->kelurahan === null) {
+            return $this->sendError("kelurahan belum diisi.",[]);
+        }
+        if ($request->kodepos === "" || $request->kodepos === null) {
+            return $this->sendError("Kodepos belum diisi.",[]);
+        }
         try {
             // Db Transaction
-            DB::beginTransaction();
+            DB::connection('sqlsrv2')->beginTransaction();
+            DB::connection('sqlsrv8')->beginTransaction();
             $autonumber = $this->MedrecNumber();
             //CONVERT No. Mr
             $idkanan = substr($autonumber, 4); // xx-xx-03 kanan
@@ -523,14 +569,30 @@ class bMedicalRecordService extends Controller {
             $NoMrfix =   $idkiri . '-' . $idtengah . '-' . $idkanan;
             $nourutfixMR = $idkiri . $idtengah . $idkanan;
             $aktif ="1";
+            
+            // untuk radiologi
+            if ($request->jeniskelamin == "P") {
+                $Medical_JKel_R = "F";
+            } elseif ($request->jeniskelamin == "L") {
+                $Medical_JKel_R = "M";
+            }
+            $DOB = date('Ymd', strtotime($request->tanggallahir));
+            $noMRRad = $this->MedrecRadiologiNumber($NoMrfix);
+            $TRIGGER_DTTM = Carbon::now()->format('YmdHis'); 
+            $this->medrecRepository->patientwlRadiologi($request,$Medical_JKel_R,$DOB,$noMRRad, $TRIGGER_DTTM);
+            // 
             $this->medrecRepository->createNonWalkin($request, $aktif,$NoMrfix,$nourutfixMR,$autonumber);
-            DB::commit();
+       
+ 
+            DB::connection('sqlsrv2')->commit();
+            DB::connection('sqlsrv8')->commit();
             $response = array(
                 'norm' => $NoMrfix, 
             );
             return $this->sendResponse($response,"Medical Record berhasil di Buat.");
-        } catch (Exception $e) {
-            DB::rollBack();
+        } catch (Exception $e) { 
+            DB::connection('sqlsrv2')->rollBack();
+            DB::connection('sqlsrv8')->rollBack();
             Log::info($e->getMessage());
             return $this->sendError("Data Gagal disimpan.",[]); 
         }    

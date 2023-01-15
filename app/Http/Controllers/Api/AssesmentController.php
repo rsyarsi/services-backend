@@ -48,4 +48,11 @@ class AssesmentController extends Controller
         $user =  $userService->ViewCppt($request);
         return $user; 
     }
+    public function ViewCpptPeriode(Request $request){
+        $assesmentRajal = new bAssesmentRajalRepositoryImpl();
+        $registrationRajal = new bVisitRepositoryImpl();
+        $userService = new bAssesmentRajalService($assesmentRajal, $registrationRajal);
+        $user =  $userService->ViewCpptPeriode($request);
+        return $user; 
+    }
 }

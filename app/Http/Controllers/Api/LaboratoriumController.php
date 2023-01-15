@@ -10,34 +10,7 @@ use App\Http\Repository\aTrsLaboratoriumRepositoryImpl;
 
 class LaboratoriumController extends Controller
 {
-    //
-    public function createheader(Request $request){
-        $tarif = new bTarifRepositoryImpl(); 
-        $visitRepository = new bVisitRepositoryImpl(); 
-        $trsLaboratorium = new aTrsLaboratoriumRepositoryImpl(); 
-        $doctorRepository = new aDoctorRepositoryImpl(); 
-        $userService = new bTrsLaboratoriumService($tarif,$visitRepository,$trsLaboratorium,$doctorRepository);
-        $user =  $userService->createheader($request);
-        return $user; 
-    }
-    public function createdetil(Request $request){
-        $tarif = new bTarifRepositoryImpl(); 
-        $visitRepository = new bVisitRepositoryImpl(); 
-        $trsLaboratorium = new aTrsLaboratoriumRepositoryImpl(); 
-        $doctorRepository = new aDoctorRepositoryImpl(); 
-        $userService = new bTrsLaboratoriumService($tarif,$visitRepository,$trsLaboratorium,$doctorRepository);
-        $user =  $userService->createdetil($request);
-        return $user; 
-    }
-    public function sendLis(Request $request){
-        $tarif = new bTarifRepositoryImpl(); 
-        $visitRepository = new bVisitRepositoryImpl(); 
-        $trsLaboratorium = new aTrsLaboratoriumRepositoryImpl(); 
-        $doctorRepository = new aDoctorRepositoryImpl(); 
-        $userService = new bTrsLaboratoriumService($tarif,$visitRepository,$trsLaboratorium,$doctorRepository);
-        $user =  $userService->sendLis($request);
-        return $user; 
-    }
+    // 
     public function viewOrderLabbyTrs(Request $request){
         $tarif = new bTarifRepositoryImpl(); 
         $visitRepository = new bVisitRepositoryImpl(); 
@@ -54,6 +27,35 @@ class LaboratoriumController extends Controller
         $doctorRepository = new aDoctorRepositoryImpl(); 
         $userService = new bTrsLaboratoriumService($tarif,$visitRepository,$trsLaboratorium,$doctorRepository);
         $user =  $userService->viewOrderLabbyMedrec($request);
+        return $user; 
+    }
+    public function createLaboratoriumOrder(Request $request){
+        $tarif = new bTarifRepositoryImpl(); 
+        $visitRepository = new bVisitRepositoryImpl(); 
+        $trsLaboratorium = new aTrsLaboratoriumRepositoryImpl(); 
+        $doctorRepository = new aDoctorRepositoryImpl(); 
+        $userService = new bTrsLaboratoriumService($tarif,$visitRepository,$trsLaboratorium,$doctorRepository);
+        $user =  $userService->createLaboratoriumOrder($request);
+        return $user; 
+    }
+    public function deleteOrderLaboratoriumDetail(Request $request)
+    {
+        $tarif = new bTarifRepositoryImpl(); 
+        $visitRepository = new bVisitRepositoryImpl(); 
+        $trsLaboratorium = new aTrsLaboratoriumRepositoryImpl(); 
+        $doctorRepository = new aDoctorRepositoryImpl(); 
+        $userService = new bTrsLaboratoriumService($tarif,$visitRepository,$trsLaboratorium,$doctorRepository);
+        $user =  $userService->deleteOrderLaboratoriumDetail($request);
+        return $user; 
+    }
+    public function deleteOrderLaboratorium(Request $request)
+    {
+        $tarif = new bTarifRepositoryImpl(); 
+        $visitRepository = new bVisitRepositoryImpl(); 
+        $trsLaboratorium = new aTrsLaboratoriumRepositoryImpl(); 
+        $doctorRepository = new aDoctorRepositoryImpl(); 
+        $userService = new bTrsLaboratoriumService($tarif,$visitRepository,$trsLaboratorium,$doctorRepository);
+        $user =  $userService->deleteOrderLaboratorium($request);
         return $user; 
     }
 }

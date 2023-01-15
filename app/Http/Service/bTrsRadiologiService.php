@@ -70,9 +70,9 @@ class bTrsRadiologiService extends Controller {
             $TRIGGER_DTTM = date("YmdHis", strtotime($request->dateOrder)); 
             $DOB = date('Ymd', strtotime($datareg->Date_of_birth));
             // Validasi tanggal order harus sama dengan tanggal Registrasi
-            if( date('Y-m-d', strtotime($request->dateOrder)) <> date('Y-m-d', strtotime($datareg->Visit_Date))){
-                return  $this->sendError("Tanggal order Harus Sama dengan Tanggal Registrasi.");
-            }
+            // if( date('Y-m-d', strtotime($request->dateOrder)) <> date('Y-m-d', strtotime($datareg->Visit_Date))){
+            //     return  $this->sendError("Tanggal order Harus Sama dengan Tanggal Registrasi.");
+            // }
             
             $validTrsTarif = $this->tarif->getTarifRadiologibyID($request->Kodetarif);
             $tarif = $validTrsTarif->first();
@@ -95,4 +95,42 @@ class bTrsRadiologiService extends Controller {
             return  $this->sendError($e->getMessage());
         }
     } 
+    public function viewOrderRadbyMedrec($request)
+    {
+        $validator = Validator::make($request->all(), [
+            "NoMR" => "required"  
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+        try{
+            // validasi jika Kode Pemriksaan Sudah Ada
+            $header = $this->trsRadiologi->viewOrderRadbyMedrec($request);
+            return $this->sendResponse($header ,"Order Radiologi Ditemukan.");  
+        }catch (Exception $e) { 
+            
+            Log::info($e->getMessage());
+            return  $this->sendError($e->getMessage());
+        }
+    }
+    public function viewOrderRadbyMedrecPeriode($request)
+    {
+        $validator = Validator::make($request->all(), [
+            "NoMR" => "required",
+            "tglPeriodeBerobatAwal" => "required", 
+            "tglPeriodeBerobatAkhir" => "required", 
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+        try{
+            // validasi jika Kode Pemriksaan Sudah Ada
+            $header = $this->trsRadiologi->viewOrderRadbyMedrecPeriode($request);
+            return $this->sendResponse($header ,"Order Radiologi Ditemukan.");  
+        }catch (Exception $e) { 
+            
+            Log::info($e->getMessage());
+            return  $this->sendError($e->getMessage());
+        }
+    }
 }

@@ -85,4 +85,18 @@ class aTrsRadiologiRepositoryImpl implements aTrsRadiologiRepositoryInterface
             
         ]);
     }
+    public function viewOrderRadbyMedrec($request)
+    {
+        return  DB::connection('sqlsrv8')->table("View_Order_Radiologi_New") 
+        ->where('MRN',$request->NoMR)  
+        ->get();
+    }
+    public function viewOrderRadbyMedrecPeriode($request)
+    {
+        return  DB::connection('sqlsrv8')->table("View_Order_Radiologi_New") 
+        ->where('MRN',$request->NoMR) 
+        ->whereBetween(DB::raw("replace(CONVERT(VARCHAR(11), ORDER_DATE, 111), '/','-')"),
+        [$request->tglPeriodeBerobatAwal,$request->tglPeriodeBerobatAkhir])  
+        ->get();
+    }
 }

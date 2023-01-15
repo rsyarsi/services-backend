@@ -28,6 +28,23 @@ class bMedicalRecordRepositoryImpl implements bMedicalRecordRepositoryInterface
             'Aktif' => '1' 
         ]);
     } 
+    public function patientwlRadiologi($request,$jeniskelamin,$birthday,$patientId,$TRIGGER_DTTM)
+    {
+        return  DB::connection('sqlsrv8')->table("PATIENTWL")->insert([
+            'PATIENT_NAME' => $request->nama,
+            'REPLICA_DTTM' => 'ANY',
+            'TRIGGER_DTTM' =>  $TRIGGER_DTTM,
+            'PATIENT_SEX' => $jeniskelamin,
+            'PATIENT_BIRTH_DTTM' => $birthday,
+            'ADDRESS' => $request->alamat,
+            'PATIENT_ID' =>  $patientId,
+            'EVENT_TYPE' => 'ADT^A04' 
+        ]);
+    }
+    public function patientwlLaboratorium($request)
+    {
+        
+    }
     public function createNonWalkin($request, $aktif,$NoMrfix,$nourutfixMR,$autonumber)
     {
         return  DB::connection('sqlsrv2')->table("Admision")->insert([
@@ -42,17 +59,19 @@ class bMedicalRecordRepositoryImpl implements bMedicalRecordRepositoryInterface
             'Religion' => $request->agama,
             'Marital_status' => $request->statusnikah,
             'Country/Region' => $request->kewarganegaraaan,
-            
             'Marital_status' => $request->statusnikah,
             'Education' => $request->pendidikan,
             'Ocupation' => $request->pekerjaan,
             'E-mail Address' => $request->email,
-
-
             'Date_of_birth' =>  $request->tanggallahir,
             'Home Phone' => $request->nohp,
             'Mobile Phone' => $request->nohp,
-            'Aktif' => $aktif 
+            'Aktif' => $aktif,
+            'State/Province' => $request->provinsi,
+            'City' => $request->kabupaten,
+            'kecamatan' => $request->kecamatan,
+            'kelurahan' => $request->kelurahan,
+            'ZIP/Postal Code' => $request->kodepos
         ]);
     } 
     public function createWalkin($request, $aktif,$jnsid,$hidden_tptlahir,$NoMrfix,$nourutfixMR,$autonumber)
@@ -162,4 +181,5 @@ class bMedicalRecordRepositoryImpl implements bMedicalRecordRepositoryInterface
             ]);
         return $updatesatuan;
     }
+   
 }

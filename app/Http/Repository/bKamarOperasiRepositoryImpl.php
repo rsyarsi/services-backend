@@ -10,15 +10,17 @@ class bKamarOperasiRepositoryImpl implements bKamarOperasiRepositoryInterface
     {
         $rajal =  DB::connection('sqlsrv5')
         ->table('View_JadwalOperasiRajal_BPJS')
+        ->select('kodebooking','tanggaloperasi','jenistindakan','kodepoli','namapoli','terlaksana','nopeserta','lastupdate')
         ->whereBetween(DB::raw("replace(CONVERT(VARCHAR(11), TglOperasi, 111), '/','-')"),[$request->tanggalawal, $request->tanggalakhir] )
         ->where('NamaPerusahaan', 'BPJS Kesehatan')
         ->where('StatusOrder', '<>' ,'Batal');
         $bid_requests = DB::connection('sqlsrv5')
                     ->table('View_JadwalOperasiRanap_BPJS')
+                    ->select('kodebooking','tanggaloperasi','jenistindakan','kodepoli','namapoli','terlaksana','nopeserta','lastupdate')
                     ->whereBetween(DB::raw("replace(CONVERT(VARCHAR(11), TglOperasi, 111), '/','-')"),[$request->tanggalawal, $request->tanggalakhir] )
                     ->where('NamaPerusahaan', 'BPJS Kesehatan')
                     ->where('StatusOrder', '<>' ,'Batal')
-                    ->unionAll($rajal)->orderBy('TglOperasi','desc')
+                    ->unionAll($rajal)->orderBy('tanggaloperasi','desc')
                     ->get();
         return $bid_requests;
     } 
