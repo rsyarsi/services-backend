@@ -154,7 +154,7 @@ class bAppointmentService extends Controller {
             $dataMedicalrecord = $this->medrecRepository->getMedrecbyNIK($request->nik);
             if ($this->medrecRepository->getMedrecbyNIK($request->nik)->count() < 1 ) {
                 $metadata = array(
-                    'message' => 'Data pasien ini tidak ditemukan, silahkan Melakukan Registrasi Pasien Baru.',  // Set array status dengan success    
+                    'message' => 'Data pasien ini tidak ditemukan di SIMRS, silahkan Melakukan Registrasi Pasien Baru.',  // Set array status dengan success    
                     'code' => 202, // Set array nama dengan isi kolom nama pada tabel siswa 
                 );
                 return  $this->sendErrorNew($metadata,null);
@@ -265,10 +265,10 @@ class bAppointmentService extends Controller {
             }
             if($jadwal->count() < 1 ){ 
                 $response = array(
-                    'message' => 'Jam Praktek Tidak Ditemukan.',  // Set array status dengan success     
+                    'message' => 'Jam Praktek Tidak Ditemukan di SIMRS, hubungi IT RS Yarsi untuk memperbaiki Jadwal Dokter.',  // Set array status dengan success     
                 );
                 $metadata = array(
-                    'message' => 'Jam Praktek Tidak Ditemukan.', // Set array status dengan success    
+                    'message' => 'Jam Praktek Tidak Ditemukan di SIMRS, hubungi IT RS Yarsi untuk memperbaiki Jadwal Dokter.', // Set array status dengan success    
                     'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
                 );
                 return  $this->sendErrorTrsNew($response,$metadata);
@@ -854,7 +854,7 @@ class bAppointmentService extends Controller {
                             $this->visitRepository->addTaskOneBPJS($kodebooking,$waktu,$taskid,$tgl_input);
                             DB::connection('sqlsrv3')->commit();
                             $response = array(
-                                'message' => 'Checkin Berhasil.', // Set array status dengan success     
+                                'message' => 'Checkin SIMRS Berhasil.', // Set array status dengan success     
                             );
                             $metadata = array(
                                 'message' => 'Ok', // Set array status dengan success    
@@ -864,10 +864,10 @@ class bAppointmentService extends Controller {
                        } else if ($JsonData['metadata']['code'] == "201") {  
                             DB::connection('sqlsrv3')->rollBack();
                             $response = array(
-                                'message' => 'Kode Booking Tidak Ditemukan.', // Set array status dengan success     
+                                'message' => 'Kode Booking Tidak Ditemukan di Mobile JKN.', // Set array status dengan success     
                             );
                             $metadata = array(
-                                'message' => "Kode Booking Tidak Ditemukan.", // Set array status dengan success    
+                                'message' => "Kode Booking Tidak Ditemukan di Mobile JKN.", // Set array status dengan success    
                                 'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
                             ); 
                             return $this->sendResponseNew($JsonData, $metadata);
