@@ -210,8 +210,9 @@ class aBarangRepositoryImpl implements aBarangRepositoryInterface
                 'ID',
                 'Product Name'
             ) 
-            ->where('Product Name', 'like', '%' . $request->name . '%')
-            ->skip(10)->take(5)->get();
+            ->where('Group_DK',$request->groupBarang)
+             ->where('Product Name', 'like', '%' . $request->name . '%')->get();
+            // ->skip(100)->take(50)
     }
     public function editHPPBarang($key)
     {

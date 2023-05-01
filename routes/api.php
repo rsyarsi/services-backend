@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\AntrianFarmasiController;
+use App\Http\Controllers\Api\Wilayah;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Api\BPJSKesehatan;
@@ -8,32 +10,31 @@ use App\Http\Controllers\Api\UnitController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\JenisController;
+use App\Http\Controllers\Api\TarifController;
+use App\Http\Controllers\Api\VisitController;
 use App\Http\Controllers\Api\BarangController;
 use App\Http\Controllers\Api\DoctorController;
 use App\Http\Controllers\Api\FakturController;
 use App\Http\Controllers\Api\MutasiController;
-use App\Http\Controllers\Api\PabrikController;
-use App\Http\Controllers\api\SatuanController;
+use App\Http\Controllers\Api\SatuanController;
+use App\Http\Controllers\Api\PabrikController; 
+use App\Http\Controllers\Api\WilayahController;
 use App\Http\Controllers\Api\GolonganController;
 use App\Http\Controllers\Api\KelompokController;
 use App\Http\Controllers\Api\SupplierController;
+use App\Http\Controllers\Api\AssesmentController;
+use App\Http\Controllers\Api\RadiologiController;
 use App\Http\Controllers\Api\ConsumableController;
 use App\Http\Controllers\Api\AppointmentController;
-use App\Http\Controllers\Api\AssesmentController;
-use App\Http\Controllers\api\FormulariumController;
+use App\Http\Controllers\Api\FormulariumController;
 use App\Http\Controllers\Api\OrderMutasiController;
+use App\Http\Controllers\Api\LaboratoriumController;
 use App\Http\Controllers\Api\BPJSKesehatanController;
 use App\Http\Controllers\Api\DeliveryOrderController;
-use App\Http\Controllers\Api\LaboratoriumController;
 use App\Http\Controllers\Api\MasterJaminanController;
 use App\Http\Controllers\Api\PurchaseOrderController; 
 use App\Http\Controllers\Api\ScheduleDoctorController;
 use App\Http\Controllers\Api\PurchaseRequisitionController;
-use App\Http\Controllers\Api\RadiologiController;
-use App\Http\Controllers\Api\TarifController;
-use App\Http\Controllers\Api\VisitController;
-use App\Http\Controllers\Api\Wilayah;
-use App\Http\Controllers\Api\WilayahController;
 
 /*
 |--------------------------------------------------------------------------
@@ -200,6 +201,7 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("getMutasibyDateUser/", [MutasiController::class, "getMutasibyDateUser"]);
         Route::post("getMutasibyPeriode/", [MutasiController::class, "getMutasibyPeriode"]);
     });
+    
     Route::group(['prefix' => 'transaction/faktur'], function () {
         Route::post("addFaktur", [FakturController::class, "addFaktur"]);
         Route::post("addFakturDetail", [FakturController::class, "addFakturDetail"]); 
@@ -210,8 +212,9 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("getFakturbyDateUser/", [FakturController::class, "getFakturbyDateUser"]);
         Route::post("getFakturbyPeriode/", [FakturController::class, "getFakturbyPeriode"]);
     });
+
     Route::group(['prefix' => 'transaction/consumable'], function () {
-        Route::post("addConsumable", [ConsumableController::class, "addConsumable"]);
+        Route::post("addConsumableHeader", [ConsumableController::class, "addConsumableHeader"]);
         Route::post("addConsumableDetail", [ConsumableController::class, "addConsumableDetail"]); 
         Route::post("voidConsumable", [ConsumableController::class, "voidConsumable"]);
         Route::post("voidConsumableDetailbyItem", [ConsumableController::class, "voidConsumableDetailbyItem"]);
@@ -220,6 +223,9 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("getConsumablebyDateUser/", [ConsumableController::class, "getConsumablebyDateUser"]);
         Route::post("getConsumablebyPeriode/", [ConsumableController::class, "getConsumablebyPeriode"]);
     });
+
+    
+
 
     // REGIS
     Route::group(['prefix' => 'masterdata/reg/'], function () {
@@ -239,9 +245,12 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("getScheduleDoctorbyIdDoctor/", [ScheduleDoctorController::class, "getScheduleDoctorbyIdDoctor"]);  
         Route::post("getScheduleDoctorDetilbyId/", [ScheduleDoctorController::class, "getScheduleDoctorDetilbyId"]);  
         Route::post("getScheduleSelectedDay/", [ScheduleDoctorController::class, "getScheduleSelectedDay"]);  
-
+        Route::post("getScheduleSelectedDayGroupByDoctor/", [ScheduleDoctorController::class, "getScheduleSelectedDayGroupByDoctor"]);  
+        Route::post("getScheduleDoctorbyIdJadwalDoctor/", [ScheduleDoctorController::class, "getScheduleDoctorbyIdJadwalDoctor"]);  
+        
         // JAMINAN
         Route::get("jaminan/view/{idgroupjaminan}", [MasterJaminanController::class, "getJaminanAllAktif"]);
+        Route::get("jaminan/view/groupjaminan/{idgroupjaminan}/idjaminan/{idjaminan}", [MasterJaminanController::class, "getJaminanAllAktifbyId"]);
 
         // PROVINSI, KABUPATEN, KECAMATAN, KELURAHAN
         Route::get("Provinsi", [WilayahController::class, "Provinsi"]);  
@@ -264,6 +273,7 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("viewAppointmentbyMedrec", [AppointmentController::class, "viewAppointmentbyMedrec"]);
         Route::post("viewAppointmentbyUserid_Mobile", [AppointmentController::class, "viewAppointmentbyUserid_Mobile"]);
         Route::post("CheckIn", [AppointmentController::class, "CheckIn"]);  
+        Route::post("CheckMedrecCheckIn", [AppointmentController::class, "CheckMedrecCheckIn"]);  
         
         // belum di pakai
         Route::post("SisaStatusAntrian", [BPJSKesehatanController::class, "SisaStatusAntrian"]);
@@ -274,12 +284,17 @@ Route::group(["middleware"=>["auth:api"]], function(){
     Route::group(['prefix' => 'registrations/'], function () {
         // unit  
         Route::post("viewByNoregistrasi", [VisitController::class, "viewByNoregistrasi"]); 
+        Route::post("viewByAppointmentNumber", [VisitController::class, "viewByAppointmentNumber"]); 
         Route::post("getRegistrationRajalbyMedreActive", [VisitController::class, "getRegistrationRajalbyMedreActive"]); 
         Route::post("getRegistrationRajalbyMedreHistory", [VisitController::class, "getRegistrationRajalbyMedreHistory"]);
         Route::post("getRegistrationRajalbyDoctorActive", [VisitController::class, "getRegistrationRajalbyDoctorActive"]); 
         Route::post("getRegistrationRajalbyDoctorHistory", [VisitController::class, "getRegistrationRajalbyDoctorHistory"]);
         Route::post("create/onsite", [VisitController::class, "createRegistrasiOnsite"]);
         Route::post("viewByNoBooking", [VisitController::class, "viewByNoBooking"]); 
+        Route::post("viewsep", [VisitController::class, "viewsep"]); 
+        Route::post("updateNoSepbyNoRegistrasi", [VisitController::class, "updateNoSepbyNoRegistrasi"]); 
+        Route::post("create/sep", [VisitController::class, "insertSEP"]);
+        Route::post("create/TaskBPJS", [VisitController::class, "addTaskBPJS"]);
 
     });  
     Route::group(['prefix' => 'medicalrecords/'], function () {
@@ -336,7 +351,30 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("viewOrderRadbyMedrec", [RadiologiController::class, "viewOrderRadbyMedrec"]);
         Route::post("viewOrderRadbyMedrecPeriode", [RadiologiController::class, "viewOrderRadbyMedrecPeriode"]);
     });
-
+    
+    Route::group(['prefix' => 'Antrian/'], function () {
+        Route::group(['prefix' => 'Farmasi/'], function () {
+            Route::post("CreateAntrian", [AntrianFarmasiController::class, "CreateAntrianFarmasi"]);
+            Route::post("UpdateAntrian", [AntrianFarmasiController::class, "UpdateAntrianFarmasi"]);
+            Route::post("ListAntrian", [AntrianFarmasiController::class, "ListAntrianFarmasi"]);
+            Route::post("ListHistoryAntrian", [AntrianFarmasiController::class, "ListHistoryAntrianFarmasi"]);
+            Route::get("ListDepoFarmasi", [AntrianFarmasiController::class, "ListDepoFarmasi"]);
+            Route::post("UpdateDataVerifikasiAmbilResep", [AntrianFarmasiController::class, "UpdateDataVerifikasiAmbilResep"]);
+        });
+        Route::group(['prefix' => 'Laboratorium/'], function () {
+           
+        });
+        Route::group(['prefix' => 'Radiologi/'], function () {
+           
+        });
+        Route::group(['prefix' => 'Admission/'], function () {
+            
+        });
+        Route::group(['prefix' => 'Kasir/'], function () {
+            
+        });
+    });
+    
     Route::group(['prefix' => 'Payments/'], function () {
         // unit  
 

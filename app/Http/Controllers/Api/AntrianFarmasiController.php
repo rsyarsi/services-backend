@@ -4,21 +4,21 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Service\bAppointmentService;
 use App\Http\Repository\bVisitRepositoryImpl;
 use App\Http\Repository\aDoctorRepositoryImpl;
 use App\Http\Repository\bAntrianRepositoryImpl;
-use App\Http\Service\bAppointmenNonBPJSService;
 use App\Http\Repository\aMasterUnitRepositoryImpl;
 use App\Http\Repository\bAppointmentRepositoryImpl;
 use App\Http\Repository\bKamarOperasiRepositoryImpl;
 use App\Http\Repository\bMedicalRecordRepositoryImpl;
 use App\Http\Repository\aScheduleDoctorRepositoryImpl;
+use App\Http\Repository\bAntrianFarmasiRepositoryImpl;
+use App\Http\Service\AntrianFarmasiService;
 
-class AppointmentController extends Controller
+class AntrianFarmasiController extends Controller
 {
     //
-    public function CreateAppointment(Request $request){
+    public function CreateAntrianFarmasi(Request $request){
         $userRepository = new bKamarOperasiRepositoryImpl();
         $medrecRepository = new bMedicalRecordRepositoryImpl();
         $doctorRepository = new aDoctorRepositoryImpl();
@@ -27,13 +27,14 @@ class AppointmentController extends Controller
         $scheduleRepository = new aScheduleDoctorRepositoryImpl();
         $antrianRepository = new bAntrianRepositoryImpl();
         $visitRepository = new bVisitRepositoryImpl();
-        $userService = new bAppointmenNonBPJSService($userRepository,$medrecRepository,
+        $antrianFarmasi = new bAntrianFarmasiRepositoryImpl();
+        $userService = new AntrianFarmasiService($userRepository,$medrecRepository,
                         $doctorRepository,$unitRepository, $appointmenRepository,$scheduleRepository,
-                        $antrianRepository,$visitRepository);
-        $user =  $userService->CreateAppointment($request);
+                        $antrianRepository,$visitRepository,$antrianFarmasi);
+        $user =  $userService->CreateAntrian($request);
         return $user;
     }
-    public function voidAppoitment(Request $request){
+    public function UpdateAntrianFarmasi(Request $request){
         $userRepository = new bKamarOperasiRepositoryImpl();
         $medrecRepository = new bMedicalRecordRepositoryImpl();
         $doctorRepository = new aDoctorRepositoryImpl();
@@ -42,13 +43,14 @@ class AppointmentController extends Controller
         $scheduleRepository = new aScheduleDoctorRepositoryImpl();
         $antrianRepository = new bAntrianRepositoryImpl();
         $visitRepository = new bVisitRepositoryImpl();
-        $userService = new bAppointmenNonBPJSService($userRepository,$medrecRepository,
+        $antrianFarmasi = new bAntrianFarmasiRepositoryImpl();
+        $userService = new AntrianFarmasiService($userRepository,$medrecRepository,
                         $doctorRepository,$unitRepository, $appointmenRepository,$scheduleRepository,
-                        $antrianRepository,$visitRepository);
-        $user =  $userService->voidAppoitment($request);
+                        $antrianRepository,$visitRepository,$antrianFarmasi);
+        $user =  $userService->UpdateAntrianFarmasi($request);
         return $user;
     }
-    public function viewAppointmentbyId(Request $request){
+    public function ListAntrianFarmasi(Request $request){
         $userRepository = new bKamarOperasiRepositoryImpl();
         $medrecRepository = new bMedicalRecordRepositoryImpl();
         $doctorRepository = new aDoctorRepositoryImpl();
@@ -57,13 +59,14 @@ class AppointmentController extends Controller
         $scheduleRepository = new aScheduleDoctorRepositoryImpl();
         $antrianRepository = new bAntrianRepositoryImpl();
         $visitRepository = new bVisitRepositoryImpl();
-        $userService = new bAppointmenNonBPJSService($userRepository,$medrecRepository,
+        $antrianFarmasi = new bAntrianFarmasiRepositoryImpl();
+        $userService = new AntrianFarmasiService($userRepository,$medrecRepository,
                         $doctorRepository,$unitRepository, $appointmenRepository,$scheduleRepository,
-                        $antrianRepository,$visitRepository);
-        $user =  $userService->viewAppointmentbyId($request);
+                        $antrianRepository,$visitRepository,$antrianFarmasi);
+        $user =  $userService->ListAntrianFarmasi($request);
         return $user;
     }
-    public function viewAppointmentbyMedrec(Request $request){
+    public function ListHistoryAntrianFarmasi(Request $request){
         $userRepository = new bKamarOperasiRepositoryImpl();
         $medrecRepository = new bMedicalRecordRepositoryImpl();
         $doctorRepository = new aDoctorRepositoryImpl();
@@ -72,13 +75,14 @@ class AppointmentController extends Controller
         $scheduleRepository = new aScheduleDoctorRepositoryImpl();
         $antrianRepository = new bAntrianRepositoryImpl();
         $visitRepository = new bVisitRepositoryImpl();
-        $userService = new bAppointmenNonBPJSService($userRepository,$medrecRepository,
+        $antrianFarmasi = new bAntrianFarmasiRepositoryImpl();
+        $userService = new AntrianFarmasiService($userRepository,$medrecRepository,
                         $doctorRepository,$unitRepository, $appointmenRepository,$scheduleRepository,
-                        $antrianRepository,$visitRepository);
-        $user =  $userService->viewAppointmentbyMedrec($request);
+                        $antrianRepository,$visitRepository,$antrianFarmasi);
+        $user =  $userService->ListHistoryAntrianFarmasi($request);
         return $user;
     }
-    public function CheckIn(Request $request){
+    public function ListDepoFarmasi(){
         $userRepository = new bKamarOperasiRepositoryImpl();
         $medrecRepository = new bMedicalRecordRepositoryImpl();
         $doctorRepository = new aDoctorRepositoryImpl();
@@ -87,13 +91,14 @@ class AppointmentController extends Controller
         $scheduleRepository = new aScheduleDoctorRepositoryImpl();
         $antrianRepository = new bAntrianRepositoryImpl();
         $visitRepository = new bVisitRepositoryImpl();
-        $userService = new bAppointmenNonBPJSService($userRepository,$medrecRepository,
+        $antrianFarmasi = new bAntrianFarmasiRepositoryImpl();
+        $userService = new AntrianFarmasiService($userRepository,$medrecRepository,
                         $doctorRepository,$unitRepository, $appointmenRepository,$scheduleRepository,
-                        $antrianRepository,$visitRepository);
-        $user =  $userService->CheckIn($request);
+                        $antrianRepository,$visitRepository,$antrianFarmasi);
+        $user =  $userService->ListDepoFarmasi();
         return $user;
     }
-    public function CheckMedrecCheckIn(Request $request){
+    public function UpdateDataVerifikasiAmbilResep(Request $request){
         $userRepository = new bKamarOperasiRepositoryImpl();
         $medrecRepository = new bMedicalRecordRepositoryImpl();
         $doctorRepository = new aDoctorRepositoryImpl();
@@ -102,25 +107,11 @@ class AppointmentController extends Controller
         $scheduleRepository = new aScheduleDoctorRepositoryImpl();
         $antrianRepository = new bAntrianRepositoryImpl();
         $visitRepository = new bVisitRepositoryImpl();
-        $userService = new bAppointmenNonBPJSService($userRepository,$medrecRepository,
+        $antrianFarmasi = new bAntrianFarmasiRepositoryImpl();
+        $userService = new AntrianFarmasiService($userRepository,$medrecRepository,
                         $doctorRepository,$unitRepository, $appointmenRepository,$scheduleRepository,
-                        $antrianRepository,$visitRepository);
-        $user =  $userService->CheckMedrecCheckIn($request);
-        return $user;
-    }
-    public function viewAppointmentbyUserid_Mobile(Request $request){
-        $userRepository = new bKamarOperasiRepositoryImpl();
-        $medrecRepository = new bMedicalRecordRepositoryImpl();
-        $doctorRepository = new aDoctorRepositoryImpl();
-        $unitRepository = new aMasterUnitRepositoryImpl();
-        $appointmenRepository = new bAppointmentRepositoryImpl();
-        $scheduleRepository = new aScheduleDoctorRepositoryImpl();
-        $antrianRepository = new bAntrianRepositoryImpl();
-        $visitRepository = new bVisitRepositoryImpl();
-        $userService = new bAppointmenNonBPJSService($userRepository,$medrecRepository,
-                        $doctorRepository,$unitRepository, $appointmenRepository,$scheduleRepository,
-                        $antrianRepository,$visitRepository);
-        $user =  $userService->viewAppointmentbyUserid_Mobile($request);
+                        $antrianRepository,$visitRepository,$antrianFarmasi);
+        $user =  $userService->UpdateDataVerifikasiAmbilResep($request);
         return $user;
     }
 }

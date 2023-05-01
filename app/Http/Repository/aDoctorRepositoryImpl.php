@@ -21,7 +21,7 @@ class aDoctorRepositoryImpl implements aDoctorRepositoryInterface
     {
         return  DB::connection('sqlsrv2')->table("View_Dokter")
         ->where('ID', $id)
-        ->select('ID','NamaDokter','NamaUnit','CodeAntrian','foto','Pendidikan','Description','Pelatihan','IdLayanan')
+        ->select('ID','NamaDokter','NamaUnit','CodeAntrian','foto','Pendidikan','Description','Pelatihan','IdLayanan','namaunit_spesialis','ID_Dokter_BPJS','NAMA_Dokter_BPJS')
         ->get();
     }
   
@@ -30,14 +30,14 @@ class aDoctorRepositoryImpl implements aDoctorRepositoryInterface
         return  DB::connection('sqlsrv2')->table("View_Dokter")
         ->where('active', '1')
         ->where('IdLayanan',$id) 
-        ->select('ID','NamaDokter','NamaUnit','foto','Pendidikan','Description','Pelatihan','IdLayanan')
+        ->select('ID','NamaDokter','NamaUnit','foto','Pendidikan','Description','Pelatihan','IdLayanan','namaunit_spesialis')
         ->get();
     }
     public function getDoctorbyUnitAll()
     {
         return  DB::connection('sqlsrv2')->table("View_Dokter")
         ->where('active', '1')
-        ->select('ID','NamaDokter','NamaUnit','foto','Pendidikan','Description','Pelatihan','IdLayanan')
+        ->select('ID','NamaDokter','NamaUnit','foto','Pendidikan','Description','Pelatihan','IdLayanan','namaunit_spesialis')
         ->get();
     }
     public function getDoctorbyUnitAllTop() //data
@@ -48,10 +48,10 @@ class aDoctorRepositoryImpl implements aDoctorRepositoryInterface
         ->where('IdLayanan','<>', '39')
         ->where('IdLayanan','<>', '9')
         ->where('IdLayanan','<>', '10')
-        ->where('IdLayanan','<>', '47')
-        ->select('ID','NamaDokter','NamaUnit','foto','Pendidikan','Description','Pelatihan','IdLayanan')
-        ->skip(15)->take(12)
-        ->orderBy('ID','desc')
+        ->where('IdLayanan','<>', '47')  
+        ->where('IdLayanan','<>', '53')  
+        ->select('ID','NamaDokter','NamaUnit','foto','Pendidikan','Description','Pelatihan','IdLayanan','namaunit_spesialis')
+       ->whereIn('ID',array('3813','3869','3873','3865','3862','3858','3859','3861','3857','3843','3860'))
         ->get();
     }
     public function getDoctorbyIDBPJS($id)

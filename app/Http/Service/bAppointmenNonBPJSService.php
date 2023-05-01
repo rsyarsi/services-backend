@@ -233,9 +233,9 @@ class bAppointmenNonBPJSService extends Controller {
                 return $this->sendError("Tanggal Booking : ".$tglbookingfix." Lebih Kecil dari tanggal Hari ini : ".$dmyreal, []);  
             }
             // Booking Harus harus H+1
-            if($tglbookingfix == $dmyreal){
-                return $this->sendError("Appointment hanya bisa dilakukan H+1 dari Hari ini.", []);  
-            }
+            // if($tglbookingfix == $dmyreal){
+            //     return $this->sendError("Appointment hanya bisa dilakukan H-1 dari Hari ini.", []);  
+            // }
             // Poli Sudah Tutup
             // if($Fixwaktureal > $Fixwaktupoliakhir){ 
             //     return $this->sendError("Pendaftaran Ke Poli ".$NamaGrupPerawatan." Sudah Tutup Jam ". $JamAkhir
@@ -264,17 +264,46 @@ class bAppointmenNonBPJSService extends Controller {
             $fixNoAntrian = $dataAntrian[1];
             $idno_urutantrian = $dataAntrian[0];
            
-            // cek sisa kuota
-            if($request->groupjadwal=="2"){
-                if($idno_urutantrian > $Max_NonJKN){
-                    return $this->sendError("Kuota Reservasi Sudah Penuh, Kuota Maksimal ". $Max_NonJKN , []);  
-                }
-            }else{
-                if($idno_urutantrian > $Max_NonJKN){
-                    return $this->sendError("Kuota Reservasi Sudah Penuh, Kuota Maksimal ". $Max_NonJKN , []);  
-                }
+            // START - cek sisa kuota
+            $harindo =  ""; 
+            if($datename == "Sunday"){
+                $harindo = "Minggu";
+                $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliMinggu($tglbookingfix,$IdDokter,$IdGrupPerawatan,$request->jampraktek);
+            } elseif ($datename == "Monday") {
+                $harindo = "Senin";
+                $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliSenin($tglbookingfix,$IdDokter,$IdGrupPerawatan,$request->jampraktek);
+            } elseif ($datename == "Tuesday") { 
+                $harindo = "Selasa";
+                $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliSelasa($tglbookingfix,$IdDokter,$IdGrupPerawatan,$request->jampraktek);
+            } elseif ($datename == "Wednesday") { 
+                $harindo = "Rabu";
+                $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliRabu($tglbookingfix,$IdDokter,$IdGrupPerawatan,$request->jampraktek);
+            } elseif ($datename == "Thursday") { 
+                $harindo = "Kamis";
+                $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliKamis($tglbookingfix,$IdDokter,$IdGrupPerawatan,$request->jampraktek);
+            } elseif ($datename == "Friday") {
+                $harindo = "Jumat"; 
+                $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliJumat($tglbookingfix,$IdDokter,$IdGrupPerawatan,$request->jampraktek);
+            } elseif ($datename == "Saturday") { 
+                $harindo = "Sabtu";
+                $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliSabtu($tglbookingfix,$IdDokter,$IdGrupPerawatan,$request->jampraktek);
             }
             
+            $koutaPerPoli = $kuotaPoliklinik->count();
+            $Ant = $koutaPerPoli+1;
+            if($request->groupjadwal=="2"){
+                if($koutaPerPoli >= $Max_NonJKN){
+                    // return $this->sendError("Kuota Dokter : " . $NamaDokter . ", Hari : " .$harindo ."  Sudah Penuh, Kuota Maksimal ". $Max_NonJKN  . ", No. Antrian Anda Adalah : " .  $Ant . ". Silahkan Pilih tanggal Lain untuk Melakukan Booking/Reservasi kembali.", []);  
+                    return $this->sendError("Kuota Dokter : " . $NamaDokter . ", Hari : " .$harindo ."  Sudah Tutup Registrasi. Silahkan Pilih tanggal Lain untuk Melakukan Booking/Reservasi kembali.", []);  
+                }
+            }else{
+                if($koutaPerPoli >= $Max_JKN){
+                    // return $this->sendError("Kuota Dokter : " . $NamaDokter . ", Hari : " .$harindo ." Sudah Penuh, Kuota Maksimal ". $Max_JKN . ", No. Antrian Anda Adalah : " .  $Ant . ". Silahkan Pilih tanggal Lain untuk Melakukan Booking/Reservasi kembali.", []);  
+                    return $this->sendError("Kuota Dokter : " . $NamaDokter . ", Hari : " .$harindo ." Sudah Tutup Registrasi. Silahkan Pilih tanggal Lain untuk Melakukan Booking/Reservasi kembali.", []);  
+                }
+            }
+            // END - cek sisa kuota
+
              // Generate No Booking
              $Notrsbooking = $this->genBookingNumber($tglbookingfix,$idbookingres);
              $xres = $idbookingres . '-' . $Notrsbooking[0];
@@ -605,11 +634,40 @@ class bAppointmenNonBPJSService extends Controller {
             return $this->sendError($e->getMessage(), []);
         }  
     }  
+    public function CheckMedrecCheckIn(Request $request){ 
+       
+        try{ 
+            DB::connection('sqlsrv3')->beginTransaction();
+
+            $kodebooking = $request->kodebooking; 
+            $NoMR = $request->NoMR;
+            $getBooking = $this->appointmenRepository->ViewBookingbyId($kodebooking); 
+            if($getBooking->count() < 1){
+                $response = array(
+                    'message' => 'No. Reservasi Tidak Ditemukan.', // Set array status dengan success     
+                );
+                $metadata = array(
+                    'message' => 'failed', // Set array status dengan success    
+                    'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
+                );
+                return $this->sendError("No. Reservasi Tidak Ditemukan atau Sudah Dibatalkan.", []); 
+            }else{ 
+                 $this->appointmenRepository->updateNoMrAppointment($kodebooking,$NoMR);
+                 DB::connection('sqlsrv3')->commit();
+                 return $this->sendResponse([] ,"No. Medical Record  Berhasil Di Update di data Apointment.");   
+            }
+        } catch (Exception $e) { 
+            DB::connection('sqlsrv3')->rollBack();
+            Log::info($e->getMessage()); 
+            return $this->sendError($e->getMessage(), []); 
+        }  
+    }
     public function CheckIn(Request $request){ 
         DB::connection('sqlsrv3')->beginTransaction();
         try{ 
             
             $kodebooking = $request->kodebooking; 
+            $Company = $request->Company; 
             $waktu = $request->waktu;
             $getBooking = $this->appointmenRepository->ViewBookingbyId($kodebooking);
             if($getBooking->count() < 1){
@@ -628,10 +686,17 @@ class bAppointmenNonBPJSService extends Controller {
                 $NoAntrianAll = $databooking->NoAntrianAll;
                 $Antrian = $databooking->Antrian;
                 $NoMrfix = $databooking->NoMR;
+                $ID_Penjamin = $databooking->ID_Penjamin;
+                $NamaDokter= $databooking->NamaDokter;
                 $NoMr = str_replace("-", "", $NoMrfix);
                 $ApmDate = $databooking->ApmDate;
                 $idperusahaan = $databooking->ID_Penjamin;
                 $JenisPembayaran = $databooking->JenisPembayaran;
+                $NamaPasien = $databooking->NamaPasien;
+                $NoKartuBPJS = $databooking->NoKartuBPJS;
+                if( $NoMrfix == "" or  $NoMrfix == null){ 
+                    return $this->sendError("No. Medical Record Anda Tidak ada. Anda Harus Membuat No. Medical Record Dahulu.", $databooking); 
+                }
                 if($JenisPembayaran == "PRIBADI"){
                     $JenisBayar = "1";
                     $kodeRegAwalXX = "RJUM";
@@ -651,13 +716,28 @@ class bAppointmenNonBPJSService extends Controller {
                 $IdDokter = $databooking->DoctorID;
                 $NamaGrupPerawatan = $databooking->Poli;
                 $IdGrupPerawatan = $databooking->IdPoli;
-                $Company = $databooking->Company;
+               
                 $ID_JadwalPraktek = $databooking->ID_JadwalPraktek;
 
+                $NoRujukanBPJS = $databooking->NoRujukanBPJS;
+                $NoKartuBPJS = $databooking->NoKartuBPJS;
+                $NoSuratKontrolBPJS = $databooking->NoSuratKontrolBPJS;
+                $NoSuratKontrolBPJS = $databooking->NoSuratKontrolBPJS;
+                $NoSEP = $databooking->NoSEP;
                 if($Datang > 0){ 
                     return $this->sendError("No. Reservasi Sudah Checkin, No. Reservasi tidak berlaku." , []); 
                 }
 
+            // Cek tanggal Reservasi nya untuk kapan, harus di hari yang sama
+            $dateNow = Carbon::now()->toDateString();
+            if($ApmDate < $dateNow){
+                return $this->sendError("Tanggal Reservasi : ". date("d-m-Y", strtotime($ApmDate)) ." Lebih Kecil dari tanggal Hari ini : ". date("d-m-Y", strtotime($dateNow)) . ". Silahkan Cek Kembali Kode Reservasi Anda. Pastikan Tanggal Reservasi Anda adalah tanggal hari ini. ", []);  
+            } 
+            $dateNow = Carbon::now()->toDateString();
+            if($ApmDate > $dateNow){
+                return $this->sendError("Tanggal Reservasi : ". date("d-m-Y", strtotime($ApmDate)) ." Lebih Besar dari tanggal Hari ini : ". date("d-m-Y", strtotime($dateNow)). ". Silahkan Cek Kembali Kode Reservasi Anda. Pastikan Tanggal Reservasi Anda adalah tanggal hari ini.", []);  
+            } 
+           
             //get max visit
             $maxVisit = $this->visitRepository->getMaxnumberVisit();
             $maxVisit->ID++;
@@ -700,22 +780,23 @@ class bAppointmenNonBPJSService extends Controller {
                 $nofixReg = $NoregistrationRajal[1]; 
                  
             }
+                $catatan = "";
                 // INSERT REGISTRATION
                 if($JenisPembayaran == "ASURANSI"){
                     $this->visitRepository->addRegistrationRajalAsuransi($maxVisit->ID,$NoEpisode,$nofixReg,$NamaGrupPerawatan,$NoMrfix,
                     $JenisBayar,$IdGrupPerawatan,$IdDokter,$Antrian,$NoAntrianAll,
                     $Company,$shift,$TelemedicineIs,$ApmDate,
                     $ApmDate,$operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
-                    $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek);
+                    $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek,$catatan);
                 }else {
                     $this->visitRepository->addRegistrationRajal($maxVisit->ID,$NoEpisode,$nofixReg,$NamaGrupPerawatan,$NoMrfix,
                     $JenisBayar,$IdGrupPerawatan,$IdDokter,$Antrian,$NoAntrianAll,
                     $Company,$shift,$TelemedicineIs,$ApmDate,
                     $ApmDate,$operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
-                    $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek);
+                    $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek,$catatan);
                 }                                          
                 //  UPDATE DATANG RESERVASI
-                $this->appointmenRepository->updateDatangAppointment($kodebooking,$nofixReg);  
+                $this->appointmenRepository->updateDatangAppointment($kodebooking,$nofixReg); 
 
                 $response = array(
                     'NoEpisode' => $NoEpisode, // Set array status dengan success     
@@ -723,7 +804,18 @@ class bAppointmenNonBPJSService extends Controller {
                     'NamaGrupPerawatan' => $NamaGrupPerawatan, // Set array status dengan success     
                     'NOMR' => $NoMrfix, // Set array status dengan success     
                     'Antrian' => $Antrian, // Set array status dengan success     
+                    'KodeAsuransi' =>  $Perusahaan, // Set array status dengan success     
+                    'GroupJaminan' =>  $JenisBayar, // Set array status dengan success  
+                    'ID_Penjamin' => $ID_Penjamin,   
                     'NoAntrianAll' =>  $NoAntrianAll, // Set array status dengan success     
+                    'NoRujukanBPJS' =>  $NoRujukanBPJS, // Set array status dengan success     
+                    'NoSuratKontrolBPJS' =>  $NoSuratKontrolBPJS, // Set array status dengan success    
+                    'NoKartuBPJS'  =>  $NoKartuBPJS, // Set array status dengan success    
+                    'NoSEP' =>  $NoSEP, // Set array status dengan success     
+                    'NamaDokter' =>  $NamaDokter, // Set array status dengan success     
+                    'TglRegistrasi' =>  $ApmDate, // Set array status dengan success  
+                    'jamPraktek'   =>  $shift, // Set array status dengan success  
+                    'NamaPasien'   =>  $NamaPasien, // Set array status dengan success  
                 );
 
                 DB::connection('sqlsrv3')->commit();
@@ -752,7 +844,11 @@ class bAppointmenNonBPJSService extends Controller {
                 'ApmDate' => $datafirst->ApmDate, // Set array status dengan success     
                 'NoAntrianAll' => $datafirst->NoAntrianAll, // Set array status dengan success     
                 'NoBooking' => $datafirst->NoBooking, // Set array status dengan success     
-                'NamaPasien' => $datafirst->NamaPasien, // Set array status dengan success     
+                'NoRegistrasi' => $datafirst->NoRegistrasi, // Set array status dengan success     
+                'NoRujukanBPJS' => $datafirst->NoRujukanBPJS, // Set array status dengan success     
+                'NoKartuBPJS' => $datafirst->NoKartuBPJS, // Set array status dengan success     
+                'NoSuratKontrolBPJS' => $datafirst->NoSuratKontrolBPJS, // Set array status dengan success     
+                'NoSEP'  => $datafirst->NoSEP, // Set array status dengan success     
             ); 
             return $this->sendResponse( $response,"Data ditemukan.");  
         }catch (Exception $e) { 

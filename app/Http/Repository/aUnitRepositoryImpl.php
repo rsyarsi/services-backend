@@ -21,7 +21,7 @@ class aUnitRepositoryImpl implements aUnitRepositoryInterface
     {
         return  DB::connection('sqlsrv2')->table("MstrUnitPerwatan")
         ->where('ID', $id)
-        ->select('ID','NamaUnit')
+        ->select('ID','NamaUnit','codeBPJS','CodeSubBPJS','NamaBPJS')
         ->get();
     }
   

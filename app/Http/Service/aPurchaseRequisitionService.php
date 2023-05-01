@@ -203,7 +203,7 @@ class aPurchaseRequisitionService extends Controller
             if ($this->aPurchaseRequisitionRepository->getPurchaseRequisitionbyID($request->TransasctionCode)->count() < 1) {
                 return $this->sendError('Transaction Number Not Found !', []);
             }
-
+            
             $this->aPurchaseRequisitionRepository->voidPurchaseRequisitionDetailbyItem($request);
 
             DB::commit();

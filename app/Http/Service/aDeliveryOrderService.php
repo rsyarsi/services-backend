@@ -320,7 +320,7 @@ class aDeliveryOrderService extends Controller
 
             // Load Data All Do Detil Untuk Di Looping 
             $dtlDo2 = $this->aDeliveryOrder->getDeliveryOrderDetailbyID($request->TransactionCode);
-           
+            $reff_void = 'DO_V';
             foreach ($dtlDo2 as $key2) {
 
                 $QtyDelivery = $key2->QtyDelivery;
@@ -332,7 +332,7 @@ class aDeliveryOrderService extends Controller
                     }
                 $sisaStok = $datastok - $Konversi_QtyTotal;
                 $this->aStok->updateStokPerItemBarang($request, $key2->ProductCode, $sisaStok);
-                $this->aStok->addBukuStokVoid($request, $key2);
+                $this->aStok->addBukuStokVoid($request, $key2,$reff_void);
 
                 // update nilai Hpp ke No. Trs Do Sebelumnya
                 $cekDoTerakhirHna = $this->aDeliveryOrder->getDeliveryOrderDetailbyIDnotIdTrsNow($key2, $request);

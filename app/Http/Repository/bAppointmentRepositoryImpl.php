@@ -78,7 +78,7 @@ class bAppointmentRepositoryImpl implements bAppointmentRepositoryInterface
         return  DB::connection('sqlsrv3')->table("Apointment")
         ->select( 'DoctorID','JamPraktek','NamaDokter','IdPoli','Poli','JamPraktek','JenisPembayaran','ID_Penjamin',
                     'NoAntrianAll','Antrian','NoBooking','NamaPasien','batal', 'Datang','NoMR','Company','ID_JadwalPraktek',
-                    DB::raw("replace(CONVERT(VARCHAR(11), ApmDate, 111), '/','-') ApmDate") )
+                    DB::raw("replace(CONVERT(VARCHAR(11), ApmDate, 111), '/','-') ApmDate"),"NoRegistrasi","NoRujukanBPJS","NoKartuBPJS","NoSuratKontrolBPJS","NamaPasien" ,"NoSEP")
         ->where('NoBooking', $nobooking)
         ->where('batal', '0')
         ->get();
@@ -88,7 +88,7 @@ class bAppointmentRepositoryImpl implements bAppointmentRepositoryInterface
         return  DB::connection('sqlsrv3')->table("Apointment")
         ->select(  'DoctorID','JamPraktek','NamaDokter','IdPoli','Poli','JamPraktek','JenisPembayaran','ID_Penjamin',
         'NoAntrianAll','Antrian','NoBooking','NamaPasien','batal', 'Datang','NoMR','Company','ID_JadwalPraktek',
-                    DB::raw("replace(CONVERT(VARCHAR(11), ApmDate, 111), '/','-') ApmDate") )
+                    DB::raw("replace(CONVERT(VARCHAR(11), ApmDate, 111), '/','-') ApmDate") ,"NoRegistrasi","NoRujukanBPJS","NoKartuBPJS","NoSuratKontrolBPJS","NamaPasien","NoSEP" )
         ->where('NoMR', $NoMR)
         ->where('batal', '0')
         ->where('Datang', '0')
@@ -100,7 +100,7 @@ class bAppointmentRepositoryImpl implements bAppointmentRepositoryInterface
         return  DB::connection('sqlsrv3')->table("Apointment")
         ->select(  'DoctorID','JamPraktek','NamaDokter','IdPoli','Poli','JamPraktek','JenisPembayaran','ID_Penjamin',
         'NoAntrianAll','Antrian','NoBooking','NamaPasien','batal', 'Datang','NoMR','Company','ID_JadwalPraktek',
-                    DB::raw("replace(CONVERT(VARCHAR(11), ApmDate, 111), '/','-') ApmDate") )
+                    DB::raw("replace(CONVERT(VARCHAR(11), ApmDate, 111), '/','-') ApmDate") ,"NoRegistrasi","NoRujukanBPJS","NoKartuBPJS","NoSuratKontrolBPJS","NamaPasien" )
         ->where('Userid_Mobile', $Userid_Mobile)
         ->where('batal', '0')
         ->where('Datang', '0')
@@ -136,6 +136,14 @@ class bAppointmentRepositoryImpl implements bAppointmentRepositoryInterface
             ->update([
                 'datang' => '1',
                 'NoRegistrasi' =>  $NoRegistrasi
+            ]);
+        return $updatesatuan;
+    }
+    public function updateNoMrAppointment($NoBooking,$NoMR){
+        $updatesatuan =  DB::connection('sqlsrv3')->table('Apointment')
+        ->where('NoBooking', $NoBooking) 
+            ->update([ 
+                'NoMR' =>  $NoMR
             ]);
         return $updatesatuan;
     }

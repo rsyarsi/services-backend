@@ -244,7 +244,7 @@ class bMedicalRecordService extends Controller {
                 'norm' => $NoMrfix, 
             );
             $metadata = array(
-                'message' => 'Harap datang ke admisi untuk melengkapi data rekam medis',
+                'message' => 'Harap datang ke admisi untuk melengkapi data rekam medis.',
                 'code' => 200,
             );
             return $this->sendResponseNew($response, $metadata);
@@ -614,7 +614,7 @@ class bMedicalRecordService extends Controller {
                 );
                 return $this->sendResponseNew($response, $metadata);
             } else {
-                return $this->sendError("Data Not Found.", [], 400);
+                return $this->sendError("Data Not Found.", [], 200);
             }
         }catch (Exception $e) { 
             Log::info($e->getMessage());
@@ -701,4 +701,5 @@ class bMedicalRecordService extends Controller {
             return $this->sendError('Data Gagal Di Tampilkan !', $e->getMessage());
         }
     }
+     
 }

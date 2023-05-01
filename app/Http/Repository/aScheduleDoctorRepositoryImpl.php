@@ -544,4 +544,122 @@ class aScheduleDoctorRepositoryImpl implements aScheduleDoctorRepositoryInterfac
         }
             
     }
+
+    // untuk cari data dokter di hari itu . nama dokter aajaa
+    public function getScheduleGroubyDoctorForTRSSenin($IdGrupPerawatan,$groupjadwal)
+    {
+       
+            return  DB::connection('sqlsrv2')->table("JadwalPraktek")
+            ->select('JadwalPraktek.IDDokter','JadwalPraktek.NamaDokter','Doctors.foto')
+            ->join('Doctors', 'Doctors.ID', '=', 'JadwalPraktek.IDDokter')
+            ->where('IDUnit', $IdGrupPerawatan) 
+            ->where('Senin', '1') 
+            ->where('Status_Aktif', '1')
+            ->where('Group_Jadwal', $groupjadwal)
+            ->groupBy('JadwalPraktek.IDDokter','JadwalPraktek.NamaDokter','Doctors.foto')
+            ->get();
+       
+           
+    }
+    public function getScheduleGroubyDoctorForTRSMinggu($IdGrupPerawatan,$groupjadwal)
+    {
+        
+            return  DB::connection('sqlsrv2')->table("JadwalPraktek")
+            ->select('JadwalPraktek.IDDokter','JadwalPraktek.NamaDokter','Doctors.foto')
+            ->join('Doctors', 'Doctors.ID', '=', 'JadwalPraktek.IDDokter')
+            ->where('IDUnit', $IdGrupPerawatan) 
+            ->where('Minggu', '1') 
+            ->where('Status_Aktif', '1')
+            ->where('Group_Jadwal', $groupjadwal)
+            ->groupBy('JadwalPraktek.IDDokter','JadwalPraktek.NamaDokter','Doctors.foto')
+            ->get();
+     
+            
+    }
+
+    public function getScheduleGroubyDoctorForTRSSelasa($IdGrupPerawatan,$groupjadwal)
+    {
+        
+            return  DB::connection('sqlsrv2')->table("JadwalPraktek")
+            ->select('JadwalPraktek.IDDokter','JadwalPraktek.NamaDokter','Doctors.foto')
+            ->join('Doctors', 'Doctors.ID', '=', 'JadwalPraktek.IDDokter')
+            ->where('IDUnit', $IdGrupPerawatan)
+            ->where('Selasa', '1')
+            ->where('Status_Aktif', '1') 
+            ->where('Group_Jadwal', $groupjadwal)
+            ->groupBy('JadwalPraktek.IDDokter','JadwalPraktek.NamaDokter','Doctors.foto')
+            ->get();
+        
+    }
+    public function getScheduleGroubyDoctorForTRSRabu($IdGrupPerawatan,$groupjadwal)
+    {
+        
+            return  DB::connection('sqlsrv2')->table("JadwalPraktek")
+            ->select('JadwalPraktek.IDDokter','JadwalPraktek.NamaDokter','Doctors.foto')
+            ->join('Doctors', 'Doctors.ID', '=', 'JadwalPraktek.IDDokter')
+            ->where('IDUnit', $IdGrupPerawatan) 
+            ->where('Rabu', '1') 
+            ->where('Status_Aktif', '1')
+            ->where('Group_Jadwal', $groupjadwal)
+            ->groupBy('JadwalPraktek.IDDokter','JadwalPraktek.NamaDokter','Doctors.foto')
+            ->get();
+         
+            
+    }
+    public function getScheduleGroubyDoctorForTRSKamis($IdGrupPerawatan,$groupjadwal)
+    {
+       
+            return  DB::connection('sqlsrv2')->table("JadwalPraktek")
+            ->select('JadwalPraktek.IDDokter','JadwalPraktek.NamaDokter','Doctors.foto')
+            ->join('Doctors', 'Doctors.ID', '=', 'JadwalPraktek.IDDokter')
+            ->where('IDUnit', $IdGrupPerawatan) 
+            ->where('Kamis', '1') 
+            ->where('Status_Aktif', '1')
+            ->where('Group_Jadwal', $groupjadwal)
+            ->groupBy('JadwalPraktek.IDDokter','JadwalPraktek.NamaDokter','Doctors.foto')
+            ->get();
+         
+            
+    }
+    public function getScheduleGroubyDoctorForTRSJumat($IdGrupPerawatan,$groupjadwal)
+    {
+       
+            return  DB::connection('sqlsrv2')->table("JadwalPraktek")
+            ->select('JadwalPraktek.IDDokter','JadwalPraktek.NamaDokter','Doctors.foto')
+            ->join('Doctors', 'Doctors.ID', '=', 'JadwalPraktek.IDDokter')
+            ->where('IDUnit', $IdGrupPerawatan) 
+            ->where('Jumat', '1') 
+            ->where('Status_Aktif', '1')
+            ->where('Group_Jadwal', $groupjadwal)
+            ->groupBy('JadwalPraktek.IDDokter','JadwalPraktek.NamaDokter','Doctors.foto')
+            ->get();
+         
+           
+    }
+    public function getScheduleGroubyDoctorForTRSSabtu($IdGrupPerawatan,$groupjadwal)
+    {
+        
+            return  DB::connection('sqlsrv2')->table("JadwalPraktek")
+            ->select('JadwalPraktek.IDDokter','JadwalPraktek.NamaDokter','Doctors.foto')
+            ->join('Doctors', 'Doctors.ID', '=', 'JadwalPraktek.IDDokter')
+            ->where('IDUnit', $IdGrupPerawatan) 
+            ->where('Sabtu', '1') 
+            ->where('Status_Aktif', '1')
+            ->where('Group_Jadwal', $groupjadwal)
+            ->groupBy('JadwalPraktek.IDDokter','JadwalPraktek.NamaDokter','Doctors.foto')
+            ->get();
+    }
+    public function getScheduleDoctorbyIdJadwalDoctor($IdJadwalDokter)
+    {
+        
+            return  DB::connection('sqlsrv2')->table("JadwalPraktek")
+            ->select('Senin_Waktu','Selasa_Waktu','Rabu_Waktu',
+            'Kamis_Waktu','Jumat_Waktu','Sabtu_Waktu','Minggu_Waktu',
+            'Senin_Max_NonJKN','Senin_Max_JKN','Selasa_Max_JKN','Selasa_Max_NonJKN','Rabu_Max_JKN','Rabu_Max_NonJKN',
+            'Kamis_Max_JKN','Kamis_Max_NonJKN','Jumat_Max_JKN','Jumat_Max_NonJKN','Sabtu_Max_JKN','Sabtu_Max_NonJKN',
+            'Minggu_Max_JKN','Minggu_Max_NonJKN') 
+            ->where('ID', $IdJadwalDokter)  
+            ->get();
+    }
+    
 }

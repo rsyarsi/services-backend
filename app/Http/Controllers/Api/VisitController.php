@@ -32,6 +32,36 @@ class VisitController extends Controller
         $user =  $userService->viewByNoregistrasi($request);
         return $user; 
     }
+    public function updateNoSepbyNoRegistrasi(Request $request){
+        $userRepository = new bKamarOperasiRepositoryImpl();
+        $medrecRepository = new bMedicalRecordRepositoryImpl();
+        $doctorRepository = new aDoctorRepositoryImpl();
+        $unitRepository = new aMasterUnitRepositoryImpl();
+        $appointmenRepository = new bAppointmentRepositoryImpl();
+        $scheduleRepository = new aScheduleDoctorRepositoryImpl();
+        $antrianRepository = new bAntrianRepositoryImpl();
+        $visitRepository = new bVisitRepositoryImpl();
+        $userService = new bVisitService($userRepository,$medrecRepository,
+        $doctorRepository,$unitRepository, $appointmenRepository,$scheduleRepository,
+        $antrianRepository,$visitRepository);
+        $user =  $userService->updateNoSepbyNoRegistrasi($request);
+        return $user; 
+    }
+    public function viewByAppointmentNumber(Request $request){
+        $userRepository = new bKamarOperasiRepositoryImpl();
+        $medrecRepository = new bMedicalRecordRepositoryImpl();
+        $doctorRepository = new aDoctorRepositoryImpl();
+        $unitRepository = new aMasterUnitRepositoryImpl();
+        $appointmenRepository = new bAppointmentRepositoryImpl();
+        $scheduleRepository = new aScheduleDoctorRepositoryImpl();
+        $antrianRepository = new bAntrianRepositoryImpl();
+        $visitRepository = new bVisitRepositoryImpl();
+        $userService = new bVisitService($userRepository,$medrecRepository,
+        $doctorRepository,$unitRepository, $appointmenRepository,$scheduleRepository,
+        $antrianRepository,$visitRepository);
+        $user =  $userService->viewByAppointmentNumber($request);
+        return $user; 
+    }
     public function getRegistrationRajalbyMedreActive(Request $request){
                $userRepository = new bKamarOperasiRepositoryImpl();
         $medrecRepository = new bMedicalRecordRepositoryImpl();
@@ -123,4 +153,50 @@ class VisitController extends Controller
         $user =  $userService->viewByNoBooking($request);
         return $user; 
     }
+    public function insertSEP(Request $request){
+        $userRepository = new bKamarOperasiRepositoryImpl();
+        $medrecRepository = new bMedicalRecordRepositoryImpl();
+        $doctorRepository = new aDoctorRepositoryImpl();
+        $unitRepository = new aMasterUnitRepositoryImpl();
+        $appointmenRepository = new bAppointmentRepositoryImpl();
+        $scheduleRepository = new aScheduleDoctorRepositoryImpl();
+        $antrianRepository = new bAntrianRepositoryImpl();
+        $visitRepository = new bVisitRepositoryImpl();
+        $userService = new bVisitService($userRepository,$medrecRepository,
+        $doctorRepository,$unitRepository, $appointmenRepository,$scheduleRepository,
+        $antrianRepository,$visitRepository);
+        $user =  $userService->insertSEP($request);
+        return $user; 
+    }
+    public function viewsep(Request $request){
+        $userRepository = new bKamarOperasiRepositoryImpl();
+        $medrecRepository = new bMedicalRecordRepositoryImpl();
+        $doctorRepository = new aDoctorRepositoryImpl();
+        $unitRepository = new aMasterUnitRepositoryImpl();
+        $appointmenRepository = new bAppointmentRepositoryImpl();
+        $scheduleRepository = new aScheduleDoctorRepositoryImpl();
+        $antrianRepository = new bAntrianRepositoryImpl();
+        $visitRepository = new bVisitRepositoryImpl();
+        $userService = new bVisitService($userRepository,$medrecRepository,
+        $doctorRepository,$unitRepository, $appointmenRepository,$scheduleRepository,
+        $antrianRepository,$visitRepository);
+        $user =  $userService->viewsep($request);
+        return $user; 
+    }
+    public function addTaskBPJS(Request $request){
+        $userRepository = new bKamarOperasiRepositoryImpl();
+        $medrecRepository = new bMedicalRecordRepositoryImpl();
+        $doctorRepository = new aDoctorRepositoryImpl();
+        $unitRepository = new aMasterUnitRepositoryImpl();
+        $appointmenRepository = new bAppointmentRepositoryImpl();
+        $scheduleRepository = new aScheduleDoctorRepositoryImpl();
+        $antrianRepository = new bAntrianRepositoryImpl();
+        $visitRepository = new bVisitRepositoryImpl();
+        $userService = new bVisitService($userRepository,$medrecRepository,
+        $doctorRepository,$unitRepository, $appointmenRepository,$scheduleRepository,
+        $antrianRepository,$visitRepository);
+        $user =  $userService->addTaskBPJS($request);
+        return $user; 
+    }
+    
 }

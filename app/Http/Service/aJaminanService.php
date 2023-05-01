@@ -29,4 +29,14 @@ class aJaminanService extends Controller
             return $this->sendError('Data Gagal Di Tampilkan !', $e->getMessage());
         }
     }
+    public function getJaminanAllAktifbyId($idgroupjaminan,$idjaminan)
+    {
+        try {   
+                $data = $this->Repository->getJaminanAllAktifbyId($idgroupjaminan,$idjaminan)->first();
+                return $this->sendResponse($data, "Data Jaminan ditemukan.");
+        }catch (Exception $e) { 
+            Log::info($e->getMessage());
+            return $this->sendError('Data Gagal Di Tampilkan !', $e->getMessage());
+        }
+    }
 }

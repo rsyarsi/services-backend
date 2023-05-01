@@ -345,4 +345,26 @@ trait AutoNumberTrait
         $data = array($WOID,$Accession_No,$nourutfixReg,$uid);
         return $data;
     }
+    public function  ConsumableNumber($request, $getmax)
+    {
+        $AWAL = 'TCS';
+        $ddatedmy = date(
+            "dmY",
+            strtotime($request['TransactionDate'])
+        );
+        $coutn = DB::connection('sqlsrv')
+        ->table("Consumables")
+        ->where(
+            'ReffDateTrs',
+            $ddatedmy
+        )->get();
+        $no = 1;
+        if ($coutn->count() > 0) {
+            $numberx =  $AWAL  .  $ddatedmy .   sprintf("%04s", Str::substr($getmax, 11, 4) + 1);
+        } else {
+            $numberx =   $AWAL  . $ddatedmy .  sprintf("%04s", $no);
+        }
+
+        return $numberx;
+    }
 }

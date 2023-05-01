@@ -72,7 +72,7 @@ class aScheduleDoctorService extends Controller
             if ($count > 0) { 
                 return $this->sendResponse($data, "Data Jadwal Dokter ditemukan.");
             } else {
-                return $this->sendError("Data Jadwal Dokter not Found.", [], 400);
+                return $this->sendError("Data Jadwal Dokter not Found.", []);
             }
         }catch (Exception $e) { 
             Log::info($e->getMessage());
@@ -88,7 +88,7 @@ class aScheduleDoctorService extends Controller
                 $data = $this->Repository->getScheduleDoctorAll();
                 return $this->sendResponse($data, "Data Unit Poliklinik ditemukan.");
             } else {
-                return $this->sendError("Data Unit Poliklinik Not Found.", [], 400);
+                return $this->sendError("Data Unit Poliklinik Not Found.", []);
             }
         }catch (Exception $e) { 
             Log::info($e->getMessage());
@@ -139,7 +139,7 @@ class aScheduleDoctorService extends Controller
             if ($count > 0) { 
                 return $this->sendResponse($data, "Data Jadwal Dokter ditemukan.");
             } else {
-                return $this->sendError("Data Jadwal Dokter Found.", [], 400);
+                return $this->sendError("Data Jadwal Dokter Found.", []);
             }
         }catch (Exception $e) { 
             Log::info($e->getMessage());
@@ -170,12 +170,53 @@ class aScheduleDoctorService extends Controller
             if ($count > 0) { 
                 return $this->sendResponse($data, "Data Jadwal Dokter ditemukan.");
             } else {
-                return $this->sendError("Data Jadwal Dokter not Found.", [], 400);
+                return $this->sendError("Data Jadwal Dokter not Found.", []);
             }
         }catch (Exception $e) { 
             Log::info($e->getMessage());
             return $this->sendError('Data Gagal Di Tampilkan !', $e->getMessage());
         }
     }
-    
+    public function getScheduleSelectedDayGroupByDoctor(Request $request)
+    {   
+
+        try {   
+            if ($request->Day === "Minggu") {
+                $data = $this->Repository->getScheduleGroubyDoctorForTRSMinggu($request->IdUnit,$request->Group_Jadwal);
+            } elseif ($request->Day === "Senin") {
+                $data = $this->Repository->getScheduleGroubyDoctorForTRSSenin($request->IdUnit,$request->Group_Jadwal);
+            } elseif ($request->Day === "Selasa") {
+                $data = $this->Repository->getScheduleGroubyDoctorForTRSSelasa($request->IdUnit,$request->Group_Jadwal);
+            } elseif ($request->Day === "Rabu") {
+                $data = $this->Repository->getScheduleGroubyDoctorForTRSRabu($request->IdUnit,$request->Group_Jadwal);
+            } elseif ($request->Day === "Kamis") {
+                $data = $this->Repository->getScheduleGroubyDoctorForTRSKamis($request->IdUnit,$request->Group_Jadwal);
+            } elseif ($request->Day === "Jumat") {
+                $data = $this->Repository->getScheduleGroubyDoctorForTRSJumat($request->IdUnit,$request->Group_Jadwal);
+            } elseif ($request->Day === "Sabtu") {
+                $data = $this->Repository->getScheduleGroubyDoctorForTRSSabtu($request->IdUnit,$request->Group_Jadwal);
+            }
+
+            $count = $data->count();
+            if ($count > 0) { 
+                return $this->sendResponse($data, "Data Jadwal Dokter ditemukan.");
+            } else {
+                return $this->sendError("Data Jadwal Dokter not Found.", []);
+            }
+        }catch (Exception $e) { 
+            Log::info($e->getMessage());
+            return $this->sendError('Data Gagal Di Tampilkan !', $e->getMessage());
+        }
+    }
+    public function getScheduleDoctorbyIdJadwalDoctor($request)
+    {
+        try {   
+            
+            $dataschedule = $this->Repository->getScheduleDoctorbyIdJadwalDoctor($request->IdJadwalDokter);
+            return $this->sendResponse($dataschedule, "Data Schedule ditemukan.");
+        }catch (Exception $e) { 
+            Log::info($e->getMessage());
+            return $this->sendError('Data Gagal Di Tampilkan !', $e->getMessage());
+        }
+    }
 }

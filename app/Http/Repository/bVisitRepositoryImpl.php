@@ -89,10 +89,17 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
         DB::raw("replace(CONVERT(VARCHAR(11), DateOfBirth, 111), '/','-') as Date_of_birth") , 
         'Address',   'IdUnit',  DB::raw("[Visit Date] AS Visit_Date"), 'NamaUnit',   'IdDokter', 'NamaDokter','NoMR','NoEpisode','NoRegistrasi',
         DB::raw("case when TipePasien='1' THEN 'PRIBADI' WHEN TipePasien='2' THEN 'ASURANSI' WHEN TipePasien='5' THEN 'PERUSAHAAN' END 
-        AS  PatientType"),'StatusID')
+        AS  PatientType"),'StatusID','MobilePhone','NoAntrianAll')
         ->where('NoRegistrasi', $NoRegistrasi) 
         ->orderBy('Visit Date', 'desc')
         ->get();
+    }
+    public function getAppointmentNumber($NoBooking)
+    {
+        //a
+        return  DB::connection('sqlsrv3')->table("View_RegistrasiByAppointmentNumber") 
+        ->where('NoBooking', $NoBooking)  
+        ->first();
     }
     public function getRegistrationLastByDate($tglregistrasi,$codeRegAwal){
         return  DB::connection('sqlsrv3')->table("Visit")
@@ -120,7 +127,7 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
                                             $PatientType,$Unit,$Doctor_1,$Antrian,$NoAntrianAll,
                                             $Company,$JamPraktek,$TelemedicineIs,$TglKunjungan,
                                             $visitdate,$Operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
-                                            $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek)
+                                            $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek,$Catatan)
     {
         return  DB::connection('sqlsrv3')->table("Visit")->insert([
             'ID' => $ID,
@@ -144,14 +151,15 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
             'idCaraMasuk' => $idCaraMasuk, 
             'idAdmin' => $idAdmin, 
             'Tipe_Registrasi' => $Tipe_Registrasi, 
-            'ID_JadwalPraktek' => $ID_JadwalPraktek
+            'ID_JadwalPraktek' => $ID_JadwalPraktek,
+            'Catatan' => $Catatan
         ]);
     }
     public function  addRegistrationRajalAsuransi($ID,$NoEpisode,$NoRegistrasi,$LokasiPasien,$NoMR,
                                             $PatientType,$Unit,$Doctor_1,$Antrian,$NoAntrianAll,
                                             $Company,$JamPraktek,$TelemedicineIs,$TglKunjungan,
                                             $visitdate,$Operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
-                                            $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek)
+                                            $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek,$Catatan)
     {
         return  DB::connection('sqlsrv3')->table("Visit")->insert([
             'ID' => $ID,
@@ -175,7 +183,8 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
             'idCaraMasuk' => $idCaraMasuk, 
             'idAdmin' => $idAdmin, 
             'Tipe_Registrasi' => $Tipe_Registrasi, 
-            'ID_JadwalPraktek' => $ID_JadwalPraktek
+            'ID_JadwalPraktek' => $ID_JadwalPraktek,
+            'Catatan' => $Catatan
         ]);
     }
     public function addTaskOneBPJS($KODE_TRANSAKSI,$WAKTU,$TASK_ID,$DATE_CREATE)
@@ -193,6 +202,108 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
         return  DB::connection('sqlsrv3')->table("View_Visit_by_Booking") 
         ->where('NoBooking', $NoBooking)  
         ->get();
+    }
+    public function updateNoSepbyNoRegistrasi($request)
+    {
+        $updatesatuan =  DB::connection('sqlsrv3')->table('Visit')
+        ->where('NoRegistrasi', $request->NoRegistrasi)
+            ->update([
+                'NoSEP' => $request->NoSep,
+                'NoPesertaBPJS' => $request->NoKartu
+            ]);
+        return $updatesatuan;
+    }
+    public function updateNoSepbyNoRegistrasi2($request)
+    {
+        $updatesatuan =  DB::connection('sqlsrv6')->table('dataRWJ')
+        ->where('NoRegistrasi', $request->NoRegistrasi)
+            ->update([
+                'NoSep' => $request->NoSep,
+                'NoPesertaBPJS' => $request->NoKartu
+            ]);
+        return $updatesatuan;
+    }
+    public function  addSEP($request)
+    {
+        return  DB::connection('sqlsrv3')->table("BPJS_T_SEP")->insert([
+            
+            
+            'NO_SEP' => $request->NO_SEP, 
+            'NO_REGISTRASI' => $request->NO_REGISTRASI, 
+            'NO_KARTU' => $request->NO_KARTU, 
+            'TGL_SEP' => $request->TGL_SEP, 
+            'NO_MR' => $request->NO_MR, 
+            'NAMA_PESERTA' => $request->NAMA_PESERTA, 
+            'JENIS_KELAMIN' => $request->JENIS_KELAMIN, 
+            'JENIS_PESERTA' => $request->JENIS_PESERTA, 
+            'COB' => $request->COB, 
+            'JENIS_RAWAT' => $request->JENIS_RAWAT, 
+            'KODE_POLI' => $request->KODE_POLI, 
+            'NAMA_POLI' => $request->NAMA_POLI, 
+            'KODE_DOKTER' => $request->KODE_DOKTER, 
+            'NAMA_DOKTER' => $request->NAMA_DOKTER, 
+            'KODE_DIAGNOSA' => $request->KODE_DIAGNOSA, 
+            'NAMA_DIAGNOSA' => $request->NAMA_DIAGNOSA, 
+            'NO_TELEPON' => $request->NO_TELEPON, 
+            'PENJAMIN' => $request->PENJAMIN, 
+            'KELAS_RAWAT' => $request->KELAS_RAWAT, 
+            'CATATAN' => $request->CATATAN, 
+            'TGL_LAHIR' => $request->TGL_LAHIR, 
+            'KODE_PERUJUK' => $request->KODE_PERUJUK, 
+            'NAMA_PERUJUK' => $request->NAMA_PERUJUK, 
+            'NO_RUJUKAN' => $request->NO_RUJUKAN, 
+            'NO_SPRI' => $request->NO_SPRI, 
+            'NO_NIK' => $request->NO_NIK, 
+            'KODE_JENIS_PESERTA' => $request->KODE_JENIS_PESERTA, 
+            'IS_EKSEKUTIF' => $request->IS_EKSEKUTIF, 
+            'IS_KATARAK' => $request->IS_KATARAK, 
+            'IS_COB' => $request->IS_COB, 
+            'COB_NO_ASURANSI' => $request->COB_NO_ASURANSI, 
+            'KODE_JENIS_RAWAT' => $request->KODE_JENIS_RAWAT, 
+            'NAIK_KELAS' => $request->NAIK_KELAS, 
+            'NAIK_KELAS_ID' => $request->NAIK_KELAS_ID, 
+            'PENANGGUNG_JAWAB' => $request->PENANGGUNG_JAWAB, 
+            'KODE_KELAS_RAWAT' => $request->KODE_KELAS_RAWAT, 
+            'KODE_PPK_PERUJUK' => $request->KODE_PPK_PERUJUK, 
+            'NAMA_PPK_PERUJUK' => $request->NAMA_PPK_PERUJUK, 
+            'KETERANGAN_PRB' => $request->KETERANGAN_PRB, 
+            'TUJUAN_KUNJUNGAN' => $request->TUJUAN_KUNJUNGAN, 
+            'FLAG_PROCEDURE' => $request->FLAG_PROCEDURE, 
+            'PENUNJANG' => $request->PENUNJANG, 
+            'ASESMENT_PELAYANAN' => $request->ASESMENT_PELAYANAN, 
+            'IS_LAKA_LANTAS' => $request->IS_LAKA_LANTAS, 
+            'TGL_LAKA_LANTAS' => $request->TGL_LAKA_LANTAS, 
+            'KET_LAKA_LANTAS' => $request->KET_LAKA_LANTAS, 
+            'IS_SUPLESI' => $request->IS_SUPLESI, 
+            'NO_SUPLESI' => $request->NO_SUPLESI, 
+            'PROV_KODE' => $request->PROV_KODE, 
+            'PROV_NAMA' => $request->PROV_NAMA, 
+            'KABUPATEN_KODE' => $request->KABUPATEN_KODE, 
+            'KABUPATEN_NAMA' => $request->KABUPATEN_NAMA, 
+            'KECAMATAN_KODE' => $request->KECAMATAN_KODE, 
+            'KECAMATAN_NAMA' => $request->KECAMATAN_NAMA, 
+            'KODE_ASAL_FASKES' => $request->KODE_ASAL_FASKES, 
+            'NAMA_ASAL_FASKES' => $request->NAMA_ASAL_FASKES, 
+            'TGL_RUJUKAN' => $request->TGL_RUJUKAN, 
+            'TGL_CREATE' => $request->TGL_CREATE, 
+            'USER_CREATE' => $request->USER_CREATE ,
+            'Task1' => $request->Task1 ,
+        ]);
+    }
+    public function viewsep($NoRegistrasi)
+    { 
+        return  DB::connection('sqlsrv3')->table("View_SEP") 
+        ->where('NO_REGISTRASI', $NoRegistrasi)  
+        ->get();
+    }
+    public function addTaskBPJS($request)
+    {
+        return  DB::connection('sqlsrv3')->table("BPJS_TASKID_LOG")->insert([
+            'KODE_TRANSAKSI' => $request->KODE_TRANSAKSI,
+            'WAKTU' => $request->WAKTU,
+            'TASK_ID' =>  $request->TASK_ID,
+            'DATE_CREATE' => $request->DATE_CREATE
+        ]);
     }
 }
 

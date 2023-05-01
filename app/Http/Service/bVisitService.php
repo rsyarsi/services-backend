@@ -57,7 +57,14 @@ class bVisitService extends Controller {
             return $this->sendError("Data Not Found.", []);
         }
     }
-
+    public function viewByAppointmentNumber(Request $request){
+        $data = $this->visitRepository->getAppointmentNumber($request->NoBooking);
+        if ($data->count() > 0) { 
+            return $this->sendResponse($data, "Data ditemukan.");
+        } else {
+            return $this->sendError("Data Not Found.", []);
+        }
+    }
     public function getRegistrationRajalbyMedreActive(Request $request){
         $data = $this->visitRepository->getRegistrationRajalbyMedreActive($request->medrec);
         
@@ -111,7 +118,7 @@ class bVisitService extends Controller {
             if ($request->KodeDokter == "") {  
                 return $this->sendError("Kode Dokter Kosong.", []);
             }
-            if ($request->IdAdmin == "") {  
+            if ($request->IdAdmin == "") {    
                 return $this->sendError("Kode Administrasi Kosong.", []);
             }
             if ($request->IdCaraMasuk == "") {  
@@ -140,32 +147,10 @@ class bVisitService extends Controller {
                 );
                 return  $this->sendErrorNew($metadata,null);
             }
-            // Jika pasien bpjs 
-            if($request->TipeRegistrasi == "1"){
-                //cek data dokter udh maping bpjs belum
-                $dataDoctorbpjs = $this->doctorRepository->getDoctorbyIDBPJS($request->KodeDokter);
-                if ( $dataDoctorbpjs->count() < 1 ) {
-                    return  $this->sendError('Data ID Dokter BPJS Belum di Maping dalam SIMRS.',[]);
-                }else{
-                    $dtdr = $dataDoctorbpjs->first();
-                    $IdDokter = $dtdr->ID;
-                    $CodeAntrian = $dtdr->CodeAntrian;
-                    $NamaDokter = $dtdr->NamaDokter; 
-                }
 
-                //cek Poli nya ada gak
-                $dataunitbpjs = $this->unitRepository->getUnitByIdBPJS($request->KodePoli);
-                if ( $dataunitbpjs->count() < 1 ) {
-                    return  $this->sendError('Data ID Poliklinik BPJS Belum di Maping dalam SIMRS.',[]);
-                }else{
-                    $dtdr = $dataunitbpjs->first();
-                    $IdGrupPerawatan = $dtdr->ID;
-                    $NamaGrupPerawatan = $dtdr->NamaUnit; 
-                }
-            }elseif($request->TipeRegistrasi == "2"){
-                    //cek data 
+                    // START - VALIDASI DOKTER DAN POLIKLINIK
+                    // 1. Validasi Dokter
                     $dataDoctorbpjs = $this->doctorRepository->getDoctorbyId($request->KodeDokter);
-               
                     if ( $dataDoctorbpjs->count() < 1 ) {
                         return  $this->sendError('Data ID Dokter Tidak ditemukan.',[]);
                     }else{
@@ -173,9 +158,16 @@ class bVisitService extends Controller {
                         $IdDokter = $dtdr->ID;
                         $CodeAntrian = $dtdr->CodeAntrian;
                         $NamaDokter = $dtdr->NamaDokter; 
+                        $ID_Dokter_BPJS = $dtdr->ID_Dokter_BPJS;  
+                        $NAMA_Dokter_BPJS = $dtdr->NAMA_Dokter_BPJS; 
+                        if($request->TipeRegistrasi == "1"){
+                            if($ID_Dokter_BPJS == null || $ID_Dokter_BPJS == ""){
+                                return  $this->sendError('Data ID Dokter BPJS Belum di Maping dalam SIMRS.',[]);
+                            }
+                        }
                     }
 
-                    //cek Poli nya ada gak
+                    //2. Validasi Unit
                     $dataunitbpjs = $this->unitRepository->getUnitById($request->KodePoli);
                     if ( $dataunitbpjs->count() < 1 ) {
                         return  $this->sendError('Data ID Poliklinik Tidak ditemukan.',[]);
@@ -183,13 +175,18 @@ class bVisitService extends Controller {
                         $dtdr = $dataunitbpjs->first();
                         $IdGrupPerawatan = $dtdr->ID;
                         $NamaGrupPerawatan = $dtdr->NamaUnit; 
+                        $CodeSubBPJS = $dtdr->CodeSubBPJS;  
+                        if($request->TipeRegistrasi == "1"){
+                            if($CodeSubBPJS == null || $CodeSubBPJS == ""){
+                                return  $this->sendError('Data ID Poliklinik BPJS Belum di Maping dalam SIMRS.',[]);
+                            }
+                        }
                     } 
-            }
+                    // END - VALIDASI DOKTER DAN POLIKLINIK
 
-            //
-            $NoMrConvert = str_replace("-", "", $request->NoMR);
                     
-                      //get max visit
+                    $NoMrConvert = str_replace("-", "", $request->NoMR);
+                    //get max visit
                     $maxVisit = $this->visitRepository->getMaxnumberVisit();
                     $maxVisit->ID++;
                     
@@ -212,50 +209,62 @@ class bVisitService extends Controller {
                         $kodeRegAwalXX = "RJJP";
                     }
                     if($request->TipeRegistrasi == "1"){ // bpjs
-                        $Perusahaan = "315";
+                        $Perusahaan = "313";
                     }else{
                         if($CaraBayar == "1"){
                             $Perusahaan = "315";
                         }else{
                             $Perusahaan = $request->Idjaminan;
                         }
-                       
                     }
                     $jamPraktek = "08:00-17:00";
+                    if($request->JamPraktek == ""){
+                        $jamPraktek = "08:00-17:00";
+                    }else{
+                        $jamPraktek = $request->JamPraktek;
+                    }
+
+                    $namaPaketMCU = $request->NamaPaketMCU;
+                    if($namaPaketMCU == ""){
+                        $Catatan = "";
+                    }else{
+                        $Catatan = $request->NamaPaketMCU;
+                    }
+                   
                        // validasi jam praktek
-                $datename = date("l", strtotime(trim(strip_tags( $request->TglRegistrasi))));
-                if($datename == "Sunday"){
-                $jadwal = $this->scheduleRepository->getScheduleDoctorForTRSMinggu($IdDokter,$IdGrupPerawatan,$jamPraktek,$request->TipeRegistrasi);
-                } elseif ($datename == "Monday") {
-                    $jadwal = $this->scheduleRepository->getScheduleDoctorForTRSSenin($IdDokter,$IdGrupPerawatan,$jamPraktek,$request->TipeRegistrasi);
-                } elseif ($datename == "Tuesday") { 
-                    $jadwal = $this->scheduleRepository->getScheduleDoctorForTRSSelasa($IdDokter,$IdGrupPerawatan,$jamPraktek,$request->TipeRegistrasi);
-                } elseif ($datename == "Wednesday") { 
-                    $jadwal = $this->scheduleRepository->getScheduleDoctorForTRSRabu($IdDokter,$IdGrupPerawatan,$jamPraktek,$request->TipeRegistrasi);
-                } elseif ($datename == "Thursday") { 
-                    $jadwal = $this->scheduleRepository->getScheduleDoctorForTRSKamis($IdDokter,$IdGrupPerawatan,$jamPraktek,$request->TipeRegistrasi);
-                } elseif ($datename == "Friday") { 
-                    $jadwal = $this->scheduleRepository->getScheduleDoctorForTRSJumat($IdDokter,$IdGrupPerawatan,$jamPraktek,$request->TipeRegistrasi);
-                } elseif ($datename == "Saturday") { 
-                    $jadwal = $this->scheduleRepository->getScheduleDoctorForTRSSabtu($IdDokter,$IdGrupPerawatan,$jamPraktek,$request->TipeRegistrasi);
-                }
-                if($jadwal->count() < 1 ){  
-                    return  $this->sendError("Jam Praktek Tidak Ditemukan.",[]);
-                }else{
-                        $single = $jadwal->first(); 
-                        $NamaSesion = $single->NamaSesion;
-                        $MaxKuota = $single->MaxKuota;
-                        $Max_JKN = $single->Max_JKN;
-                        $Max_NonJKN = $single->Max_NonJKN;
-                        $JamAwal = $single->JamAwal;
-                        $JamAkhir = $single->JamAkhir;
-                        $ID_JadwalPraktek = $single->ID;
-                        $xesti = $request->tanggalperiksa . ' ' . $JamAwal;
-                        date_default_timezone_set("Asia/Jakarta");
-                        $shift =  $JamAwal.'-'.$JamAkhir;
-                        $estimasi2 = strtotime($xesti);
-                        $estimasi = $estimasi2*1000;
-                }
+                    $datename = date("l", strtotime(trim(strip_tags( $request->TglRegistrasi))));
+                    if($datename == "Sunday"){
+                    $jadwal = $this->scheduleRepository->getScheduleDoctorForTRSMinggu($IdDokter,$IdGrupPerawatan,$jamPraktek,$request->TipeRegistrasi);
+                    } elseif ($datename == "Monday") {
+                        $jadwal = $this->scheduleRepository->getScheduleDoctorForTRSSenin($IdDokter,$IdGrupPerawatan,$jamPraktek,$request->TipeRegistrasi);
+                    } elseif ($datename == "Tuesday") { 
+                        $jadwal = $this->scheduleRepository->getScheduleDoctorForTRSSelasa($IdDokter,$IdGrupPerawatan,$jamPraktek,$request->TipeRegistrasi);
+                    } elseif ($datename == "Wednesday") { 
+                        $jadwal = $this->scheduleRepository->getScheduleDoctorForTRSRabu($IdDokter,$IdGrupPerawatan,$jamPraktek,$request->TipeRegistrasi);
+                    } elseif ($datename == "Thursday") { 
+                        $jadwal = $this->scheduleRepository->getScheduleDoctorForTRSKamis($IdDokter,$IdGrupPerawatan,$jamPraktek,$request->TipeRegistrasi);
+                    } elseif ($datename == "Friday") { 
+                        $jadwal = $this->scheduleRepository->getScheduleDoctorForTRSJumat($IdDokter,$IdGrupPerawatan,$jamPraktek,$request->TipeRegistrasi);
+                    } elseif ($datename == "Saturday") { 
+                        $jadwal = $this->scheduleRepository->getScheduleDoctorForTRSSabtu($IdDokter,$IdGrupPerawatan,$jamPraktek,$request->TipeRegistrasi);
+                    }
+                    if($jadwal->count() < 1 ){  
+                        return  $this->sendError("Jam Praktek Tidak Ditemukan.",[]);
+                    }else{
+                            $single = $jadwal->first(); 
+                            $NamaSesion = $single->NamaSesion;
+                            $MaxKuota = $single->MaxKuota;
+                            $Max_JKN = $single->Max_JKN;
+                            $Max_NonJKN = $single->Max_NonJKN;
+                            $JamAwal = $single->JamAwal;
+                            $JamAkhir = $single->JamAkhir;
+                            $ID_JadwalPraktek = $single->ID;
+                            $xesti = $request->tanggalperiksa . ' ' . $JamAwal;
+                            date_default_timezone_set("Asia/Jakarta");
+                            $shift =  $JamAwal.'-'.$JamAkhir;
+                            $estimasi2 = strtotime($xesti);
+                            $estimasi = $estimasi2*1000;
+                    }
                 
                     // get last registration active
                     $lastreg = $this->visitRepository->getRegistrationActivebyMedrec($request->NoMR);
@@ -290,44 +299,76 @@ class bVisitService extends Controller {
                 $NoAntrianAll = $dataAntrian[1];
                 $idno_urutantrian = $dataAntrian[0];
 
-                // cek sisa kuota
-                if($request->groupjadwal=="2"){
-                    if($idno_urutantrian > $Max_NonJKN){
-                        return $this->sendError("Kuota Reservasi Sudah Penuh, Kuota Maksimal ". $Max_NonJKN , []);  
+                 // START - cek sisa kuota
+                 $harindo =  ""; 
+                if($datename == "Sunday"){
+                    $harindo = "Minggu";
+                    $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliMinggu($request->TglRegistrasi,$IdDokter,$IdGrupPerawatan,$jamPraktek);
+                } elseif ($datename == "Monday") {
+                    $harindo = "Senin";
+                    $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliSenin($request->TglRegistrasi,$IdDokter,$IdGrupPerawatan,$jamPraktek);
+                } elseif ($datename == "Tuesday") { 
+                    $harindo = "Selasa";
+                    $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliSelasa($request->TglRegistrasi,$IdDokter,$IdGrupPerawatan,$jamPraktek);
+                } elseif ($datename == "Wednesday") { 
+                    $harindo = "Rabu";
+                    $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliRabu($request->TglRegistrasi,$IdDokter,$IdGrupPerawatan,$jamPraktek);
+                } elseif ($datename == "Thursday") { 
+                    $harindo = "Kamis";
+                    $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliKamis($request->TglRegistrasi,$IdDokter,$IdGrupPerawatan,$jamPraktek);
+                } elseif ($datename == "Friday") {
+                    $harindo = "Jumat"; 
+                    $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliJumat($request->TglRegistrasi,$IdDokter,$IdGrupPerawatan,$jamPraktek);
+                } elseif ($datename == "Saturday") { 
+                    $harindo = "Sabtu";
+                    $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliSabtu($request->TglRegistrasi,$IdDokter,$IdGrupPerawatan,$jamPraktek);
+                }
+                
+                $koutaPerPoli = $kuotaPoliklinik->count();
+               
+                $Ant = $koutaPerPoli+1;
+               
+                if($request->TipeRegistrasi=="2"){
+                    if($koutaPerPoli >= $Max_NonJKN){
+                        // return $this->sendError("Kuota Dokter : " . $NamaDokter . ", Hari : " .$harindo ." Sudah Penuh, Kuota Maksimal ". $Max_NonJKN . ", No. Antrian Anda Adalah : " .  $Ant . ". Silahkan Pilih tanggal Lain untuk Melakukan Booking/Reservasi kembali.", []);  
+                        return $this->sendError("Dokter  " . $NamaDokter . ", Hari : " .$harindo ." Sudah Tutup Registrasi. Silahkan Pilih tanggal Lain untuk Melakukan Booking/Reservasi kembali.", []);  
                     }
                 }else{
-                    if($idno_urutantrian > $Max_NonJKN){
-                        return $this->sendError("Kuota Reservasi Sudah Penuh, Kuota Maksimal ". $Max_NonJKN , []);  
+                    if($koutaPerPoli >= $Max_JKN){
+                        // return $this->sendError("Kuota Dokter : " . $NamaDokter . ", Hari : " .$harindo ." Sudah Penuh, Kuota Maksimal ". $Max_JKN . ", No. Antrian Anda Adalah : " .  $Ant . ". Silahkan Pilih tanggal Lain untuk Melakukan Booking/Reservasi kembali.", []);  
+                        return $this->sendError("Dokter : " . $NamaDokter . ", Hari : " .$harindo ." Sudah Tutup Registrasi. Silahkan Pilih tanggal Lain untuk Melakukan Booking/Reservasi kembali.", []);  
                     }
                 }
-
+                
             // INSERT REGISTRATION
             if($CaraBayar == "2"){
                 $this->visitRepository->addRegistrationRajalAsuransi($maxVisit->ID,$NoEpisode,$nofixReg,$NamaGrupPerawatan,$request->NoMR,
                 $request->CaraBayar,$IdGrupPerawatan,$IdDokter,$idno_urutantrian,$NoAntrianAll,
                 $request->Company,$NamaSesion,$TelemedicineIs,$request->TglRegistrasi,
                 $request->TglRegistrasi,$operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
-                $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek);
+                $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek,$Catatan);
             }else{
                 $this->visitRepository->addRegistrationRajal($maxVisit->ID,$NoEpisode,$nofixReg,$NamaGrupPerawatan,$request->NoMR,
                 $request->CaraBayar,$IdGrupPerawatan,$IdDokter,$idno_urutantrian,$NoAntrianAll,
                 $request->Company,$NamaSesion,$TelemedicineIs,$request->TglRegistrasi,
                 $request->TglRegistrasi,$operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
-                $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek);
+                $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek,$Catatan);
             }
            
-
+            // INSERT TABEL ANTRIAN
+            $this->antrianRepository->insertAntrian($nofixReg,$IdDokter,$NamaSesion,$idno_urutantrian,$NoAntrianAll,$request->TglRegistrasi,$request->Company);
+            
             $response = array(
-            'NoEpisode' => $NoEpisode, // Set array status dengan success     
-            'NoRegistrasi' => $nofixReg, // Set array status dengan success     
-            'NamaGrupPerawatan' => $NamaGrupPerawatan, // Set array status dengan success     
-            'NOMR' => $request->NoMR, // Set array status dengan success     
-            'Antrian' => $idno_urutantrian, // Set array status dengan success     
-            'NoAntrianAll' =>  $NoAntrianAll, // Set array status dengan success     
+                'NoEpisode' => $NoEpisode, // Set array status dengan success     
+                'NoRegistrasi' => $nofixReg, // Set array status dengan success     
+                'NamaGrupPerawatan' => $NamaGrupPerawatan, // Set array status dengan success     
+                'NOMR' => $request->NoMR, // Set array status dengan success     
+                'Antrian' => $idno_urutantrian, // Set array status dengan success     
+                'NoAntrianAll' =>  $NoAntrianAll, // Set array status dengan success     
             );
 
             DB::connection('sqlsrv3')->commit();
-            return $this->sendResponse($response ,"Registrasi Berhasil dibuat. Silahkan menuju Poliklinik MCU untuk melakukan Konfirmasi ke Admin Kami.");  
+            return $this->sendResponse($response ,"Registrasi Berhasil dibuat. Silahkan menuju Poliklinik untuk melakukan Konfirmasi ke Admin Kami.");  
 
 
         }catch (Exception $e) { 
@@ -343,5 +384,90 @@ class bVisitService extends Controller {
         } else {
             return $this->sendError("Data Not Found.", [],200);
         }
+    }
+    public function updateNoSepbyNoRegistrasi(Request $request)
+    {
+        try{
+            DB::connection('sqlsrv3')->beginTransaction();
+            DB::connection('sqlsrv6')->beginTransaction();
+
+            // validasi 
+            if ($request->NoRegistrasi == "") {  
+                return $this->sendError("No. Registrasi Kosong.", []);
+            }
+            
+            if ($request->NoSep == "") {  
+                return $this->sendError("No. SEP Kosong.", []);
+            }
+
+            if ($request->NoKartu == "") {  
+                return $this->sendError("No. Kartu BPJS Pasien Kosong.", []);
+            }
+            
+            $this->visitRepository->updateNoSepbyNoRegistrasi($request);
+            // $this->visitRepository->updateNoSepbyNoRegistrasi2($request);
+
+            DB::connection('sqlsrv3')->commit();
+            DB::connection('sqlsrv6')->commit();
+            return $this->sendResponse([],"Data Sep Berhasil Di Update.");  
+
+        }catch (Exception $e) { 
+
+            DB::connection('sqlsrv3')->rollBack();
+            DB::connection('sqlsrv6')->rollBack();
+            Log::info($e->getMessage()); 
+            return $this->sendError($e->getMessage(), []); 
+
+        }  
+    }
+    public function insertSEP(Request $request)
+    {
+        try{
+            DB::connection('sqlsrv3')->beginTransaction(); 
+            
+            $this->visitRepository->addSEP($request); 
+
+            DB::connection('sqlsrv3')->commit();
+
+            return $this->sendResponse([],"Data Sep Berhasil Di Simpan.");  
+
+        }catch (Exception $e) { 
+
+            DB::connection('sqlsrv3')->rollBack();
+
+            Log::info($e->getMessage()); 
+            return $this->sendError($e->getMessage(), []); 
+
+        }  
+    }
+    public function viewsep(Request $request){
+       
+        $data = $this->visitRepository->viewsep($request->NoRegistrasi);
+        if ($data->count() > 0) { 
+            return $this->sendResponse($data, "Data SEP ditemukan.");
+        } else {
+            return $this->sendError("Data SEP tidak ditemukan.", []);
+        }
+    }
+    public function addTaskBPJS(Request $request){
+       
+        try{
+            DB::connection('sqlsrv3')->beginTransaction(); 
+            
+            $this->visitRepository->addTaskBPJS($request); 
+            
+
+            DB::connection('sqlsrv3')->commit();
+
+            return $this->sendResponse([],"Data Sep Berhasil Di Simpan.");  
+
+        }catch (Exception $e) { 
+
+            DB::connection('sqlsrv3')->rollBack();
+
+            Log::info($e->getMessage()); 
+            return $this->sendError($e->getMessage(), []); 
+
+        }  
     }
 }

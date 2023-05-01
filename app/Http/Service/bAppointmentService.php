@@ -178,7 +178,9 @@ class bAppointmentService extends Controller {
             } else {
                 $MrExist = "0";
             }
-            //cek data dokter udh maping bpjs belum
+            //cek data dokter udh maping bpjs belum 
+            ////return  $IdDokter . ' - ' .$IdGrupPerawatan . ' - ' .$request->jampraktek . ' - ' .$groupjadwal . '  -  ' .(string)$request->kodedokter;
+
             $dataDoctorbpjs = $this->doctorRepository->getDoctorbyIDBPJS((string)$request->kodedokter);
             if ( $dataDoctorbpjs->count() < 1 ) {
                 $response = array(
@@ -319,6 +321,47 @@ class bAppointmentService extends Controller {
              $nobokingreal = $Notrsbooking[1];
              $ID_Penjamin = '313';
              
+            // START - cek sisa kuota
+            $harindo =  ""; 
+            if($datename == "Sunday"){
+                $harindo = "Minggu";
+                $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliMinggu($tglbookingfix,$IdDokter,$IdGrupPerawatan,$request->jampraktek);
+            } elseif ($datename == "Monday") {
+                $harindo = "Senin";
+                $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliSenin($tglbookingfix,$IdDokter,$IdGrupPerawatan,$request->jampraktek);
+            } elseif ($datename == "Tuesday") { 
+                $harindo = "Selasa";
+                $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliSelasa($tglbookingfix,$IdDokter,$IdGrupPerawatan,$request->jampraktek);
+            } elseif ($datename == "Wednesday") { 
+                $harindo = "Rabu";
+                $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliRabu($tglbookingfix,$IdDokter,$IdGrupPerawatan,$request->jampraktek);
+            } elseif ($datename == "Thursday") { 
+                $harindo = "Kamis";
+                $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliKamis($tglbookingfix,$IdDokter,$IdGrupPerawatan,$request->jampraktek);
+            } elseif ($datename == "Friday") {
+                $harindo = "Jumat"; 
+                $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliJumat($tglbookingfix,$IdDokter,$IdGrupPerawatan,$request->jampraktek);
+            } elseif ($datename == "Saturday") { 
+                $harindo = "Sabtu";
+                $kuotaPoliklinik = $this->antrianRepository->AntrianPoliklinikByDoctorPoliSabtu($tglbookingfix,$IdDokter,$IdGrupPerawatan,$request->jampraktek);
+            }
+            
+            $koutaPerPoli = $kuotaPoliklinik->count();
+            $Ant = $koutaPerPoli+1;
+            if($request->groupjadwal=="2"){
+                if($koutaPerPoli >= $Max_NonJKN){
+                    //  Sudah Tutup Registrasi. 
+                    // return $this->sendError("Kuota Dokter : " . $NamaDokter . ", Hari : " .$harindo ." Sudah Penuh, Kuota Maksimal ". $Max_NonJKN . ", No. Antrian Anda Adalah : " .  $Ant . ". Silahkan Pilih tanggal Lain untuk Melakukan Booking/Reservasi kembali.", []);  
+                    return $this->sendError("Kuota Dokter : " . $NamaDokter . ", Hari : " .$harindo ." Sudah Tutup Registrasi. Silahkan Pilih tanggal Lain untuk Melakukan Booking/Reservasi kembali.", []);  
+                }
+            }else{
+                if($koutaPerPoli >= $Max_JKN){
+                    // return $this->sendError("Kuota Dokter : " . $NamaDokter . ", Hari : " .$harindo ." Sudah Penuh, Kuota Maksimal ". $Max_JKN . ", No. Antrian Anda Adalah : " .  $Ant . ". Silahkan Pilih tanggal Lain untuk Melakukan Booking/Reservasi kembali.", []);  
+                    return $this->sendError("Kuota Dokter : " . $NamaDokter . ", Hari : " .$harindo ." Sudah Tutup Registrasi. Silahkan Pilih tanggal Lain untuk Melakukan Booking/Reservasi kembali.", []);  
+                }
+            }
+            // END - cek sisa kuota
+
              // INSERT TABEL BOOKING
              $this->appointmenRepository->AmbilAntrian($request,$JenisBoking,$idbooking,$nouruttrx,$TglLahir,$JnsKelamin,
              $StatusNikahPasien,$IdGrupPerawatan,$NamaGrupPerawatan,$IdDokter,
@@ -795,12 +838,13 @@ class bAppointmentService extends Controller {
 
             
             }
+            $catatan = '';
                 // // INSERT REGISTRATION
                 $this->visitRepository->addRegistrationRajal($maxVisit->ID,$NoEpisode,$nofixReg,$NamaGrupPerawatan,$NoMrfix,
                                                             $JenisBayar,$IdGrupPerawatan,$IdDokter,$Antrian,$NoAntrianAll,
                                                             $Company,$shift,$TelemedicineIs,$ApmDate,
                                                             $ApmDate,$operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
-                                                            $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek);
+                                                            $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek,$catatan);
 
                 // //  UPDATE DATANG RESERVASI
                 $this->appointmenRepository->updateDatangAppointment($kodebooking,$nofixReg); 

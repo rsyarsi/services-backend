@@ -70,4 +70,163 @@ class bAntrianRepositoryImpl implements bAntrianRepositoryInterface
             'batal' => '1' 
         ]); 
     }
+    // CARI MAX TOTAL ANTRIAN POLI PER DOKTER BERDASARKAN HARI DAN JAM PRAKTEK
+    public function AntrianPoliklinikByDoctorPoliSenin($tanggal,$doctor,$idPoli,$jampraktek)
+    {
+        $booking =  DB::connection('sqlsrv3')
+        ->table('View_Antrian_Booking')
+        ->select('id','noAntrianAll') 
+        ->where(DB::raw("replace(CONVERT(VARCHAR(11), TglKunjungan, 111), '/','-')"), $tanggal)
+        ->where('Batal', '0')
+        ->where('Doctor_1', $doctor)
+        ->where('IdPoli', $idPoli)
+        ->where('Senin_Waktu', $jampraktek);
+        $registrasi = DB::connection('sqlsrv3')
+                    ->table('View_Antrian_Registrasi')
+                    ->select('id','noAntrianAll') 
+                    ->where(DB::raw("replace(CONVERT(VARCHAR(11), TglKunjungan, 111), '/','-')"), $tanggal)
+                    ->where('Batal', '0')
+                    ->where('Doctor_1', $doctor)
+                    ->where('Unit', $idPoli)
+                    ->where('Senin_Waktu', $jampraktek) 
+                    ->unionAll($booking)
+                    ->get();
+        return $registrasi;
+    } 
+    public function AntrianPoliklinikByDoctorPoliSelasa($tanggal,$doctor,$idPoli,$jampraktek)
+    {
+        $booking =  DB::connection('sqlsrv3')
+        ->table('View_Antrian_Booking')
+        ->select('id','noAntrianAll') 
+        ->where(DB::raw("replace(CONVERT(VARCHAR(11), TglKunjungan, 111), '/','-')"), $tanggal)
+        ->where('Batal', '0')
+        ->where('Doctor_1', $doctor)
+        ->where('IdPoli', $idPoli)
+        ->where('Selasa_Waktu', $jampraktek);
+        $registrasi = DB::connection('sqlsrv3')
+                    ->table('View_Antrian_Registrasi')
+                    ->select('id','noAntrianAll') 
+                    ->where(DB::raw("replace(CONVERT(VARCHAR(11), TglKunjungan, 111), '/','-')"), $tanggal)
+                    ->where('Batal', '0')
+                    ->where('Doctor_1', $doctor)
+                    ->where('Unit', $idPoli)
+                    ->where('Selasa_Waktu', $jampraktek) 
+                    ->unionAll($booking)
+                    ->get();
+        return $registrasi;
+    } 
+    public function AntrianPoliklinikByDoctorPoliRabu($tanggal,$doctor,$idPoli,$jampraktek)
+    {
+        $booking =  DB::connection('sqlsrv3')
+        ->table('View_Antrian_Booking')
+        ->select('id','noAntrianAll') 
+        ->where(DB::raw("replace(CONVERT(VARCHAR(11), TglKunjungan, 111), '/','-')"), $tanggal)
+        ->where('Batal', '0')
+        ->where('Doctor_1', $doctor)
+        ->where('IdPoli', $idPoli)
+        ->where('Rabu_Waktu', $jampraktek);
+        $registrasi = DB::connection('sqlsrv3')
+                    ->table('View_Antrian_Registrasi')
+                    ->select('id','noAntrianAll') 
+                    ->where(DB::raw("replace(CONVERT(VARCHAR(11), TglKunjungan, 111), '/','-')"), $tanggal)
+                    ->where('Batal', '0')
+                    ->where('Doctor_1', $doctor)
+                    ->where('Unit', $idPoli)
+                    ->where('Rabu_Waktu', $jampraktek) 
+                    ->unionAll($booking)
+                    ->get();
+        return $registrasi;
+    } 
+
+
+
+
+    public function AntrianPoliklinikByDoctorPoliKamis($tanggal,$doctor,$idPoli,$jampraktek)
+    {
+        $booking =  DB::connection('sqlsrv3')
+        ->table('View_Antrian_Booking')
+        ->select('id','noAntrianAll') 
+        ->where(DB::raw("replace(CONVERT(VARCHAR(11), TglKunjungan, 111), '/','-')"), $tanggal)
+        ->where('Batal', '0')
+        ->where('Doctor_1', $doctor)
+        ->where('IdPoli', $idPoli)
+        ->where('Kamis_Waktu', $jampraktek);
+        $registrasi = DB::connection('sqlsrv3')
+                    ->table('View_Antrian_Registrasi')
+                    ->select('id','noAntrianAll') 
+                    ->where(DB::raw("replace(CONVERT(VARCHAR(11), TglKunjungan, 111), '/','-')"), $tanggal)
+                    ->where('Batal', '0')
+                    ->where('Doctor_1', $doctor)
+                    ->where('Unit', $idPoli)
+                    ->where('Kamis_Waktu', $jampraktek) 
+                    ->unionAll($booking)
+                    ->get();
+        return $registrasi;
+    } 
+    public function AntrianPoliklinikByDoctorPoliJumat($tanggal,$doctor,$idPoli,$jampraktek)
+    {
+        $booking =  DB::connection('sqlsrv3')
+        ->table('View_Antrian_Booking')
+        ->select('id','noAntrianAll') 
+        ->where(DB::raw("replace(CONVERT(VARCHAR(11), TglKunjungan, 111), '/','-')"), $tanggal)
+        ->where('Batal', '0')
+        ->where('Doctor_1', $doctor)
+        ->where('IdPoli', $idPoli)
+        ->where('Jumat_Waktu', $jampraktek);
+        $registrasi = DB::connection('sqlsrv3')
+                    ->table('View_Antrian_Registrasi')
+                    ->select('id','noAntrianAll') 
+                    ->where(DB::raw("replace(CONVERT(VARCHAR(11), TglKunjungan, 111), '/','-')"), $tanggal)
+                    ->where('Batal', '0')
+                    ->where('Doctor_1', $doctor)
+                    ->where('Unit', $idPoli)
+                    ->where('Jumat_Waktu', $jampraktek) 
+                    ->unionAll($booking)
+                    ->get();
+        return $registrasi;
+    } 
+    public function AntrianPoliklinikByDoctorPoliSabtu($tanggal,$doctor,$idPoli,$jampraktek)
+    {
+        $booking =  DB::connection('sqlsrv3')
+        ->table('View_Antrian_Booking')
+        ->select('id','noAntrianAll') 
+        ->where(DB::raw("replace(CONVERT(VARCHAR(11), TglKunjungan, 111), '/','-')"), $tanggal)
+        ->where('Batal', '0')
+        ->where('Doctor_1', $doctor)
+        ->where('IdPoli', $idPoli)
+        ->where('Sabtu_Waktu', $jampraktek);
+        $registrasi = DB::connection('sqlsrv3')
+                    ->table('View_Antrian_Registrasi')
+                    ->select('id','noAntrianAll') 
+                    ->where(DB::raw("replace(CONVERT(VARCHAR(11), TglKunjungan, 111), '/','-')"), $tanggal)
+                    ->where('Batal', '0')
+                    ->where('Doctor_1', $doctor)
+                    ->where('Unit', $idPoli)
+                    ->where('Sabtu_Waktu', $jampraktek) 
+                    ->unionAll($booking)
+                    ->get();
+        return $registrasi;
+    } 
+    public function AntrianPoliklinikByDoctorPoliMinggu($tanggal,$doctor,$idPoli,$jampraktek)
+    {
+        $booking =  DB::connection('sqlsrv3')
+        ->table('View_Antrian_Booking')
+        ->select('id','noAntrianAll') 
+        ->where(DB::raw("replace(CONVERT(VARCHAR(11), TglKunjungan, 111), '/','-')"), $tanggal)
+        ->where('Batal', '0')
+        ->where('Doctor_1', $doctor)
+        ->where('IdPoli', $idPoli)
+        ->where('Minggu_Waktu', $jampraktek);
+        $registrasi = DB::connection('sqlsrv3')
+                    ->table('View_Antrian_Registrasi')
+                    ->select('id','noAntrianAll') 
+                    ->where(DB::raw("replace(CONVERT(VARCHAR(11), TglKunjungan, 111), '/','-')"), $tanggal)
+                    ->where('Batal', '0')
+                    ->where('Doctor_1', $doctor)
+                    ->where('Unit', $idPoli)
+                    ->where('Minggu_Waktu', $jampraktek) 
+                    ->unionAll($booking)
+                    ->get();
+        return $registrasi;
+    }  
 }

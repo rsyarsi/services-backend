@@ -48,7 +48,7 @@ class aStokRepositoryImpl implements aStokRepositoryInterface
             'BatchNumber' => $key['NoBatch']
         ]);
     }
-    public function addBukuStokVoid($request, $key)
+    public function addBukuStokVoid($request, $key,$reff_void)
     {
         $qtystok = $key->QtyDelivery* $key->KonversiQty;
         return  DB::connection('sqlsrv')->table("BukuStoks")->insert([
@@ -62,7 +62,7 @@ class aStokRepositoryImpl implements aStokRepositoryInterface
             'Hpp' => $key->Hpp,
             'PersediaanOut' => $key->Hpp * $qtystok,
             'TransactionCodeReff' => $request->TransactionCode,
-            'TransactionCodeReff2' => 'DO_V',
+            'TransactionCodeReff2' => $reff_void,
             'Status' => '1',
             'DeliveryCode' => $request->TransactionCode,
             'Unit' => $request->UnitCode,
@@ -199,6 +199,9 @@ class aStokRepositoryImpl implements aStokRepositoryInterface
         } else {
             $qtystok = "0";
         }
+        if ($TipeTrs == "CM") {
+            $qtystok = $qtynew; 
+        } 
         return  DB::connection('sqlsrv')->table("BukuStoks")->insert([
             'TransactionCode' => $request->TransactionCode,
             'TransactionDate' => $request->TransactionDate,
@@ -217,5 +220,65 @@ class aStokRepositoryImpl implements aStokRepositoryInterface
             'Unit' => $UnitOut,
             'BatchNumber' => $BatchNumber
         ]);
+    }
+    public function addBukuStokInVoidFromSelect($key,$reff,$request)
+    {
+        return  DB::connection('sqlsrv')->table("BukuStoks")->insert([
+            'TransactionCode' => $key->TransactionCode,
+            'TransactionDate' => Carbon::now(),
+            'UserCreate' =>  $request->UserVoid,
+            'ProductCode' => $key->ProductCode,
+            'ProductName' => $key->ProductName,
+            'Satuan' => $key->Satuan,
+            'QtyIn' => $key->QtyOut,
+            'Hpp' => $key->Hpp,
+            'PersediaanIn' => $key->PersediaanOut,
+            'TransactionCodeReff' =>$key->TransactionCodeReff,
+            'TransactionCodeReff2' => $reff,
+            'Status' => '2',
+            'ExpiredDate' => $key->ExpiredDate,
+            'DeliveryCode' => $key->DeliveryCode,
+            'Unit' =>$key->Unit,
+            'BatchNumber' => $key->BatchNumber
+        ]);
+            // DB::connection('sqlsrv')->table('BukuStoks')
+            // ->insert(
+            //     (array)
+            // DB::connection('sqlsrv')->table('BukuStoks')
+            //         ->where('TransactionCodeReff', '=', $request->TransactionCode)
+            //         ->where('ProductCode', '=',  $key->ProductCode)
+            //         ->where('TransactionCodeReff2', '=', 'CM')
+            //         ->select('TransactionCode','TransactionDate', 
+            //         'UserCreate','ProductCode', 
+            //         'ProductName','Satuan', 
+            //         'QtyIn','Hpp', 
+            //         'PersediaanIn','TransactionCodeReff', 
+            //         DB::raw('CM_V  AS TransactionCodeReff2'),'Status', 
+            //         'DeliveryCode','Unit', 
+            //         'BatchNumber','ExpiredDate' )
+            //         ->first()
+            // );
+    }
+    public function cekBukuByTransactionandCodeProduct($id, $request)
+    {
+        return  DB::connection('sqlsrv')->table("BukuStoks")
+        ->where('ProductCode', $id)
+        ->where('TransactionCodeReff2', 'CM')
+        ->where('TransactionCode', $request->TransactionCode)
+        ->get();
+    }
+    public function getQtyPersediaan($request, $key)
+    {
+        return  DB::connection('sqlsrv')->table("BukuStoks")
+        ->where('ProductCode', $key['ProductCode'])
+        ->where('Unit', $request->UnitTujuan)
+        -> select( 
+            DB::raw('(isnull(sum(isnull(QtyIn,0))-sum(isnull(QtyOut,0)),0))  AS SaldoQty'),
+            'hpp','ProductCode','DeliveryCode',
+            DB::raw('CAST((isnull(sum(isnull(QtyIn,0))-sum(isnull(QtyOut,0)),0))*hpp  AS DECIMAL(18,0) )  as persediaan') )
+            ->groupBy('BukuStoks.Hpp','BukuStoks.ProductCode','BukuStoks.DeliveryCode')
+            ->having(DB::raw('(isnull(sum(isnull(QtyIn,0))-sum(isnull(QtyOut,0)),0))'), '>', 0)
+            ->orderBy('DeliveryCode','asc')
+            ->get();
     }
 }

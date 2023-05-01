@@ -39,7 +39,7 @@ class aDoctorService extends Controller
                 $data = $this->Repository->getDoctorbyUnit($id);
                 return $this->sendResponse($data, "Data Unit Poliklinik ditemukan.");
             } else {
-                return $this->sendError("Data Unit Poliklinik Not Found.", [], 400);
+                return $this->sendError("Data Unit Poliklinik Not Found.", []);
             }
         }catch (Exception $e) { 
             Log::info($e->getMessage());
@@ -54,7 +54,7 @@ class aDoctorService extends Controller
                 $data = $this->Repository->getDoctorbyUnitAll();
                 return $this->sendResponse($data, "Data Unit Poliklinik ditemukan.");
             } else {
-                return $this->sendError("Data Unit Poliklinik Not Found.", [], 400);
+                return $this->sendError("Data Unit Poliklinik Not Found.", []);
             }
         }catch (Exception $e) { 
             Log::info($e->getMessage());
@@ -69,7 +69,7 @@ class aDoctorService extends Controller
                 $data = $this->Repository->getDoctorbyUnitAllTop();
                 return $this->sendResponse($data, "Data Unit Poliklinik ditemukan.");
             } else {
-                return $this->sendError("Data Unit Poliklinik Not Found.", [], 400);
+                return $this->sendError("Data Unit Poliklinik Not Found.", []);
             }
         }catch (Exception $e) { 
             Log::info($e->getMessage());
@@ -86,7 +86,7 @@ class aDoctorService extends Controller
                 $data = $this->Repository->getDoctorbyId($id)->first();
                 return $this->sendResponse($data, "Data User ditemukan.");
             } else {
-                return $this->sendError("Data User Not Found.", [], 400);
+                return $this->sendError("Data User Not Found.", []);
             }
         }catch (Exception $e) { 
             Log::info($e->getMessage());

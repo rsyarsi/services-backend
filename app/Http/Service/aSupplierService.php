@@ -36,7 +36,7 @@ class aSupplierService extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+            return response()->json($validator->errors());
         }
         // create new user 
         // $getSataun = $this->aSupplierRepository->getSupplierbyId($request)->count();
@@ -82,7 +82,7 @@ class aSupplierService extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+            return response()->json($validator->errors());
         }
         // create new user 
         $getSataun = $this->aSupplierRepository->getSupplierbyId($request->ID)->count();
@@ -118,7 +118,7 @@ class aSupplierService extends Controller
             $data = $this->aSupplierRepository->getSupplierbyId($id);
             return $this->sendResponse($data, "Data User ditemukan.");
         } else {
-            return $this->sendError("Data User Not Found.", [], 400);
+            return $this->sendError("Data User Not Found.", []);
         }
     }
     public function getSupplierAll()
@@ -130,7 +130,7 @@ class aSupplierService extends Controller
             $data = $this->aSupplierRepository->getSupplierAll();
             return $this->sendResponse($data, "Data Supplier ditemukan.");
         } else {
-            return $this->sendError("Data User Not Found.", [], 400);
+            return $this->sendError("Data User Not Found.", []);
         }
     }
 }
