@@ -133,11 +133,49 @@ class aPurchaseRequisitionRepositoryImpl implements aPurchaseRequisitionReposito
         ->where('Void', '0')
         ->get();
     }
+    public function getPurchaseRequisitionDetailPObyIDBarang($request)
+    {
+        return  DB::connection('sqlsrv')->table("PurchaseRequisitionDetails")
+        ->where('TransactionCode', $request->PurchaseRequisitonCode)
+        ->where('ProductCode', $request->ProductCode)
+        ->where('Void', '0')
+        ->get();
+    }
+    public function getPurchaseRequisitionDetailPObyIDBarang2($PurchaseRequisitonCode, $ProductCode)
+    {
+        return  DB::connection('sqlsrv')->table("PurchaseRequisitionDetails")
+        ->where('TransactionCode', $PurchaseRequisitonCode)
+        ->where('ProductCode', $ProductCode)
+        ->where('Void', '0')
+        ->get();
+    }
     public function updateQtyRemainPR($request,$key,$qtyRemain)
     {
         $updatesatuan =  DB::connection('sqlsrv')->table('PurchaseRequisitionDetails')
         ->where('TransactionCode', $request->PurchaseReqCode)
          ->where('ProductCode', $key['ProductCode'])
+            ->where('Void', '0')
+            ->update([
+                'QtyRemainPR' => $qtyRemain
+            ]);
+        return $updatesatuan;
+    }
+    public function updateQtyRemainPRbyPo($request,$qtyRemain)
+    {
+        $updatesatuan =  DB::connection('sqlsrv')->table('PurchaseRequisitionDetails')
+        ->where('TransactionCode', $request->PurchaseRequisitonCode)
+         ->where('ProductCode', $request->ProductCode)
+            ->where('Void', '0')
+            ->update([
+                'QtyRemainPR' => $qtyRemain
+            ]);
+        return $updatesatuan;
+    }
+    public function updateQtyRemainPRbyPo2($PurchaseRequisitonCode,$ProductCode,$qtyRemain)
+    {
+        $updatesatuan =  DB::connection('sqlsrv')->table('PurchaseRequisitionDetails')
+        ->where('TransactionCode', $PurchaseRequisitonCode)
+         ->where('ProductCode', $ProductCode)
             ->where('Void', '0')
             ->update([
                 'QtyRemainPR' => $qtyRemain

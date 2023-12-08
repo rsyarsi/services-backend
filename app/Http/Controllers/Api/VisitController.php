@@ -198,5 +198,19 @@ class VisitController extends Controller
         $user =  $userService->addTaskBPJS($request);
         return $user; 
     }
-    
+    public function getRegistrationMCUbyDate(Request $request){
+        $userRepository = new bKamarOperasiRepositoryImpl();
+        $medrecRepository = new bMedicalRecordRepositoryImpl();
+        $doctorRepository = new aDoctorRepositoryImpl();
+        $unitRepository = new aMasterUnitRepositoryImpl();
+        $appointmenRepository = new bAppointmentRepositoryImpl();
+        $scheduleRepository = new aScheduleDoctorRepositoryImpl();
+        $antrianRepository = new bAntrianRepositoryImpl();
+        $visitRepository = new bVisitRepositoryImpl();
+        $userService = new bVisitService($userRepository,$medrecRepository,
+        $doctorRepository,$unitRepository, $appointmenRepository,$scheduleRepository,
+        $antrianRepository,$visitRepository);
+        $user =  $userService->getRegistrationMCUbyDate($request);
+        return $user; 
+    }
 }

@@ -5,7 +5,7 @@ namespace App\Http\Repository;
 interface aMutasiRepositoryInterface
 {
     public function addMutasi($request, $autoNumber);
-    public function addMutasiDetail($request,$key);
+    public function addMutasiDetail($request,$key,$hpp);
     public function editMutasi($request);
     public function voidMutasi($request);
     public function voidMutasiDetailbyItem($request);

@@ -39,6 +39,13 @@ class ScheduleDoctorController extends Controller
         $getScheduleDoctorbyUnitDay =  $Service->getScheduleDoctorDetilbyId($request);
         return $getScheduleDoctorbyUnitDay;
     }
+    public function getScheduleDoctorDetilNonBPJSbyId(Request $request){
+        $Repository = new aScheduleDoctorRepositoryImpl();
+       $doctorRepository = new aDoctorRepositoryImpl();
+       $Service = new aScheduleDoctorService($Repository,$doctorRepository);
+       $getScheduleDoctorbyUnitDay =  $Service->getScheduleDoctorDetilNonBPJSbyId($request);
+       return $getScheduleDoctorbyUnitDay;
+   }
     public function getScheduleSelectedDay(Request $request){
         $Repository = new aScheduleDoctorRepositoryImpl();
        $doctorRepository = new aDoctorRepositoryImpl();

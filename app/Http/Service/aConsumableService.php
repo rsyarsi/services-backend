@@ -34,6 +34,7 @@ class aConsumableService extends Controller
     private $aJurnal;
     private $aConsumableRepository;
     private $aMasterUnitRepository;
+    private $ahnaRepository;
 
     public function __construct(
         aDeliveryOrderRepositoryImpl $aDeliveryOrder,
@@ -44,7 +45,8 @@ class aConsumableService extends Controller
         aHnaRepositoryImpl $aHna,
         aJurnalRepositoryImpl $aJurnal,
         aConsumableRepositoryImpl $aConsumableRepository,
-        aMasterUnitRepositoryImpl $aMasterUnitRepository
+        aMasterUnitRepositoryImpl $aMasterUnitRepository,
+        aHnaRepositoryImpl $ahnaRepository
     ) {
         $this->aDeliveryOrder = $aDeliveryOrder;
         $this->aBarangRepository = $aBarangRepository;
@@ -55,6 +57,7 @@ class aConsumableService extends Controller
         $this->aJurnal = $aJurnal;
         $this->aConsumableRepository = $aConsumableRepository;
         $this->aMasterUnitRepository = $aMasterUnitRepository;
+        $this->ahnaRepository = $ahnaRepository;
     }
 
     public function addConsumableHeader(Request $request)
@@ -162,6 +165,10 @@ class aConsumableService extends Controller
 
             foreach ($request->Items as $key) {
                 $getdatadetilmutasi = $this->aConsumableRepository->getConsumableDetailbyIDBarang($request,$key);
+                    // get Hpp Average 
+                    $getHppBarang = $this->ahnaRepository->getHppAverage($key)->first()->first();
+                    $xhpp = $getHppBarang->NominalHpp;
+                    // get Hpp Average
                 if($getdatadetilmutasi->count() < 1){
                     if ($key['Qty'] > 0) {
                         $this->aConsumableRepository->addConsumableDetail($request, $key); 
@@ -186,13 +193,10 @@ class aConsumableService extends Controller
                         $getCurrentStok = $this->aStok->cekStokbyIDBarang($key, $request->UnitTujuan)->first();
                         $totalstok = $getCurrentStok->Qty + $mtKonversi_QtyTotal;
                         $this->aStok->updateStokTrs($request,$key,$totalstok,$request->UnitTujuan);
-                        $this->aStok->deleteBukuStok($request,$key,"CM",$request->UnitTujuan);
-
-
-                        
+                        $this->aStok->deleteBukuStok($request,$key,"CM",$request->UnitTujuan);  
                    // }  
                 }
-                //
+
                  
                         // QUERY PENGURANGAN STOK METODE FIFO
                         first:
@@ -200,7 +204,7 @@ class aConsumableService extends Controller
                         
                         //  return $getStokFirst;
                         $DeliveryCodex = $getStokFirst->DeliveryCode;
-                        $xhpp = $getStokFirst->Hpp;
+                        //$xhpp = $getStokFirst->Hpp;
                         $qtyBuku = $getStokFirst->x;
                         $ExpiredDate = $getStokFirst->ExpiredDate;
                         $BatchNumber = $getStokFirst->BatchNumber;
@@ -361,7 +365,7 @@ class aConsumableService extends Controller
                 $this->aStok->updateStokPerItemBarang($request, $key2->ProductCode, $sisaStok);
 
                 // buku 
-                    $cekBuku = $this->aStok->cekBukuByTransactionandCodeProduct($key2->ProductCode,$request);
+                    $cekBuku = $this->aStok->cekBukuByTransactionandCodeProduct($key2->ProductCode,$request,'CM');
                     foreach ($cekBuku as $data) {
                        $asd = $data;
                     }
@@ -430,7 +434,7 @@ class aConsumableService extends Controller
             $this->aStok->updateStokPerItemBarang($request, $request->ProductCode, $sisaStok);
 
             // buku 
-            $cekBuku = $this->aStok->cekBukuByTransactionandCodeProduct($request->ProductCode,$request);
+            $cekBuku = $this->aStok->cekBukuByTransactionandCodeProduct($request->ProductCode,$request,'CM');
             foreach ($cekBuku as $data) {
                $asd = $data;
             } 

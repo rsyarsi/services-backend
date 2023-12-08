@@ -5,7 +5,7 @@ namespace App\Http\Repository;
 interface aDeliveryOrderRepositoryInterface
 {
     public function addDeliveryOrder($request, $autoNumber);
-    public function addDeliveryOrderDetil($key, $kodePo);
+    public function addDeliveryOrderDetil($key, $kodePo,$nilaiHppFix);
     public function editDeliveryOrder($request);
     public function getDeliveryOrderbyID($id); 
     public function getDeliveryOrderDetailbyID($id);
@@ -17,5 +17,5 @@ interface aDeliveryOrderRepositoryInterface
     public function getDeliveryOrderDetailByBarang($ProductCode, $TransactionCode); 
     public function getMaxCode($request);
     public function delItemsbyPOnumber($key, $po);
-    public function updateDeliveryOrdeDetails($request, $key);
+    public function updateDeliveryOrdeDetails($request, $key,$nilaiHppFix);
 }

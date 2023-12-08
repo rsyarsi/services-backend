@@ -75,6 +75,13 @@ class aTrsLaboratoriumRepositoryImpl implements aTrsLaboratoriumRepositoryInterf
         ->where('NoLab',$NoOrderLabLIS)    
         ->get();
     }
+    public function viewHasilLaboratoriumbyTrs($NoOrderLabLIS)
+    {
+        return  DB::connection('sqlsrv7')->table("View_Web_Hasil_Lab")
+        ->where('NoLab',$NoOrderLabLIS)    
+        ->orderBy('NOINDEX', 'asc')
+        ->get();
+    }
     public function getTrsLabHasReceived($request)
     {
         return  DB::connection('sqlsrv7')->table("tblLab")
@@ -244,4 +251,11 @@ class aTrsLaboratoriumRepositoryImpl implements aTrsLaboratoriumRepositoryInterf
             ]);
         return $updatesatuan;
     }
+    public function viewOrderLabbyNoReg($request)
+    {
+        return  DB::connection('sqlsrv7')->table("View_Web_Order_Lab")
+         ->where('NoRegRI',$request->NoRegistrasi)
+        ->get();
+    }
 }
+

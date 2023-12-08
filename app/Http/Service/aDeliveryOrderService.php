@@ -121,17 +121,34 @@ class aDeliveryOrderService extends Controller
                     return $this->sendError('Product Not Found !', []);
                 } 
             }
-      
+       
+            
             foreach ($request->Items as $key) {
+       
                 # code...
                 // // cek kode barangnya ada ga
                 if ($this->aDeliveryOrder->getDeliveryOrderDetailByBarang($key['ProductCode'], $request->TransactionCode)->count() < 1) {
                     // Jika Kosong
+
+                    // cek hpp dulu ada gak
+                    $hpp = $this->aHna->getHpp($key,$request);
+                    $nilaiHppBaru = ($key['Price']-$key['DiscountRp'])/$key['Konversi_QtyTotal']; 
+                 
+                   
+                    if($hpp->count() > 0 ){   
+                        $NilaiHppTerakhir = $hpp->first()->first()->NominalHpp; 
+                        $nilaiHppFix = ($NilaiHppTerakhir+$nilaiHppBaru)/2;
+                    }else{ 
+                        $NilaiHppTerakhir = 0;
+                        $nilaiHppFix = $nilaiHppBaru;
+                    }
+                 
+                    $this->aHna->addHpp($request,$key,$nilaiHppFix); 
                     // INSEERT DO DETIL
-                    $this->aDeliveryOrder->addDeliveryOrderDetil($key, $kodePo); 
+                    $this->aDeliveryOrder->addDeliveryOrderDetil($key, $kodePo,$nilaiHppFix); 
 
                     // INSERT BUKU STOK
-                    $this->aStok->addBukuStok($request, $key);
+                    $this->aStok->addBukuStok($request, $key,$nilaiHppFix);
 
                     // UPDATE PURCHASE ORDER DETL QTY PURCAHSE REMAIN
                     $getPoData = $this->aPurchaseOrderRepository->getPurchaseOrderDetailbyIDBrgForDo($request,$key);
@@ -143,6 +160,9 @@ class aDeliveryOrderService extends Controller
                     
                     $this->aPurchaseOrderRepository->editQtyPurchaseRemain($request,$qtyremainPO, $key['ProductCode']);
 
+                    // update hpp
+                    $this->aBarangRepository->editHPPBarang($key,$nilaiHppFix);
+                    
                     // INSERT TABEL STOK
                     // cek stok ada ga di tabel 
                     if ($this->aStok->cekStokbyIDBarang($key, $request->UnitCode)->count() < 1) {
@@ -157,18 +177,52 @@ class aDeliveryOrderService extends Controller
                         $QtyTotal = $QtyCurrent + $key['Konversi_QtyTotal'];
                         $this->aStok->updateStok($request, $key, $QtyTotal); 
                     }
+                    
+                    // Update Hna Penjualan
+                   
+                    $hnaHigh = $this->aHna->getHnaHigh($key,$request);
+                
+                    $hna = ($key['Price'] / $key['Konversi_QtyTotal']);
+                    $nilaiHnaBaru = $hna + ($key['TaxRp']/$key['Konversi_QtyTotal']);
+                    $hnaTaxDiskon = (($hna - $key['DiscountRp']) + $key['TaxRp']);
 
-                    // Update Hpp Barang
-                    $this->aHna->addHna($request, $key);
+                    if($hnaHigh->count() < 1 ){ 
+                        $nilaiHnaFix = $nilaiHnaBaru;
+                    }else{
+                    
+                         
+                            $NilaiHnaTertingi = $hnaHigh->first()->first()->NominalHna; 
+                         
+                        if($NilaiHnaTertingi < $nilaiHnaBaru){
+                            $nilaiHnaFix = $nilaiHnaBaru;
+                        }else{
+                            $nilaiHnaFix = $NilaiHnaTertingi;
+                        }
+                        
+                    } 
+                    $this->aHna->addHna($request, $key,$nilaiHnaFix,$hnaTaxDiskon);
 
 
                 }else{
                     // Jika Tidak Kosong
-
+                        // cek hpp dulu ada gak
+                        
+                        $hpp = $this->aHna->getHpp($key,$request);
+                        
+                        $nilaiHppBaru = ($key['Price']-$key['DiscountRp'])/$key['Konversi_QtyTotal']; 
+                        if($hpp->count() > 0  ){ 
+                            $NilaiHppTerakhir = $hpp->first()->first()->NominalHpp; 
+                            $nilaiHppFix = ($NilaiHppTerakhir+$nilaiHppBaru)/2;
+                        
+                        }else{
+                            $NilaiHppTerakhir = 0;
+                            $nilaiHppFix = $nilaiHppBaru;
+                        }
+                        
                     // INSERT BUKU STOK
                     $tipetrs = "DO";
                     $this->aStok->deleteBukuStok($request,$key, $tipetrs,$request->UnitCode);
-                    $this->aStok->addBukuStok($request, $key);
+                    $this->aStok->addBukuStok($request, $key,$nilaiHppFix);
                     
                     // INSERT TABEL STOK
                     // cek stok ada ga di tabel 
@@ -203,18 +257,35 @@ class aDeliveryOrderService extends Controller
                     $this->aPurchaseOrderRepository->editQtyPurchaseRemain($request, $qtyremainPO, $key['ProductCode']);
 
                     // update hpp
-                    $this->aBarangRepository->editHPPBarang($key);
+                    $this->aBarangRepository->editHPPBarang($key,$nilaiHppFix);
 
                     // update do detil
-                    $this->aDeliveryOrder->updateDeliveryOrdeDetails($request, $key);
+                    $this->aDeliveryOrder->updateDeliveryOrdeDetails($request, $key,$nilaiHppFix);
 
                     // update hna 
-                    $this->aHna->updateHna($request, $key);
+                     // Update Hna Penjualan
+                     $hnaHigh = $this->aHna->getHnaHigh($key,$request);
+                     $hna = ($key['Price'] / $key['Konversi_QtyTotal']);
+                     $nilaiHnaBaru = $hna + ($key['TaxRp']/$key['Konversi_QtyTotal']);
+                     $hnaTaxDiskon = (($hna - $key['DiscountRp']) + $key['TaxRp']);
+                    
+                     if($hnaHigh->count() < 1 ){
+                        $nilaiHnaFix = $nilaiHnaBaru;
+                     }else{ 
+                        $NilaiHnaTertingi = $hnaHigh->first()->first()->NominalHna; 
+                         if($NilaiHnaTertingi < $nilaiHnaBaru){
+                             $nilaiHnaFix = $nilaiHnaBaru;
+                         }else{
+                             $nilaiHnaFix = $NilaiHnaTertingi;
+                         }
+                         
+                     } 
+                    $this->aHna->updateHna($request, $key,$nilaiHnaFix,$hnaTaxDiskon);
                 }
                 
             }
             DB::commit();
-            return $this->sendResponse([], 'Items Purchase Requisition Add Successfully !');
+           return $this->sendResponse([], 'Items Purchase Requisition Add Successfully !');
         } catch (Exception $e) {
             DB::rollBack();
             Log::info($e->getMessage());
@@ -247,19 +318,26 @@ class aDeliveryOrderService extends Controller
             DB::beginTransaction();
 
             // // cek ada gak datanya
-            $rekHutangbarang = $this->aJurnal->getRekHutangBarang()->first();
-            
+            $rekHutangbarang = $this->aJurnal->getRekHutangBarang();
+            if ($rekHutangbarang->count() < 1) {
+                return $this->sendError('Rekening Hutang Barang Kosong, Silahkan Maping Dahulu !', []);
+            } 
             if ($this->aDeliveryOrder->getDeliveryOrderbyID($request->TransactionCode)->count() < 1) {
                 return $this->sendError('Delivery Order Number Not Found !', []);
             } 
-            $this->aJurnal->delJurnalHdr($request);
-            $this->aJurnal->delJurnalDtl($request);
+           
             $cekDodetil = $this->aDeliveryOrder->getDeliveryOrderDetailbyID($request->TransactionCode);
             foreach ($cekDodetil as $valueDo) { 
                 $cekrek = $this->aJurnal->getRekeningPersediaaan($valueDo); 
+                if($cekrek->count() < 1) {
+                    return $this->sendError('Rekening Persediaan Kosong, Silahkan Cek Master Kelompok dan Barang Anda !', []);
+                } 
+                $this->aJurnal->delJurnalHdr($request);
+                $this->aJurnal->delJurnalDtl($request);
                 $this->aJurnal->addJurnalDetailDebetPersediaan($valueDo, $cekrek->first()->RekPersediaan); 
             }
-            $this->aJurnal->addJurnalDetailKreditHutangBarang($request, $rekHutangbarang->rekening);
+            
+            $this->aJurnal->addJurnalDetailKreditHutangBarang($request, $rekHutangbarang->first()->rekening);
             $notes = 'Pembelian Barang No. Penerimaan : ' . $request->TransactionCode;
             $this->aJurnal->addJurnalHeader($request, $notes);
             $this->aDeliveryOrder->editDeliveryOrder($request);

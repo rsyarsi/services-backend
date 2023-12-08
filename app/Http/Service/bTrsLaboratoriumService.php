@@ -331,4 +331,48 @@ class bTrsLaboratoriumService extends Controller {
         }
 
     }
+    public function viewHasilLaboratorium($request)
+    {
+        $validator = Validator::make($request->all(), [
+            "NoTrsOrderLab" => "required", 
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+        try{
+            $Labdetil = $this->trsLaboratorium->viewHasilLaboratoriumbyTrs($request->NoTrsOrderLab);
+            if($Labdetil->count() > 0){
+                return $this->sendResponse($Labdetil,"Hasil Laboratorium Ditemukan.");  
+            }else{
+                return $this->sendError("Hasil Laboratorium Tidak Ditemukan.",[]);
+            } 
+        }catch (Exception $e) { 
+            
+            Log::info($e->getMessage());
+            return  $this->sendError($e->getMessage());
+        }
+    }
+    public function viewOrderLabbyNoReg($request)
+    {
+        $validator = Validator::make($request->all(), [
+            "NoRegistrasi" => "required"  
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+        try{
+            // validasi jika Kode Pemriksaan Sudah Ada
+            $header = $this->trsLaboratorium->viewOrderLabbyNoReg($request); 
+
+            if($header->count() > 0){
+                return $this->sendResponse($header ,"Hasil Laboratorium Ditemukan.");  
+            }else{
+                return $this->sendError("Hasil Laboratorium Tidak Ditemukan.",[]);
+            } 
+        }catch (Exception $e) { 
+            
+            Log::info($e->getMessage());
+            return  $this->sendError($e->getMessage());
+        }
+    }
 }

@@ -26,7 +26,7 @@ class aMutasiRepositoryImpl implements aMutasiRepositoryInterface
             'ReffDateTrs' => date("dmY", strtotime($request->TransactionDate))
         ]);
     }
-    public function addMutasiDetail($request,$key)
+    public function addMutasiDetail($request,$key,$xhpp)
     {
         return  DB::connection('sqlsrv')->table("MutasiNewDetails")->insert([
             'TransactionCode' => $request->TransactionCode,
@@ -39,14 +39,14 @@ class aMutasiRepositoryImpl implements aMutasiRepositoryInterface
             'KonversiQty' => $key['KonversiQty'],
             'Konversi_QtyTotal' => $key['Konversi_QtyTotal'],
             'ExpiredDate' => '',
-            'Hpp' => '0',
-            'Total' => '0',
+            'Hpp' => $xhpp,
+            'Total' => $xhpp*$key['Konversi_QtyTotal'],
             'Satuan ' =>  $key['ProductSatuan'],
             'DateAdd' => Carbon::now(),
             'UserAdd' =>  $request->UserAdd
         ]);
     }
-    public function editMutasiDetailbyIdBarang($request, $key)
+    public function editMutasiDetailbyIdBarang($request, $key,$hpp)
     {
         $updatesatuan =  DB::connection('sqlsrv')->table('MutasiNewDetails')
         ->where('TransactionCode', $request->TransactionCode)
@@ -54,7 +54,9 @@ class aMutasiRepositoryImpl implements aMutasiRepositoryInterface
             ->update([
                 'KonversiQty' => $key['KonversiQty'],
                 'Konversi_QtyTotal' => $key['Konversi_QtyTotal'],
-                'QtyMutasi' => $key['QtyMutasi'] 
+                'QtyMutasi' => $key['QtyMutasi'],
+                'Hpp' => $hpp,
+                'Total' => $hpp*$key['Konversi_QtyTotal']
             ]);
         return $updatesatuan;
     }

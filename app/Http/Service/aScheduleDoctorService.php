@@ -111,6 +111,22 @@ class aScheduleDoctorService extends Controller
             return $this->sendError('Data Gagal Di Tampilkan !', $e->getMessage());
         }
     }
+    public function getScheduleDoctorDetilNonBPJSbyId($request)
+    {
+        try {   
+            $datadokter = [];
+            $dataschedule = $this->Repository->getScheduleDoctorDetilNonBPJSbyId($request->IdDokter);
+            $datadokter = $this->doctorRepository->getDoctorNonIGDbyId($request->IdDokter)->first();
+            $response = [
+                'dokter' => $datadokter, 
+                'schedule' => $dataschedule , 
+            ];
+            return $this->sendResponse($response, "Data Schedule ditemukan.");
+        }catch (Exception $e) { 
+            Log::info($e->getMessage());
+            return $this->sendError('Data Gagal Di Tampilkan !', $e->getMessage());
+        }
+    }
     public function getScheduleDoctorbyIdDoctor($request)
     {
         $request->validate([

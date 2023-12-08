@@ -196,6 +196,7 @@ class aPurchaseOrderService extends Controller
             "PurchaseCode" => "required",
             "DateVoid" => "required",
             "UserVoid" => "required",
+            "PurchaseRequisitonCode" => "required",
             "Void" => "required"
         ]);
 
@@ -207,8 +208,35 @@ class aPurchaseOrderService extends Controller
             if ($this->aPurchaseOrder->getPurchaseOrderbyID($request->PurchaseCode)->count() < 1) {
                 return $this->sendError('Purchase Order Number Not Found !', []);
             }
+            if ($this->aPurchaseOrder->getPurchaseOrderDetailbyID($request->PurchaseCode)->count() < 1) {
+                return $this->sendError('Purchase Order Detail Number Not Found !', []);
+            }
+            if ($this->aPurchaseOrder->getPurchaseOrderDetailbyID($request->PurchaseCode)->count() < 1) {
+                return $this->sendError('Purchase Order Detail Number Not Found !', []);
+            }
+
+            
+            // void detail pr - reset qty order
+            $getPodetil = $this->aPurchaseOrder->getPurchaseOrderDetailbyID($request->PurchaseCode);
+           
+            foreach ($getPodetil as $valueDodetil) {
+                $QtyPurchase = $valueDodetil->QtyPurchase;
+                $ProductCode = $valueDodetil->ProductCode;
+                    $getPr = $this->aPurchaseRequisitionRepository->getPurchaseRequisitionDetailPObyIDBarang2($request->PurchaseRequisitonCode,$ProductCode);
+                    
+                    if ($getPr->count() < 1) {
+                        
+                        return $this->sendError('Purchase Requisition Detail Not Found !', []);
+                    } 
+                    $QtyQtyRemainPR = $getPr->first()->QtyRemainPR;
+                    $qtyremainPRAfter = $QtyQtyRemainPR + $QtyPurchase; 
+                    $this->aPurchaseRequisitionRepository->updateQtyRemainPRbyPo2($request->PurchaseRequisitonCode,$ProductCode,$qtyremainPRAfter);
+            }
+
+            // void detail pr - reset qty order
             $this->aPurchaseOrder->voidPurchaseDetailAllOrder($request);
             $this->aPurchaseOrder->voidPurchaseOrder($request);
+
             DB::commit();
             return $this->sendResponse([], 'Purchase Order Void Successfully !');
         } catch (Exception $e) {
@@ -225,6 +253,8 @@ class aPurchaseOrderService extends Controller
             "ProductCode" => "required",
             "DateVoid" => "required",
             "UserVoid" => "required",
+            "QtyPurchase" => "required",
+            "PurchaseRequisitonCode" => "required",
             "Void" => "required"
         ]);
         try {
@@ -239,8 +269,17 @@ class aPurchaseOrderService extends Controller
             if ($this->aPurchaseOrder->getPurchaseOrderApprovedbyID($request->PurchaseCode)->count() > 0) {
                 return $this->sendError('Purchase Order Number Has Been Approved !', []);
             }
-
+            if ($this->aPurchaseRequisitionRepository->getPurchaseRequisitionDetailPObyIDBarang($request)->count() < 1) {
+                return $this->sendError('Purchase Order with This Code Item Invalid !', []);
+            }
             $this->aPurchaseOrder->voidPurchaseOrderDetailbyItem($request);
+
+            $getPr = $this->aPurchaseRequisitionRepository->getPurchaseRequisitionDetailPObyIDBarang($request)->first();
+          
+            $QtyQtyRemainPR = $getPr->QtyRemainPR;
+            $qtyremainPRAfter = $QtyQtyRemainPR + $request['QtyPurchase']; 
+    
+            $this->aPurchaseRequisitionRepository->updateQtyRemainPRbyPo($request,$qtyremainPRAfter);
 
             DB::commit();
             return $this->sendResponse([], 'Purchase Order Void Successfully !');

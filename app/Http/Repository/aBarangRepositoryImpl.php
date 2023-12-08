@@ -212,15 +212,15 @@ class aBarangRepositoryImpl implements aBarangRepositoryInterface
             ) 
             ->where('Group_DK',$request->groupBarang)
              ->where('Product Name', 'like', '%' . $request->name . '%')->get();
-            // ->skip(100)->take(50)
+            // ->skip(10a0)->take(50)
     }
-    public function editHPPBarang($key)
+    public function editHPPBarang($key,$nilaiHppFix)
     {
 
         $updateBarang =  DB::connection('sqlsrv')->table('Products')
         ->where('ID', $key['ProductCode'])
             ->update([ 
-                'NilaiHpp' => $key[ 'Hpp']
+                'NilaiHpp' => $nilaiHppFix
             ]);
         return $updateBarang;
     }

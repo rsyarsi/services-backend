@@ -133,4 +133,51 @@ class bTrsRadiologiService extends Controller {
             return  $this->sendError($e->getMessage());
         }
     }
+    public function viewHasilRadiology($request)
+    {
+        $validator = Validator::make($request->all(), [
+            "AccNumber" => "required", 
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+        try{
+            // validasi jika Kode Pemriksaan Sudah Ada
+            $header = $this->trsRadiologi->viewHasilRadiologybyAccnumber($request);
+            if($header->count() > 0){
+                return $this->sendResponse($header->first() ,"Hasil Order Radiologi Ditemukan.");  
+            }else{
+                return $this->sendError("Data Order Tidak Ditemukan.",[]);
+            }
+           
+        }catch (Exception $e) { 
+            
+            Log::info($e->getMessage());
+            return  $this->sendError($e->getMessage());
+        }
+    }
+    public function viewOrderRadbyNoReg($request)
+    {
+        $validator = Validator::make($request->all(), [
+            "NoRegistrasi" => "required"  
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+        try{
+            // validasi jika Kode Pemriksaan Sudah Ada
+            $header = $this->trsRadiologi->viewOrderRadbyNoReg($request);
+            if($header->count() > 0){
+                
+                return $this->sendResponse($header,"Order Radiologi Ditemukan.");  
+            }else{
+                return $this->sendError("Data Order Tidak Ditemukan.",[]);
+            }
+            
+        }catch (Exception $e) { 
+            
+            Log::info($e->getMessage());
+            return  $this->sendError($e->getMessage());
+        }
+    }
 }

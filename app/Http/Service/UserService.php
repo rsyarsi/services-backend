@@ -124,9 +124,35 @@ class UserService extends Controller {
 
         //login
         $loginUser = $this->userRepository->getLoginSimrs($request);
+        
         if ($loginUser) {
         
             return $this->sendResponse($loginUser ,"Login berhasil.");  
+
+
+        } else {
+            //response
+            return $this->sendError("login Gagal.", []);
+        }
+    }
+    public function getLoginSimrsToken(Request $request)
+    {
+        // validator  
+        $request->validate([
+            "username" => "required",
+            "password" => "required" 
+        ]);
+
+        //login
+        $loginUser = $this->userRepository->getLoginSimrs($request);
+        $token = $this->userRepository->token($request->username,$request->password);
+        $response = [
+            'userlogin' => $loginUser, 
+            'token' => $token , 
+        ];
+        if ($loginUser) {
+        
+            return $this->sendResponse($response ,"Login berhasil.");  
 
 
         } else {

@@ -32,5 +32,17 @@ class aUnitRepositoryImpl implements aUnitRepositoryInterface
         ->select('ID','NamaUnit','Foto')
         ->get();
     }
-    
+    public function getUnit()
+    {
+        return  DB::connection('sqlsrv2')->table("MstrUnitPerwatan") 
+        ->select('ID','NamaUnit','Foto')
+        ->get();
+    }
+    public function getUnitbyId($id)
+    {
+        return  DB::connection('sqlsrv2')->table("MstrUnitPerwatan")
+        ->where('ID', $id)
+        ->select('ID','NamaUnit','codeBPJS','CodeSubBPJS','NamaBPJS')
+        ->get();
+    }
 }

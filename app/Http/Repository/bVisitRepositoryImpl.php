@@ -35,6 +35,18 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
         ->orderBy('Visit Date', 'desc')
         ->get();
     }
+    public function getRegistrationMCUbyDate($request)
+    {
+        //a
+        return  DB::connection('sqlsrv6')->table("dataRWJ")
+        ->select('NoEpisode','NoRegistrasi','NoMR','PatientName',DB::raw("replace(CONVERT(VARCHAR(11),[Visit Date], 111), '/','-') AS VisitDate") ,
+        'DateOfBirth',  'Sex','NamaDokter')
+        ->where('IdUnit','53')
+        ->whereBetween(DB::raw("replace(CONVERT(VARCHAR(11), [Visit Date], 111), '/','-')"),
+         [$request->tglPeriodeBerobatAwal,$request->tglPeriodeBerobatAkhir])  
+        ->orderBy('Visit Date', 'desc')
+        ->get();
+    }
     public function getRegistrationRajalbyMedreHistory($request)
     {
         //a
@@ -89,7 +101,8 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
         DB::raw("replace(CONVERT(VARCHAR(11), DateOfBirth, 111), '/','-') as Date_of_birth") , 
         'Address',   'IdUnit',  DB::raw("[Visit Date] AS Visit_Date"), 'NamaUnit',   'IdDokter', 'NamaDokter','NoMR','NoEpisode','NoRegistrasi',
         DB::raw("case when TipePasien='1' THEN 'PRIBADI' WHEN TipePasien='2' THEN 'ASURANSI' WHEN TipePasien='5' THEN 'PERUSAHAAN' END 
-        AS  PatientType"),'StatusID','MobilePhone','NoAntrianAll')
+        AS  PatientType"),'StatusID','MobilePhone','NoAntrianAll'
+        ,'Kelurahan','Kecamatan','kabupatenNama','ProvinsiNama')
         ->where('NoRegistrasi', $NoRegistrasi) 
         ->orderBy('Visit Date', 'desc')
         ->get();
@@ -127,7 +140,7 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
                                             $PatientType,$Unit,$Doctor_1,$Antrian,$NoAntrianAll,
                                             $Company,$JamPraktek,$TelemedicineIs,$TglKunjungan,
                                             $visitdate,$Operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
-                                            $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek,$Catatan)
+                                            $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek,$Catatan,$FisioterapiFlag)
     {
         return  DB::connection('sqlsrv3')->table("Visit")->insert([
             'ID' => $ID,
@@ -152,14 +165,15 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
             'idAdmin' => $idAdmin, 
             'Tipe_Registrasi' => $Tipe_Registrasi, 
             'ID_JadwalPraktek' => $ID_JadwalPraktek,
-            'Catatan' => $Catatan
+            'Catatan' => $Catatan,
+            'FisioterapiFlag' => $FisioterapiFlag
         ]);
     }
     public function  addRegistrationRajalAsuransi($ID,$NoEpisode,$NoRegistrasi,$LokasiPasien,$NoMR,
                                             $PatientType,$Unit,$Doctor_1,$Antrian,$NoAntrianAll,
                                             $Company,$JamPraktek,$TelemedicineIs,$TglKunjungan,
                                             $visitdate,$Operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
-                                            $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek,$Catatan)
+                                            $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek,$Catatan,$FisioterapiFlag)
     {
         return  DB::connection('sqlsrv3')->table("Visit")->insert([
             'ID' => $ID,
@@ -184,7 +198,8 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
             'idAdmin' => $idAdmin, 
             'Tipe_Registrasi' => $Tipe_Registrasi, 
             'ID_JadwalPraktek' => $ID_JadwalPraktek,
-            'Catatan' => $Catatan
+            'Catatan' => $Catatan,
+            'FisioterapiFlag' => $FisioterapiFlag
         ]);
     }
     public function addTaskOneBPJS($KODE_TRANSAKSI,$WAKTU,$TASK_ID,$DATE_CREATE)
@@ -303,6 +318,72 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
             'WAKTU' => $request->WAKTU,
             'TASK_ID' =>  $request->TASK_ID,
             'DATE_CREATE' => $request->DATE_CREATE
+        ]);
+    }
+    public function  addDatRWJDashboard($NoEpisode,$NoRegistrasi,$NoMR,$PatientName,
+    $VisitDate,$KelurahanName,$KecamatanName,$kabupatenNama,$ProvinceName,$BL,$JenisBayar,
+    $perusahaanid,$namaPerusahaan,$Gander,$DateOfBirth,$TipeIdCard,$NoIdCard,$Address,$MaritalStatus,$Religion,
+    $Education,$HomePhone,$MobilePhone,$Pekerjaan,$KodePos,$IdUnit,$NamaUnit,$IdDokter,$NamaDokter,
+    $NoPesertaBPJS,$NoSep,$JamPraktek,$OperatorId,
+    $JenisDaftar,$Telemedicine,$Appointment_ID,$Tipe_Registrasi,$Id_Jadwal_Praktek,
+    $idCaraMasuk,$referralid,$idAdmin,$NoAntrianAll,$Company,$NamaCaraMasuk,$NamaCaraMasukRef,$NamaKarcis,
+    $NilaiKarcis,$hosnamedata,$datatimestamp,$Bahasa,$Etnis)
+    {
+        return  DB::connection('sqlsrv6')->table("dataRWJ")->insert([
+            'NoEpisode' => $NoEpisode,
+            'NoRegistrasi' => $NoRegistrasi,
+            'NoMR' => $NoMR,
+            'PatientName' => $PatientName,
+            'VisitDate' => $VisitDate,
+            'Kelurahan' => $KelurahanName,
+            'Kecamatan' => $KecamatanName,
+            'CityName' => $kabupatenNama,
+            'ProvinsiNama' => $ProvinceName,
+            'BL' => $BL,
+            'FP' => '1',
+            'TipePasien' => $JenisBayar,
+            'KodeJaminan' => $perusahaanid,
+            'NamaJaminan' => $namaPerusahaan,
+            'Sex' => $Gander,
+            'DateOfBirth' => $DateOfBirth,
+            'TipeIdCard' => $TipeIdCard,
+            'NoIdCard' => $NoIdCard,
+            'Address' => $Address,
+            'MaritalStatus' => $MaritalStatus,
+            'Religion' => $Religion,
+            'Education' => $Education,
+            'HomePhone' => $HomePhone,
+            'MobilePhone' => $MobilePhone,
+            'Pekerjaan' => $Pekerjaan,
+            'KodePos' => $KodePos,
+            'IdUnit' => $IdUnit,
+            'NamaUnit' => $NamaUnit,
+            'IdDokter' => $IdDokter,
+            'NamaDokter' => $NamaDokter,
+            'NoPesertaBPJS' => $NoPesertaBPJS,
+            'NoSep' => $NoSep,
+            'JamPraktek' => $JamPraktek,
+            'StatusID' => '0',
+            'OperatorId' => $OperatorId,
+            'LockBill' => '0',
+            'JenisDaftar' => $JenisDaftar,
+            'Telemedicine' => $Telemedicine,
+            'Appointment_ID' => $Appointment_ID,
+            'Tipe_Registrasi' => $Tipe_Registrasi,
+            'Id_Jadwal_Praktek' => $Id_Jadwal_Praktek,
+            'idCaraMasuk' => $idCaraMasuk,
+            'idCaraMasuk2' => $referralid,
+            'idAdmin' => $idAdmin,
+            'NoAntrianAll' => $NoAntrianAll,
+            'Company' => $Company,
+            'NamaCaraMasuk' => $NamaCaraMasuk,
+            'NamaCaraMasukRef' => $NamaCaraMasukRef,
+            'NamaKarcis' => $NamaKarcis,
+            'NilaiKarcis' => $NilaiKarcis,
+            'Bahasa' => $Bahasa,
+            'Etnis' => $Etnis,
+            'datatimestamp' => $datatimestamp,
+            'hosnamedata' => $hosnamedata
         ]);
     }
 }

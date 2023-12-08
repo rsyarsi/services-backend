@@ -352,12 +352,21 @@ class bAppointmentService extends Controller {
                 if($koutaPerPoli >= $Max_NonJKN){
                     //  Sudah Tutup Registrasi. 
                     // return $this->sendError("Kuota Dokter : " . $NamaDokter . ", Hari : " .$harindo ." Sudah Penuh, Kuota Maksimal ". $Max_NonJKN . ", No. Antrian Anda Adalah : " .  $Ant . ". Silahkan Pilih tanggal Lain untuk Melakukan Booking/Reservasi kembali.", []);  
-                    return $this->sendError("Kuota Dokter : " . $NamaDokter . ", Hari : " .$harindo ." Sudah Tutup Registrasi. Silahkan Pilih tanggal Lain untuk Melakukan Booking/Reservasi kembali.", []);  
+                     $metadata = array(
+                        'message' => "Kuota Dokter : " . $NamaDokter . ", Hari : " .$harindo ." Sudah Tutup Registrasi. Silahkan Pilih tanggal Lain untuk Melakukan Booking/Reservasi kembali.",
+                        'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
+                    ); 
+                    return  $this->sendErrorNew($metadata,null);
+               
                 }
             }else{
                 if($koutaPerPoli >= $Max_JKN){
                     // return $this->sendError("Kuota Dokter : " . $NamaDokter . ", Hari : " .$harindo ." Sudah Penuh, Kuota Maksimal ". $Max_JKN . ", No. Antrian Anda Adalah : " .  $Ant . ". Silahkan Pilih tanggal Lain untuk Melakukan Booking/Reservasi kembali.", []);  
-                    return $this->sendError("Kuota Dokter : " . $NamaDokter . ", Hari : " .$harindo ." Sudah Tutup Registrasi. Silahkan Pilih tanggal Lain untuk Melakukan Booking/Reservasi kembali.", []);  
+                     $metadata = array(
+                        'message' => "Kuota Dokter : " . $NamaDokter . ", Hari : " .$harindo ." Sudah Tutup Registrasi. Silahkan Pilih tanggal Lain untuk Melakukan Booking/Reservasi kembali.",
+                        'code' => 201, // Set array nama dengan isi kolom nama pada tabel siswa 
+                    ); 
+                    return  $this->sendErrorNew($metadata,null);
                 }
             }
             // END - cek sisa kuota
@@ -368,7 +377,7 @@ class bAppointmentService extends Controller {
              $NamaDokter,$NamaSesion,$idno_urutantrian,
              $fixNoAntrian,$NamaPasien,$tglbookingfix,$nobokingreal,
              $xres,$MrExist,$Company,$kodejenispayment,$NoTlp,$NoHp,$Alamat,$datenowcreate,
-             $noteall,$txEmail,$NoMrfix,$ID_Penjamin,$ID_JadwalPraktek,'');
+             $noteall,$txEmail,$NoMrfix,$ID_Penjamin,$ID_JadwalPraktek,'','');
 
              // INSERT TABEL ANTRIAN
              $this->antrianRepository->insertAntrian($nobokingreal,$IdDokter,$NamaSesion,$idno_urutantrian,$fixNoAntrian,$tglbookingfix,$Company);
@@ -839,16 +848,25 @@ class bAppointmentService extends Controller {
             
             }
             $catatan = '';
+            $FisioterapiFlag = '0';
+            if($IdGrupPerawatan == "17"){
+                $FisioterapiFlag = '1';
+            }else{
+                $FisioterapiFlag = '0';
+            }
                 // // INSERT REGISTRATION
                 $this->visitRepository->addRegistrationRajal($maxVisit->ID,$NoEpisode,$nofixReg,$NamaGrupPerawatan,$NoMrfix,
                                                             $JenisBayar,$IdGrupPerawatan,$IdDokter,$Antrian,$NoAntrianAll,
                                                             $Company,$shift,$TelemedicineIs,$ApmDate,
                                                             $ApmDate,$operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
-                                                            $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek,$catatan);
+                                                            $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek,$catatan,$FisioterapiFlag);
 
                 // //  UPDATE DATANG RESERVASI
                 $this->appointmenRepository->updateDatangAppointment($kodebooking,$nofixReg); 
 
+                // INSERT KE DASHBAORD
+
+                
                 // DATA 
                 $jenispasien = "JKN";
                 

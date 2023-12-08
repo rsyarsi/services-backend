@@ -20,11 +20,23 @@ class UnitController extends Controller
         $aUnitService = new aUnitService($aUnitRepository);
         $getUnitPoliklinik =  $aUnitService->getUnitPoliklinik();
         return $getUnitPoliklinik;
-    }
+    } 
     public function getUnitPoliklinikbyId($id){
         $aUnitRepository = new aUnitRepositoryImpl();
         $aUnitService = new aUnitService($aUnitRepository);
         $getUnitPoliklinik =  $aUnitService->getUnitPoliklinikbyId($id);
+        return $getUnitPoliklinik;
+    }
+    public function getUnit(){
+        $aUnitRepository = new aUnitRepositoryImpl();
+        $aUnitService = new aUnitService($aUnitRepository);
+        $getUnitPoliklinik =  $aUnitService->getUnit();
+        return $getUnitPoliklinik;
+    }
+    public function getUnitbyId($id){
+        $aUnitRepository = new aUnitRepositoryImpl();
+        $aUnitService = new aUnitService($aUnitRepository);
+        $getUnitPoliklinik =  $aUnitService->getUnitbyId($id);
         return $getUnitPoliklinik;
     }
 }

@@ -51,9 +51,21 @@ class UserRepositoryImpl  implements UserRepositoryInterface
     }
     public function getLoginSimrs($request){
         return  DB::connection('sqlsrv2')->table("Employees")
-        ->select('First Name','Last Name','GroupUser' )
+        ->select('First Name','Last Name','GroupUser' ,'JenisAntrian')
         ->where('NoPIN', $request->username)
         ->where('password', $request->password)
+        ->get();
+    }
+    public function getLoginSimrsPin($NoPIN){
+        return  DB::connection('sqlsrv2')->table("Employees")
+        ->select(DB::raw("[First Name] as NamaDepan") ,'Last Name','GroupUser','JenisAntrian' )
+        ->where('TTD_Pegawai', $NoPIN) 
+        ->get();
+    }
+    public function getLoginSimrswithUserNameOnly($username){
+        return  DB::connection('sqlsrv2')->table("Employees")
+        ->select('First Name','Last Name','GroupUser','JenisAntrian' )
+        ->where('NoPIN', $username) 
         ->get();
     }
 }

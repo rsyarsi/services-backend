@@ -367,4 +367,59 @@ trait AutoNumberTrait
 
         return $numberx;
     }
+    public function AntrianAdmission($datenow,$jenisJaminan)
+    {
+        $maxnumberantrian = $this->trsAntrianAdmissionRepository->getMaxAntrianAdmission($datenow,$jenisJaminan);
+        if($maxnumberantrian){
+            $idno_urutantrian = $maxnumberantrian->NoAntrianAll;
+            $idno_urutantrian++;
+         }else{
+            $idno_urutantrian=1;
+         }
+
+        
+        if (strlen($idno_urutantrian) == 1) {
+            $nourutfixMR = "000" . $idno_urutantrian;
+        } else if (strlen($idno_urutantrian) == 2) {
+            $nourutfixMR = "00" . $idno_urutantrian;
+        } else if (strlen($idno_urutantrian) == 3) {
+            $nourutfixMR = "0" . $idno_urutantrian;
+        }
+ 
+        return $nourutfixMR;
+    }
+    public function AntrianKasir($datenow)
+    {
+        $maxnumberantrian = $this->trsAntrianKasirRepository->getMaxAntrianKasir($datenow);
+        if($maxnumberantrian){
+            $idno_urutantrian = $maxnumberantrian->NoAntrianAll;
+            $idno_urutantrian++;
+         }else{
+            $idno_urutantrian=1;
+         } 
+ 
+        return $idno_urutantrian;
+    }
+    public function  SalesResepNumber($request, $getmax)
+    {
+        $AWAL = 'TSR';
+        $ddatedmy = date(
+            "dmY",
+            strtotime($request['TransactionDate'])
+        );
+        $coutn = DB::connection('sqlsrv')
+        ->table("Sales")
+        ->where(
+            'ReffDateTrs',
+            $ddatedmy
+        )->get();
+        $no = 1;
+        if ($coutn->count() > 0) {
+            $numberx =  $AWAL  .  $ddatedmy .   sprintf("%04s", Str::substr($getmax, 11, 4) + 1);
+        } else {
+            $numberx =   $AWAL  . $ddatedmy .  sprintf("%04s", $no);
+        }
+
+        return $numberx;
+    }
 }

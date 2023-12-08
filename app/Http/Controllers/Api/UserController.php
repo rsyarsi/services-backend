@@ -43,4 +43,10 @@ class UserController extends Controller
         $user =  $userService->getLoginSimrs($request);
         return $user;
     }
+    public function getLoginSimrsToken(Request $request){  
+        $userRepository = new UserRepositoryImpl();
+        $userService = new UserService($userRepository);
+        $user =  $userService->getLoginSimrsToken($request);
+        return $user;
+    }
 }

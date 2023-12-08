@@ -26,7 +26,7 @@ class aStokRepositoryImpl implements aStokRepositoryInterface
             'Layanan' => $Unit
         ]);
     }
-    public function addBukuStok($request, $key)
+    public function addBukuStok($request, $key,$nilaiHppFix)
     {
         $qtystok = $key['QtyDelivery'] * $key['KonversiQty'];
         return  DB::connection('sqlsrv')->table("BukuStoks")->insert([
@@ -37,12 +37,13 @@ class aStokRepositoryImpl implements aStokRepositoryInterface
             'ProductName' => $key['ProductName'],
             'Satuan' => $key['Satuan_Konversi'],
             'QtyIn' => $qtystok ,
-            'Hpp' => $key['Hpp'],
-            'PersediaanIn' => $key['Hpp']*$qtystok ,
+            'QtySisa' => $qtystok ,
+            'Hpp' => $nilaiHppFix,
+            'PersediaanIn' => $nilaiHppFix*$qtystok ,
             'TransactionCodeReff' => $request->TransactionCode,
             'TransactionCodeReff2' => 'DO',
             'Status' => '1',
-            'ExpiredDate' => $request->ExpiredDate,
+            'ExpiredDate' => $key['ExpiredDate'],
             'DeliveryCode' => $request->TransactionCode,
             'Unit' => $request->UnitCode,
             'BatchNumber' => $key['NoBatch']
@@ -131,7 +132,13 @@ class aStokRepositoryImpl implements aStokRepositoryInterface
         ->where('Layanan', $unit)
         ->get();
     }
-    
+    public function getStokBarangbyUnitNameLike($request)
+    {
+        return  DB::connection('sqlsrv')
+            ->table("v_stok") 
+            ->where('Layanan',$request->unit)
+            ->where('NamaBarang', 'like', '%' . $request->name . '%')->get();
+    }
     public function cekStokbyIDBarangOnly($id, $request)
     {
         return  DB::connection('sqlsrv')->table("v_stok")
@@ -259,11 +266,11 @@ class aStokRepositoryImpl implements aStokRepositoryInterface
             //         ->first()
             // );
     }
-    public function cekBukuByTransactionandCodeProduct($id, $request)
+    public function cekBukuByTransactionandCodeProduct($id, $request,$typetrsReff)
     {
         return  DB::connection('sqlsrv')->table("BukuStoks")
         ->where('ProductCode', $id)
-        ->where('TransactionCodeReff2', 'CM')
+        ->where('TransactionCodeReff2', $typetrsReff)
         ->where('TransactionCode', $request->TransactionCode)
         ->get();
     }
@@ -281,4 +288,5 @@ class aStokRepositoryImpl implements aStokRepositoryInterface
             ->orderBy('DeliveryCode','asc')
             ->get();
     }
+    
 }

@@ -53,7 +53,7 @@ class aUnitService extends Controller
 
             if ($count > 0) {
                 $data = $this->aUnitRepository->getUnitPoliklinikbyId($id)->first();
-                return $this->sendResponse($data, "Data User ditemukan.");
+                return $this->sendResponse($data, "Data Poliklinik ditemukan.");
             } else {
                 return $this->sendError("Data Unit Not Found.", []);
             }
@@ -62,5 +62,36 @@ class aUnitService extends Controller
             return $this->sendError('Data Gagal Di Tampilkan !', $e->getMessage());
         }
     }
-    
+    public function getUnit()
+    {
+        try {   
+            $count = $this->aUnitRepository->getUnit()->count();
+            if ($count > 0) {
+                $data = $this->aUnitRepository->getUnit();
+                return $this->sendResponse($data, "Data Unit ditemukan.");
+            } else {
+                return $this->sendError("Data Unit Not Found.", []);
+            }
+        }catch (Exception $e) { 
+            Log::info($e->getMessage());
+            return $this->sendError('Data Gagal Di Tampilkan !', $e->getMessage());
+        }
+    }
+    public function getUnitbyId($id)
+    {
+        try {   
+            // validator 
+            $count = $this->aUnitRepository->getUnitbyId($id)->count();
+
+            if ($count > 0) {
+                $data = $this->aUnitRepository->getUnitbyId($id)->first();
+                return $this->sendResponse($data, "Data Unit ditemukan.");
+            } else {
+                return $this->sendError("Data Unit Not Found.", []);
+            }
+        }catch (Exception $e) { 
+            Log::info($e->getMessage());
+            return $this->sendError('Data Gagal Di Tampilkan !', $e->getMessage());
+        }
+    }
 }

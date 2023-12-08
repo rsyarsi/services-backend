@@ -17,6 +17,6 @@ interface aBarangRepositoryInterface
     public function deleteBarangFormularium($request);
     public function getBarangbyFormulariums($id);
     public function getBarangbyNameLike($request);
-    public function editHPPBarang($request);
+    public function editHPPBarang($request,$nilaiHppFix);
     
 }

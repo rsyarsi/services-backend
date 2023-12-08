@@ -99,4 +99,18 @@ class aTrsRadiologiRepositoryImpl implements aTrsRadiologiRepositoryInterface
         [$request->tglPeriodeBerobatAwal,$request->tglPeriodeBerobatAkhir])  
         ->get();
     }
+    public function viewHasilRadiologybyAccnumber($request)
+    {
+        return  DB::connection('sqlsrv8')->table("REPORT_RIS") 
+        ->select( 'ACCESSION_NO','CREATE_DTTM','REPORT_STAT','PATIENT_ID','CREATOR_NAME','REPORT_TEXT','CONCLUSION','APPROVER_NAME','APPROVE_DTTM' )
+        ->where('ACCESSION_NO',$request->AccNumber)  
+        ->where('STUDY_REASON','<>',"BATAL")  
+        ->get();
+    }
+    public function viewOrderRadbyNoReg($request)
+    {
+        return  DB::connection('sqlsrv8')->table("View_Order_Radiologi_New") 
+        ->where('NOREGISTRASI',$request->NoRegistrasi)  
+        ->get();
+    }
 }

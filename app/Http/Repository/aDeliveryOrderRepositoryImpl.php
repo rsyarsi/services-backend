@@ -25,7 +25,7 @@ class aDeliveryOrderRepositoryImpl implements aDeliveryOrderRepositoryInterface
             'ReffDateTrs' => date("dmY", strtotime($request->DeliveryOrderDate))
         ]);
     }
-    public function addDeliveryOrderDetil($key, $kodePo)
+    public function addDeliveryOrderDetil($key, $kodePo,$nilaiHppFix)
     {
         return  DB::connection('sqlsrv')->table("DeliveryOrderDetails")->insert([
             'TransactionCode' => $kodePo,
@@ -46,7 +46,7 @@ class aDeliveryOrderRepositoryImpl implements aDeliveryOrderRepositoryInterface
             'TaxRpTTL' => $key['TaxRpTTL'],
             'TotalDeliveryOrder' => $key['TotalDeliveryOrder'],
             'ExpiredDate' => $key['ExpiredDate'],
-            'Hpp' => $key['Hpp'],
+            'Hpp' => $nilaiHppFix,
             'HppTax' => $key['HppTax'],
             'KonversiQty' => $key['KonversiQty'],
             'Konversi_QtyTotal' => $key['Konversi_QtyTotal'],
@@ -95,7 +95,7 @@ class aDeliveryOrderRepositoryImpl implements aDeliveryOrderRepositoryInterface
         ->where('ProductCode', $ProductCode)
         ->get(); 
     }
-    public function updateDeliveryOrdeDetails($request,$key)
+    public function updateDeliveryOrdeDetails($request,$key,$nilaiHppFix)
     {
         $updatesatuan =  DB::connection('sqlsrv')->table('DeliveryOrderDetails')
         ->where('TransactionCode', $request->TransactionCode)
@@ -118,7 +118,7 @@ class aDeliveryOrderRepositoryImpl implements aDeliveryOrderRepositoryInterface
                 'TotalDeliveryOrder' => $key['TotalDeliveryOrder'],
                 'ExpiredDate' => $key['ExpiredDate'],
                 'NoBatch' => $key['NoBatch'],
-                'Hpp' => $key['Hpp'],
+                'Hpp' => $nilaiHppFix,
                 'HppTax' => $key['HppTax'],
                 'KonversiQty' => $key['KonversiQty'],
                 'Konversi_QtyTotal' => $key['Konversi_QtyTotal'],

@@ -50,4 +50,22 @@ class RadiologiController extends Controller
         $user =  $userService->viewOrderRadbyMedrecPeriode($request);
         return $user; 
     }
+    public function viewHasilRadiology(Request $request){
+        $tarif = new bTarifRepositoryImpl(); 
+        $visitRepository = new bVisitRepositoryImpl(); 
+        $trsRadiologi = new aTrsRadiologiRepositoryImpl(); 
+        $doctorRepository = new aDoctorRepositoryImpl(); 
+        $userService = new bTrsRadiologiService($tarif,$visitRepository,$trsRadiologi,$doctorRepository);
+        $user =  $userService->viewHasilRadiology($request);
+        return $user; 
+    }
+    public function viewOrderRadbyNoReg(Request $request){
+        $tarif = new bTarifRepositoryImpl(); 
+        $visitRepository = new bVisitRepositoryImpl(); 
+        $trsRadiologi = new aTrsRadiologiRepositoryImpl(); 
+        $doctorRepository = new aDoctorRepositoryImpl(); 
+        $userService = new bTrsRadiologiService($tarif,$visitRepository,$trsRadiologi,$doctorRepository);
+        $user =  $userService->viewOrderRadbyNoReg($request);
+        return $user; 
+    }
 }

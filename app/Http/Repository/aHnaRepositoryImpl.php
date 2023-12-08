@@ -5,52 +5,88 @@ use Illuminate\Support\Facades\DB;
 
 class aHnaRepositoryImpl implements aHnaRepositoryInterface
 {
-    public function addHna($request, $key)
+    public function addHna($request, $key,$nilaiHnaFix,$hnaTaxDiskon)
     {
-        $hna = ($key['Price'] / $key['Konversi_QtyTotal']);
-        $hnaTax = $hna + $key['TaxRp'];
-        $hnaTaxDiskon = ($hna + $key['DiscountRp']) - $key['TaxRp'];
         $dateStart = date('Y-m-d', strtotime($request->TransactionDate . ' + 1 days'));
         return  DB::connection('sqlsrv')->table("Hnas")->insert([
             'DeliveryCode' => $request->TransactionCode,
             'DeliveryDate' => $request->TransactionDate,
             'ProductCode' => $key['ProductCode'],
-            'NominalHna' => $hnaTax,
+            'NominalHna' => $nilaiHnaFix,
             'NominalHnaMinDiskon' => $hnaTaxDiskon,
             'UserCreate' => $request->UserCreate,
             'StartDate' => $dateStart,
             'ExpiredDate' => "4000-01-01"
         ]);
     }
-    public function updateHna($request, $key)
-    {
-        $hna = ($key['Price'] / $key['Konversi_QtyTotal']);
-        $hnaTax = $hna + $key['TaxRp'];
-        $hnaTaxDiskon =  $hna - $key['TaxRp'];
+    public function updateHna($request, $key,$nilaiHnaFix,$hnaTaxDiskon)
+    { 
         $dateStart = date('Y-m-d', strtotime($request->TransactionDate . ' + 1 days'));
         return DB::connection('sqlsrv')->table('Hnas')
         ->where('DeliveryCode', $request->TransactionCode)
         ->where('ProductCode', $key['ProductCode'])
             ->update(['DeliveryDate' => $request->TransactionDate,
             'ProductCode' => $key['ProductCode'],
-            'NominalHna' => $hnaTax,
+            'NominalHna' => $nilaiHnaFix,
             'NominalHnaMinDiskon' => $hnaTaxDiskon,
             'UserCreate' => $request->UserCreate,
             'StartDate' => $dateStart,
             'ExpiredDate' => "4000-01-01"
             ]);
     }
-    public function getHnabyDOIdbarang($request,$key)
-    {
-        return  DB::connection('sqlsrv')->table("Hnas")
-        ->where('DeliveryCode', $key['ProductCode'])
-        ->where('ProductCode', $request->UnitCode)
-        ->get();
+    // public function getHnabyDOIdbarang($request,$key)
+    // {
+    //     return  DB::connection('sqlsrv')->table("Hnas")
+    //     ->where('DeliveryCode', $key['ProductCode'])
+    //     ->where('ProductCode', $request->ProductCode)
+    //     ->get();
+    // }
+    // public function getHnabyIdbarang($request)
+    // {
+    //     return  DB::connection('sqlsrv')->table("Hnas") 
+    //     ->where('ProductCode', $request->ProductCode)
+    //         ->get();
+    // }
+    public function getHpp($key,$request){
+        return  DB::connection('sqlsrv')->table("hpps") 
+        ->select('NominalHpp')
+        ->where('ProductCode', $key['ProductCode'])
+        ->where('DeliveryCode','<>', $request->TransactionCode)
+        ->orderBy('id','desc')
+        ->get()->chunk(1);
     }
-    public function getHnabyIdbarang($request)
+    public function getHnaHigh($key,$request){
+        return  DB::connection('sqlsrv')->table("Hnas") 
+        ->where('ProductCode', $key['ProductCode'])
+        ->where('DeliveryCode','<>', $request->TransactionCode)
+        ->orderBy('NominalHna','desc')
+        ->get()->chunk(1);
+    }
+    public function getHnaHighPeriodik($ProductCode,$tgl)
     {
         return  DB::connection('sqlsrv')->table("Hnas") 
-        ->where('ProductCode', $request->UnitCode)
-            ->get();
+        ->where('ProductCode',$ProductCode) 
+        ->whereRaw("'$tgl' BETWEEN StartDate AND ExpiredDate")
+        ->orderBy('NominalHna','desc')
+        ->get()->chunk(1);
     }
+    public function getHppAverage($key){
+        return  DB::connection('sqlsrv')->table("hpps") 
+        ->select('NominalHpp')
+        ->where('ProductCode', $key['ProductCode'])
+        ->orderBy('id','desc')
+        ->get()->chunk(1);
+    }
+    public function addHpp($request,$key,$nilaiHppFix){
+        return  DB::connection('sqlsrv')->table("hpps")->insert([
+            'DeliveryCode' =>  $request->TransactionCode,  
+            'NominalHargabeli' =>  $key['Price'],
+            'ProductCode' =>  $key['ProductCode'],
+            'NominalDiskon' =>  $key['DiscountRp'],
+            'DeliveryDate' => $request->TransactionDate,
+            'NominalHpp' => $nilaiHppFix,
+            'UserCreate' =>  $request->UserCreate, 
+        ]);
+    }
+    
 }

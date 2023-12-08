@@ -3,6 +3,6 @@ namespace App\Http\Repository;
 
 interface aHnaRepositoryInterface
 {
-    public function addHna($request, $key);
-    public function getHnabyDOIdbarang($request, $key);
+    public function addHna($request, $key,$nilaiHnaFix,$hnaTaxDiskon);
+    // public function getHnabyDOIdbarang($request, $key);
 }

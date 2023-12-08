@@ -18,7 +18,7 @@ use App\Http\Repository\bAppointmentRepositoryImpl;
 use App\Http\Repository\bKamarOperasiRepositoryImpl;
 use App\Http\Repository\bMedicalRecordRepositoryImpl;
 use App\Http\Repository\aScheduleDoctorRepositoryImpl;
-
+date_default_timezone_set("Asia/Jakarta");
 class bVisitService extends Controller {
     use AutoNumberTrait;
     private $visitRepository;
@@ -108,6 +108,8 @@ class bVisitService extends Controller {
         try{
             DB::connection('sqlsrv3')->beginTransaction();
             $datenow = Carbon::now()->toDateString();
+            $timenow = Carbon::now()->toTimeString();
+            
             // validasi 
             if ($request->NoMR == "") {  
                 return $this->sendError("No. Medical Record Kosong.", []);
@@ -341,22 +343,29 @@ class bVisitService extends Controller {
                 }
                 
             // INSERT REGISTRATION
+            $FisioterapiFlag = '0';
+            if($IdGrupPerawatan == "17"){
+                $FisioterapiFlag = '1';
+            }else{
+                $FisioterapiFlag = '0';
+            }
+           
             if($CaraBayar == "2"){
                 $this->visitRepository->addRegistrationRajalAsuransi($maxVisit->ID,$NoEpisode,$nofixReg,$NamaGrupPerawatan,$request->NoMR,
                 $request->CaraBayar,$IdGrupPerawatan,$IdDokter,$idno_urutantrian,$NoAntrianAll,
-                $request->Company,$NamaSesion,$TelemedicineIs,$request->TglRegistrasi,
-                $request->TglRegistrasi,$operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
-                $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek,$Catatan);
+                $request->Company,$NamaSesion,$TelemedicineIs,$request->TglRegistrasi.' '.$timenow,
+                $request->TglRegistrasi.' '.$timenow,$operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
+                $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek,$Catatan,$FisioterapiFlag);
             }else{
                 $this->visitRepository->addRegistrationRajal($maxVisit->ID,$NoEpisode,$nofixReg,$NamaGrupPerawatan,$request->NoMR,
                 $request->CaraBayar,$IdGrupPerawatan,$IdDokter,$idno_urutantrian,$NoAntrianAll,
-                $request->Company,$NamaSesion,$TelemedicineIs,$request->TglRegistrasi,
-                $request->TglRegistrasi,$operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
-                $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek,$Catatan);
+                $request->Company,$NamaSesion,$TelemedicineIs,$request->TglRegistrasi.' '.$timenow,
+                $request->TglRegistrasi.' '.$timenow,$operator,$CaraBayar,$Perusahaan,$idCaraMasuk,
+                $idAdmin,$Tipe_Registrasi,$ID_JadwalPraktek,$Catatan,$FisioterapiFlag);
             }
            
             // INSERT TABEL ANTRIAN
-            $this->antrianRepository->insertAntrian($nofixReg,$IdDokter,$NamaSesion,$idno_urutantrian,$NoAntrianAll,$request->TglRegistrasi,$request->Company);
+            $this->antrianRepository->insertAntrian($nofixReg,$IdDokter,$NamaSesion,$idno_urutantrian,$NoAntrianAll,$request->TglRegistrasi.' '.$timenow,$request->Company);
             
             $response = array(
                 'NoEpisode' => $NoEpisode, // Set array status dengan success     
@@ -364,7 +373,9 @@ class bVisitService extends Controller {
                 'NamaGrupPerawatan' => $NamaGrupPerawatan, // Set array status dengan success     
                 'NOMR' => $request->NoMR, // Set array status dengan success     
                 'Antrian' => $idno_urutantrian, // Set array status dengan success     
-                'NoAntrianAll' =>  $NoAntrianAll, // Set array status dengan success     
+                'NoAntrianAll' =>  $NoAntrianAll, // Set array status dengan success   
+                'TglRegistrasi' => $request->TglRegistrasi, // Set array status dengan success  
+                'JamRegistrasi' =>  $timenow // Set array status dengan success  
             );
 
             DB::connection('sqlsrv3')->commit();
@@ -422,6 +433,13 @@ class bVisitService extends Controller {
     }
     public function insertSEP(Request $request)
     {
+        
+        if ($request->NO_SEP == "") {  
+            return $this->sendError("No. SEP Kosong.", []);
+        }
+        if ($request->NO_REGISTRASI == "") {  
+            return $this->sendError("No. Registration Kosong.", []);
+        }
         try{
             DB::connection('sqlsrv3')->beginTransaction(); 
             
@@ -469,5 +487,15 @@ class bVisitService extends Controller {
             return $this->sendError($e->getMessage(), []); 
 
         }  
+    }
+    public function getRegistrationMCUbyDate(Request $request){
+
+        $data = $this->visitRepository->getRegistrationMCUbyDate($request);
+        
+        if ($data->count() > 0) { 
+            return $this->sendResponse($data, "Data ditemukan.");
+        } else {
+            return $this->sendError("Data Not Found.", []);
+        }
     }
 }

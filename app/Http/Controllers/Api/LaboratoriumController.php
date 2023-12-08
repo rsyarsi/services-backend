@@ -58,4 +58,23 @@ class LaboratoriumController extends Controller
         $user =  $userService->deleteOrderLaboratorium($request);
         return $user; 
     }
+    public function viewHasilLaboratorium(Request $request)
+    {
+        $tarif = new bTarifRepositoryImpl(); 
+        $visitRepository = new bVisitRepositoryImpl(); 
+        $trsLaboratorium = new aTrsLaboratoriumRepositoryImpl(); 
+        $doctorRepository = new aDoctorRepositoryImpl(); 
+        $userService = new bTrsLaboratoriumService($tarif,$visitRepository,$trsLaboratorium,$doctorRepository);
+        $user =  $userService->viewHasilLaboratorium($request);
+        return $user; 
+    }
+    public function viewOrderLabbyNoReg(Request $request){
+        $tarif = new bTarifRepositoryImpl(); 
+        $visitRepository = new bVisitRepositoryImpl(); 
+        $trsLaboratorium = new aTrsLaboratoriumRepositoryImpl(); 
+        $doctorRepository = new aDoctorRepositoryImpl(); 
+        $userService = new bTrsLaboratoriumService($tarif,$visitRepository,$trsLaboratorium,$doctorRepository);
+        $user =  $userService->viewOrderLabbyNoReg($request);
+        return $user; 
+    }
 }

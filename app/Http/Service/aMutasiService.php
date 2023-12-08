@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller; 
 use App\Http\Repository\aStokRepositoryImpl;
 use App\Http\Repository\aBarangRepositoryImpl;
+use App\Http\Repository\aHnaRepositoryImpl;
 use App\Http\Repository\aMutasiRepositoryImpl;
 use App\Http\Repository\aSupplierRepositoryImpl;
 use App\Http\Repository\aMasterUnitRepositoryImpl;
@@ -27,6 +28,8 @@ class aMutasiService extends Controller
     private $aOrderMutasiRepository;
     private $aMasterUnitRepository;
     private $aMutasiRepository;
+    private $ahnaRepository;
+
 
     public function __construct(
         aBarangRepositoryImpl $aBarangRepository,
@@ -35,7 +38,8 @@ class aMutasiService extends Controller
         aStokRepositoryImpl $aStokRepository,
         aOrderMutasiRepositoryImpl $aOrderMutasiRepository,
         aMasterUnitRepositoryImpl $aMasterUnitRepository,
-        aMutasiRepositoryImpl $aMutasiRepository
+        aMutasiRepositoryImpl $aMutasiRepository,
+        aHnaRepositoryImpl $ahnaRepository
     ) {
         $this->aBarangRepository = $aBarangRepository;
         $this->asupplierRepository = $asupplierRepository;
@@ -44,6 +48,7 @@ class aMutasiService extends Controller
         $this->aOrderMutasiRepository = $aOrderMutasiRepository;
         $this->aMasterUnitRepository = $aMasterUnitRepository;
         $this->aMutasiRepository = $aMutasiRepository;
+        $this->ahnaRepository = $ahnaRepository;
     }
     public function addMutasi(Request $request)
     {
@@ -55,8 +60,7 @@ class aMutasiService extends Controller
             "UnitOrder" => "required",
             "Notes" => "required",
             "JenisMutasi" => "required",
-            "JenisStok" => "required",
-            "TransactionOrderCode" => "required"
+            "JenisStok" => "required" 
         ]);
         try {
             // Db Transaction
@@ -71,9 +75,12 @@ class aMutasiService extends Controller
             }
 
             // cek kode PR udah ada belom
-            if ($this->aOrderMutasiRepository->getOrderMutasibyID($request->TransactionOrderCode)->count() < 1) {
-                return $this->sendError('Order Mutasi Code Not Found !', []);
-            }
+            if($request->TransactionOrderCode <> ""){
+                if ($this->aOrderMutasiRepository->getOrderMutasibyID($request->TransactionOrderCode)->count() < 1) {
+                    return $this->sendError('Order Mutasi Code Not Found !', []);
+                }
+            } 
+            
 
             $getmax = $this->aMutasiRepository->getMaxCode($request);
             if ($getmax->count() > 0) {
@@ -168,12 +175,16 @@ class aMutasiService extends Controller
 
             foreach ($request->Items as $key) {
                 $getdatadetilmutasi = $this->aMutasiRepository->getMutasiDetailbyIDBarang($request,$key);
-              
+               // get Hpp Average 
+               $getHppBarang = $this->ahnaRepository->getHppAverage($key)->first()->first();
+               $xhpp = $getHppBarang->NominalHpp;
+               // get Hpp Average
+
                 if($getdatadetilmutasi->count() < 1){
                     if ($key['Konversi_QtyTotal'] > 0) {
-                        $this->aMutasiRepository->addMutasiDetail($request, $key); 
+                        $this->aMutasiRepository->addMutasiDetail($request, $key,$xhpp); 
                     }
-                }else{
+                }else{  
                    $showData = $getdatadetilmutasi->first();
                     $mtSatuan = $showData->Satuan;
                     $mtSatuan_Konversi = $showData->Satuan_Konversi;
@@ -182,7 +193,7 @@ class aMutasiService extends Controller
                     $mtQtyMutasi = $showData->QtyMutasi;
                     $mtQtyOrder = $showData->QtyOrder;
                     $mtQtySisa = $showData->QtySisa; 
-
+ 
                     if($mtKonversi_QtyTotal <> $key['Konversi_QtyTotal']){ // Dirubah jika Qty nya ada Perubahan Aja
                        $goQtyMutasiSisaheaderBefore = $mtQtyMutasi + $key['QtyMutasi'];
                        $goQtyMutasiSisaheaderAfter = $goQtyMutasiSisaheaderBefore - $key['QtyMutasi'];
@@ -190,8 +201,8 @@ class aMutasiService extends Controller
                        $goQtyMutasiSisaKovenrsiBefore = $mtKonversi_QtyTotal + $key['Konversi_QtyTotal'];
                        $goQtyMutasiSisaKovenrsiAfter = $goQtyMutasiSisaKovenrsiBefore - $key['Konversi_QtyTotal'];
 
-                        //$this->aMutasiRepository->editMutasiDetailbyIdBarang($request,$key);
-                        //$this->aOrderMutasiRepository->updateQtyOrderMutasi2($request,$key, $goQtyMutasiSisaheaderAfter);
+                        $this->aMutasiRepository->editMutasiDetailbyIdBarang($request,$key,$xhpp);
+                        $this->aOrderMutasiRepository->updateQtyOrderMutasi2($request,$key, $goQtyMutasiSisaheaderAfter);
 
                         if ($request->JenisStok == "STOK") {
                             // replace stok ke awal
@@ -211,13 +222,14 @@ class aMutasiService extends Controller
                     } 
                 }
                 // delete tabel buku
+                 
                         // CARI DO TERATAS YANG MASIH ADA QTY
                         first:
                         $getStokFirst = $this->aStokRepository->getStokExpiredFirst($request, $key);
 
                         //return $getStokFirst;
                         $DeliveryCodex = $getStokFirst->DeliveryCode;
-                        $xhpp = $getStokFirst->Hpp;
+                        
                         $qtyBuku = $getStokFirst->x;
                         $ExpiredDate = $getStokFirst->ExpiredDate;
                         $BatchNumber = $getStokFirst->BatchNumber;
