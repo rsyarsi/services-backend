@@ -498,4 +498,23 @@ class bVisitService extends Controller {
             return $this->sendError("Data Not Found.", []);
         }
     }
+    //coass
+    public function getRegistrationRajalActiveCoas(Request $request){
+        $data = $this->visitRepository->getRegistrationRajalActiveCoas($request);
+        
+        if ($data->count() > 0) { 
+            return $this->sendResponse($data, "Data ditemukan.");
+        } else {
+            return $this->sendError("Data Not Found.", []);
+        }
+    }
+    public function getRegistrationRajalHistoryCoas(Request $request){
+        $data = $this->visitRepository->getRegistrationRajalHistoryCoas($request);
+        
+        if ($data->count() > 0) { 
+            return $this->sendResponse($data, "Data ditemukan.");
+        } else {
+            return $this->sendError("Data Not Found.", []);
+        }
+    }
 }

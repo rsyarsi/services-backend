@@ -330,6 +330,10 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("create/sep", [VisitController::class, "insertSEP"]);
         Route::post("create/TaskBPJS", [VisitController::class, "addTaskBPJS"]);
 
+        //coas
+        Route::post("getRegistrationRajalActiveCoas", [VisitController::class, "getRegistrationRajalActiveCoas"]); 
+        Route::post("getRegistrationRajalHistoryCoas", [VisitController::class, "getRegistrationRajalHistoryCoas"]);
+
     });  
     Route::group(['prefix' => 'medicalrecords/'], function () {
         Route::post("create", [MedicalRecord::class, "createNonWalkin"]);

@@ -235,7 +235,14 @@ class bMedicalRecordService extends Controller {
             $DOB = date('Ymd', strtotime($request->tanggallahir));
             $noMRRad = $this->MedrecRadiologiNumber($NoMrfix);
             $TRIGGER_DTTM = Carbon::now()->format('YmdHis'); 
-            $this->medrecRepository->patientwlRadiologi($request,$Medical_JKel_R,$DOB,$noMRRad, $TRIGGER_DTTM);
+
+            //cek jika sudah ada di patientwl
+            if ($this->medrecRepository->getpatientwlRadiologibyPatientID($request->NoResep)->count() < 1) {
+                $event_type = 'ADT^A04';
+            }else{
+                $event_type = 'ADT^A08';
+            }
+            $this->medrecRepository->patientwlRadiologi($request,$Medical_JKel_R,$DOB,$noMRRad, $TRIGGER_DTTM,$event_type);
             // 
             $this->medrecRepository->create($request, $aktif,$jnsid,$hidden_tptlahir,$NoMrfix,$nourutfixMR,$autonumber);
             DB::connection('sqlsrv2')->commit();
@@ -476,7 +483,13 @@ class bMedicalRecordService extends Controller {
             $DOB = date('Ymd', strtotime($request->tanggallahir));
             $noMRRad = $this->MedrecRadiologiNumber($NoMrfix);
             $TRIGGER_DTTM = Carbon::now()->format('YmdHis'); 
-            $this->medrecRepository->patientwlRadiologi($request,$Medical_JKel_R,$DOB,$noMRRad, $TRIGGER_DTTM);
+           //cek jika sudah ada di patientwl
+            if ($this->medrecRepository->getpatientwlRadiologibyPatientID($request->NoResep)->count() < 1) {
+                $event_type = 'ADT^A04';
+            }else{
+                $event_type = 'ADT^A08';
+            }
+            $this->medrecRepository->patientwlRadiologi($request,$Medical_JKel_R,$DOB,$noMRRad, $TRIGGER_DTTM,$event_type);
             // 
             $this->medrecRepository->createWalkin($request, $aktif,$jnsid,$hidden_tptlahir,$NoMrfix,$nourutfixMR,$autonumber);
             DB::connection('sqlsrv2')->commit();
@@ -579,7 +592,13 @@ class bMedicalRecordService extends Controller {
             $DOB = date('Ymd', strtotime($request->tanggallahir));
             $noMRRad = $this->MedrecRadiologiNumber($NoMrfix);
             $TRIGGER_DTTM = Carbon::now()->format('YmdHis'); 
-            $this->medrecRepository->patientwlRadiologi($request,$Medical_JKel_R,$DOB,$noMRRad, $TRIGGER_DTTM);
+            //cek jika sudah ada di patientwl
+            if ($this->medrecRepository->getpatientwlRadiologibyPatientID($noMRRad)->count() < 1) {
+                $event_type = 'ADT^A04';
+            }else{
+                $event_type = 'ADT^A08';
+            }
+            $this->medrecRepository->patientwlRadiologi($request,$Medical_JKel_R,$DOB,$noMRRad, $TRIGGER_DTTM,$event_type);
             // 
             $this->medrecRepository->createNonWalkin($request, $aktif,$NoMrfix,$nourutfixMR,$autonumber);
        

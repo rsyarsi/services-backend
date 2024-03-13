@@ -27,8 +27,8 @@ class bMedicalRecordRepositoryImpl implements bMedicalRecordRepositoryInterface
             'Mobile Phone' => $request->nohp,
             'Aktif' => '1' 
         ]);
-    } 
-    public function patientwlRadiologi($request,$jeniskelamin,$birthday,$patientId,$TRIGGER_DTTM)
+    }  
+    public function patientwlRadiologi($request,$jeniskelamin,$birthday,$patientId,$TRIGGER_DTTM,$event_type)
     {
         return  DB::connection('sqlsrv8')->table("PATIENTWL")->insert([
             'PATIENT_NAME' => $request->nama,
@@ -38,7 +38,7 @@ class bMedicalRecordRepositoryImpl implements bMedicalRecordRepositoryInterface
             'PATIENT_BIRTH_DTTM' => $birthday,
             'ADDRESS' => $request->alamat,
             'PATIENT_ID' =>  $patientId,
-            'EVENT_TYPE' => 'ADT^A04' 
+            'EVENT_TYPE' => $event_type
         ]);
     }
     public function patientwlLaboratorium($request)
@@ -97,7 +97,7 @@ class bMedicalRecordRepositoryImpl implements bMedicalRecordRepositoryInterface
         ->select( 'PatientName',  'Date_of_birth','Gander','Marital_status',
         'Address' ,DB::raw('[E-mail Address]  AS Email') , 'ID_Card_number',DB::raw('[Home Phone]  AS tlp'),
         DB::raw('[Mobile Phone]  AS Hp'),
-        'NoMR')
+        'NoMR','kelurahan')
         ->where('ID_Card_number', $nik)
         ->where('Aktif', '1')
         ->orderBy('ID', 'desc')
@@ -181,5 +181,10 @@ class bMedicalRecordRepositoryImpl implements bMedicalRecordRepositoryInterface
             ]);
         return $updatesatuan;
     }
-   
+    public function getpatientwlRadiologibyPatientID($noMRRad){
+        $query = DB::connection('sqlsrv8')->table("PATIENTWL")
+        ->where('PATIENT_ID',$noMRRad)
+        ->get();
+        return $query;
+    }
 }

@@ -102,7 +102,7 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
         'Address',   'IdUnit',  DB::raw("[Visit Date] AS Visit_Date"), 'NamaUnit',   'IdDokter', 'NamaDokter','NoMR','NoEpisode','NoRegistrasi',
         DB::raw("case when TipePasien='1' THEN 'PRIBADI' WHEN TipePasien='2' THEN 'ASURANSI' WHEN TipePasien='5' THEN 'PERUSAHAAN' END 
         AS  PatientType"),'StatusID','MobilePhone','NoAntrianAll'
-        ,'Kelurahan','Kecamatan','kabupatenNama','ProvinsiNama')
+        ,'Kelurahan','Kecamatan','kabupatenNama','ProvinsiNama','pekerjaan',DB::raw("datediff(year, DateOfBirth, getdate()) AS Usia"),'Education','Etnis')
         ->where('NoRegistrasi', $NoRegistrasi) 
         ->orderBy('Visit Date', 'desc')
         ->get();
@@ -385,6 +385,38 @@ class bVisitRepositoryImpl implements bVisitRepositoryInterface
             'datatimestamp' => $datatimestamp,
             'hosnamedata' => $hosnamedata
         ]);
+    }
+    // coas
+    public function getRegistrationRajalActiveCoas($request)
+    {
+        //a
+        return  DB::connection('sqlsrv6')->table("dataRWJ")
+        ->select('NoAntrianAll',  'NamaJaminan','PatientName',DB::raw("CASE WHEN Sex='L' then 'M' ELSE 'F' END AS Gander") ,
+        DB::raw("replace(CONVERT(VARCHAR(11), DateOfBirth, 111), '/','-') as Date_of_birth") , 
+        'Address',   'IdUnit', DB::raw("[Visit Date] AS Visit_Date"), 'NamaUnit',   'IdDokter', 'NamaDokter','NoMR','NoEpisode','NoRegistrasi',
+        DB::raw("case when TipePasien='1' THEN 'PRIBADI' WHEN TipePasien='2' THEN 'ASURANSI' WHEN TipePasien='5' THEN 'PERUSAHAAN' END 
+        AS  PatientType"),'StatusID')
+        ->whereIn('IdUnit',  array(8,33,46,58,59,60,137,145))
+        ->whereBetween(DB::raw("replace(CONVERT(VARCHAR(11), [Visit Date], 111), '/','-')"),
+        [$request->tglPeriodeBerobatAwal,$request->tglPeriodeBerobatAkhir])  
+        ->orderBy('Visit Date', 'desc')
+        ->get();
+    }
+    public function getRegistrationRajalHistoryCoas($request)
+    {
+        //a
+        return  DB::connection('sqlsrv6')->table("dataRWJ")
+        ->select('NoAntrianAll', 'NamaJaminan','StatusID','PatientName',DB::raw("CASE WHEN Sex='L' then 'M' ELSE 'F' END AS Gander") ,
+        DB::raw("replace(CONVERT(VARCHAR(11), DateOfBirth, 111), '/','-') as Date_of_birth") , 
+        'Address',   'IdUnit',  DB::raw("[Visit Date] AS Visit_Date"), 'NamaUnit',   'IdDokter', 'NamaDokter','NoMR','NoEpisode','NoRegistrasi',
+        DB::raw("case when TipePasien='1' THEN 'PRIBADI' WHEN TipePasien='2' THEN 'ASURANSI' WHEN TipePasien='5' THEN 'PERUSAHAAN' END 
+        AS  PatientType"),'StatusID')
+        ->whereIn('IdUnit',  array(8,33,46,58,59,60,137,145))
+        ->where('StatusID','4')
+        ->whereBetween(DB::raw("replace(CONVERT(VARCHAR(11), [Visit Date], 111), '/','-')"),
+        [$request->tglPeriodeBerobatAwal,$request->tglPeriodeBerobatAkhir])  
+        ->orderBy('Visit Date', 'desc')
+        ->get();
     }
 }
 

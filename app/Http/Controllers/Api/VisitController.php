@@ -213,4 +213,35 @@ class VisitController extends Controller
         $user =  $userService->getRegistrationMCUbyDate($request);
         return $user; 
     }
+    //coass
+    public function getRegistrationRajalActiveCoas(Request $request){
+        $userRepository = new bKamarOperasiRepositoryImpl();
+        $medrecRepository = new bMedicalRecordRepositoryImpl();
+        $doctorRepository = new aDoctorRepositoryImpl();
+        $unitRepository = new aMasterUnitRepositoryImpl();
+        $appointmenRepository = new bAppointmentRepositoryImpl();
+        $scheduleRepository = new aScheduleDoctorRepositoryImpl();
+        $antrianRepository = new bAntrianRepositoryImpl();
+        $visitRepository = new bVisitRepositoryImpl();
+        $userService = new bVisitService($userRepository,$medrecRepository,
+        $doctorRepository,$unitRepository, $appointmenRepository,$scheduleRepository,
+        $antrianRepository,$visitRepository);
+        $user =  $userService->getRegistrationRajalActiveCoas($request);
+        return $user; 
+    }
+        public function getRegistrationRajalHistoryCoas(Request $request){
+                $userRepository = new bKamarOperasiRepositoryImpl();
+        $medrecRepository = new bMedicalRecordRepositoryImpl();
+        $doctorRepository = new aDoctorRepositoryImpl();
+        $unitRepository = new aMasterUnitRepositoryImpl();
+        $appointmenRepository = new bAppointmentRepositoryImpl();
+        $scheduleRepository = new aScheduleDoctorRepositoryImpl();
+        $antrianRepository = new bAntrianRepositoryImpl();
+        $visitRepository = new bVisitRepositoryImpl();
+        $userService = new bVisitService($userRepository,$medrecRepository,
+        $doctorRepository,$unitRepository, $appointmenRepository,$scheduleRepository,
+        $antrianRepository,$visitRepository);
+        $user =  $userService->getRegistrationRajalHistoryCoas($request);
+        return $user; 
+    }
 }
