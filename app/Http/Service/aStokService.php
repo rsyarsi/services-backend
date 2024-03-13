@@ -38,4 +38,68 @@ class aStokService extends Controller
             return $this->sendError('Data Transaction Gagal ditambahkan !', $e->getMessage());
         }
     }
+    public function getStokBarangbyUnit(Request $request)
+    {
+        // validate 
+        $request->validate([
+            "unit" => "required" 
+        ]);
+        try {
+            $count = $this->aStokRepository->getStokBarangbyUnit($request);
+            if($count->count() > 0){ 
+                return $this->sendResponse($count, "Data Product ditemukan.");
+            }else{
+                return $this->sendError("Data Product Found.", [], 400);
+            }
+        } catch (Exception $e) { 
+            Log::info($e->getMessage());
+            return $this->sendError('Data Transaction Gagal ditambahkan !', $e->getMessage());
+        }
+    }
+    public function getBukuStokBarangbyUnit(Request $request)
+    {
+        // validate 
+        $request->validate([
+            "PeriodeAwal" => "required",             
+            "PeriodeAkhir" => "required", 
+            "unit" => "required",             
+            "ProductCode" => "required" 
+
+
+        ]);
+        try {
+            $count = $this->aStokRepository->getBukuStokBarangbyUnit($request);
+            if($count->count() > 0){ 
+                return $this->sendResponse($count, "Data Product ditemukan.");
+            }else{
+                return $this->sendError("Data Product Found.", [], 400);
+            }
+        } catch (Exception $e) { 
+            Log::info($e->getMessage());
+            return $this->sendError('Data Transaction Gagal ditambahkan !', $e->getMessage());
+        }
+    }
+    public function getBukuStokBarangBeforebyUnit(Request $request)
+    {
+        // validate 
+        $request->validate([
+            "PeriodeAwal" => "required",             
+            "PeriodeAkhir" => "required", 
+            "unit" => "required",             
+            "ProductCode" => "required" 
+
+
+        ]);
+        try {
+            $count = $this->aStokRepository->getBukuStokBarangBeforebyUnit($request);
+            if($count->count() > 0){ 
+                return $this->sendResponse($count, "Data Product ditemukan.");
+            }else{
+                return $this->sendError("Data Product Found.", [], 400);
+            }
+        } catch (Exception $e) { 
+            Log::info($e->getMessage());
+            return $this->sendError('Data Transaction Gagal ditambahkan !', $e->getMessage());
+        }
+    }
 }

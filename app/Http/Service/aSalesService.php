@@ -19,10 +19,12 @@ use App\Http\Repository\aDeliveryOrderRepositoryImpl;
 use App\Http\Repository\aSalesRepositoryImpl;
 use App\Http\Repository\bBillingRepositoryImpl;
 use App\Http\Repository\bVisitRepositoryImpl;
+use App\Traits\FifoTrait;
 
 class aSalesService extends Controller
 {
     use AutoNumberTrait;
+    use FifoTrait;
     private $trsResepRepository;
     private $aDeliveryOrderRepository;
     private $aBarangRepository;
@@ -174,7 +176,14 @@ class aSalesService extends Controller
             DB::beginTransaction(); 
 
             // // billinga
-            $this->billingRepository->insertHeader($request,$request->TransactionCode);
+            $cekbill = $this->billingRepository->getBillingFo($request)->count(); 
+            //cek jika sudah ada di table
+            if ( $cekbill > 0) {
+                //update
+            }else{
+                //insert
+                $this->billingRepository->insertHeader($request,$request->TransactionCode);
+            }
 
             foreach ($request->Items as $key) {
                 $getdatadetilmutasi = $this->aSalesRepository->getSalesDetailbyIDBarang($request,$key);
@@ -185,65 +194,50 @@ class aSalesService extends Controller
                 if($getdatadetilmutasi->count() < 1){
                     if ($key['Qty'] > 0) {
                         $this->aSalesRepository->addSalesDetail($request, $key,$xhpp); 
+                         // fifo
+                         $this->fifoSales($request,$key,$xhpp);
                     }
                 }else{
                     // jika sudah ada
                     $showData = $getdatadetilmutasi->first();
                    
                     $mtKonversi_QtyTotal = $showData->Qty;
-                    $mtQtyMutasi = $showData->Qty;
+                    // $mtQtyMutasi = $showData->Qty;
 
-                   // if($mtKonversi_QtyTotal <> $key['Qty']){ // Dirubah jika Qty nya ada Perubahan Aja
-                        $goQtyMutasiSisaheaderBefore = $mtQtyMutasi + $key['Qty'];
-                        $goQtyMutasiSisaheaderAfter = $goQtyMutasiSisaheaderBefore - $key['Qty'];
+                   if($mtKonversi_QtyTotal <> $key['Qty']){ // Dirubah jika Qty nya ada Perubahan Aja
+                        // $goQtyMutasiSisaheaderBefore = $mtQtyMutasi + $key['Qty'];
+                        // $goQtyMutasiSisaheaderAfter = $goQtyMutasiSisaheaderBefore - $key['Qty'];
 
-                        $goQtyMutasiSisaKovenrsiBefore = $mtKonversi_QtyTotal + $key['Qty'];
-                        $goQtyMutasiSisaKovenrsiAfter = $goQtyMutasiSisaKovenrsiBefore - $key['Qty'];
+                        // $goQtyMutasiSisaKovenrsiBefore = $mtKonversi_QtyTotal + $key['Qty'];
+                        // $goQtyMutasiSisaKovenrsiAfter = $goQtyMutasiSisaKovenrsiBefore - $key['Qty'];
 
                          $this->aSalesRepository->editSalesDetailbyIdBarang($request,$key,$xhpp);
 
                         // replace stok ke awal
-                        $getCurrentStok = $this->sStokRepository->cekStokbyIDBarang($key, $request->UnitTujuan)->first();
-                        $totalstok = $getCurrentStok->Qty + $mtKonversi_QtyTotal;
-                        $this->sStokRepository->updateStokTrs($request,$key,$totalstok,$request->UnitTujuan);
-                        $this->sStokRepository->deleteBukuStok($request,$key,"CM",$request->UnitTujuan);
-                   // }  
+                        // $getCurrentStok = $this->sStokRepository->cekStokbyIDBarang($key, $request->UnitTujuan)->first();
+                        // $totalstok = $getCurrentStok->Qty + $mtKonversi_QtyTotal;
+                        // $this->sStokRepository->updateStokTrs($request,$key,$totalstok,$request->UnitTujuan);
+                        $this->sStokRepository->deleteBukuStok($request,$key,"TPR",$request->UnitTujuan);
+                        $this->sStokRepository->deleteDataStoks($request,$key,"TPR",$request->UnitTujuan);
+
+                         // fifo
+                         $this->fifoSales($request,$key,$xhpp);
+                   }  
                 }
-                 
-                        // QUERY PENGURANGAN STOK METODE FIFO
-                        first:
-                        $getStokFirst = $this->sStokRepository->getStokExpiredFirst($request, $key);
-                     
-                        //  return $getStokFirst;
-                        $DeliveryCodex = $getStokFirst->DeliveryCode;
-                        $qtyBuku = $getStokFirst->x;
-                        $ExpiredDate = $getStokFirst->ExpiredDate;
-                        $BatchNumber = $getStokFirst->BatchNumber;
 
-                        if ($qtyBuku < $key['Qty']) {
-                            $qtynew = $qtyBuku;
-                            $persediaan = $qtynew * $xhpp;
-                        } else {
-                            $qtynew = $key['Qty'];
-                            $persediaan = $qtynew * $xhpp;
-                        }
-                        $TipeTrs = "TPR";
-                        // // INSERT BUKU IN DI LAYANAN GUDANG
-                        $this->sStokRepository->addBukuStokOut($request, $key, $TipeTrs, $DeliveryCodex, $xhpp, $ExpiredDate, $BatchNumber, $qtynew, $persediaan, $request->UnitTujuan);
-
-                        // update stok Tujuan / Gudang 
-                        if ($this->sStokRepository->cekStokbyIDBarang($key, $request->UnitTujuan)->count() < 1) {
-                            //kalo g ada insert
-                            $this->sStokRepository->addStokTrs($request, $key, $qtynew, $request->UnitTujuan);
-                        } else {
-                            //kallo ada ya update
-                            $sumstok = $this->sStokRepository->cekStokbyIDBarang($key, $request->UnitTujuan);
-                            foreach ($sumstok as $value) {
-                                $QtyCurrent = $value->Qty;
+                        //UPDATE SIGNA TERJEMAHAN
+                        if ($key['Racik'] <> 0 ){
+                            if ($key['RacikHeader'] == 1){
+                                if ($key['IDResepDetail'] != 'null'){
+                                     $this->trsResepRepository->editSignaTerjemahanbyID($key['IDResepDetail'],$key['AturanPakai']);
+                                }
                             }
-                            $QtyTotal = $QtyCurrent - $qtynew;
-                            $this->sStokRepository->updateStokTrs($request, $key, $QtyTotal, $request->UnitTujuan);
+                        }else{
+                            if ($key['IDResepDetail'] != 'null'){
+                                $this->trsResepRepository->editSignaTerjemahanbyID($key['IDResepDetail'],$key['AturanPakai']);
+                            }
                         }
+<<<<<<< HEAD
 
                         if ($qtynew < $key['Qty']) {
                             $key['Qty'] = $key['Qty'] - $qtynew;
@@ -259,6 +253,8 @@ class aSalesService extends Controller
                         }else{
                             $this->trsResepRepository->editSignaTerjemahanbyID($key['IDResepDetail'],$key['AturanPakai']);
                         }
+=======
+>>>>>>> 280f35c7aa45b5e95ac163ef071ad7d6bbfcbefa
                 
                     // insert billing detail
                     $this->billingRepository->insertDetail($request->TransactionCode,$request->TransactionDate,$request->UserCreate,
@@ -279,7 +275,7 @@ class aSalesService extends Controller
                  $this->trsResepRepository->editReviewbyIDResep($request->IdOrderResep);
 
                 DB::commit();
-                return $this->sendResponse([], 'Items Add Successfully !');
+                return $this->sendResponse([], 'Data Detail Penjualan berhasil disimpan !');
         }catch (Exception $e) {
             DB::rollBack();
             Log::info($e->getMessage());
@@ -300,11 +296,11 @@ class aSalesService extends Controller
           // validasi 
         // // cek ada gak datanya
         if ($this->aSalesRepository->getSalesbyID($request->TransactionCode)->count() < 1) {
-            return $this->sendError('Sales Transaction Number Not Found !', []);
+            return $this->sendError('Transaksi Penjualan tidak ditemukan !', []);
         }
         // cek kode 
         if ($this->aMasterUnitRepository->getUnitById($request->UnitCode)->count() < 1) {
-            return $this->sendError('Unit Order Code Not Found !', []);
+            return $this->sendError('Kode Unit Penjualan tidak ditemukan !', []);
         }
 
 
@@ -315,22 +311,19 @@ class aSalesService extends Controller
             // Load Data All Do Detil Untuk Di Looping 
             $dtlconsumable = $this->aSalesRepository->getSalesDetailbyID($request->TransactionCode);
             foreach ($dtlconsumable as $key2) {
-                $QtyPakai = $key2->Qty;
-                $Konversi_QtyTotal = $key2->Konversi_QtyTotal;
+                // $QtyPakai = $key2->Qty;
+                // $Konversi_QtyTotal = $key2->Konversi_QtyTotal;
 
                 $cekqtystok = $this->sStokRepository->cekStokbyIDBarangOnly($key2->ProductCode,$request);
  
                     if ( $cekqtystok->count() < 1) {
                         return  $this->sendError('Qty Stok Tidak ada diLayanan Tujuan Ini ! ' , []);
                     }
-             
-
-                
-                    foreach ($cekqtystok as $valueStok) {
-                        $datastok = $valueStok->Qty;
-                    } 
-                $sisaStok = $datastok + $Konversi_QtyTotal;
-                $this->sStokRepository->updateStokPerItemBarang($request, $key2->ProductCode, $sisaStok);
+                    // foreach ($cekqtystok as $valueStok) {
+                    //     $datastok = $valueStok->Qty;
+                    // } 
+                // $sisaStok = $datastok + $Konversi_QtyTotal;
+                // $this->sStokRepository->updateStokPerItemBarang($request, $key2->ProductCode, $sisaStok);
 
                 // buku 
                     $cekBuku = $this->sStokRepository->cekBukuByTransactionandCodeProduct($key2->ProductCode,$request,'TPR');
@@ -339,6 +332,7 @@ class aSalesService extends Controller
                     }
                     
                     $this->sStokRepository->addBukuStokInVoidFromSelect($asd,$reff_void,$request);
+                    $this->sStokRepository->addDataStoksInVoidFromSelect($asd,$reff_void,$request);
             }
         
             $this->aSalesRepository->voidSalesDetailAllOrder($request);
@@ -350,7 +344,7 @@ class aSalesService extends Controller
             $this->billingRepository->voidBillingPasienTwo($request);
 
             DB::commit();
-            return $this->sendResponse([], 'Transaction Resep Void Successfully !');
+            return $this->sendResponse([], 'Transaksi Penjualan berhasil dihapus !');
         }catch (Exception $e) {
             DB::rollBack();
             Log::info($e->getMessage());
@@ -384,7 +378,7 @@ class aSalesService extends Controller
         }
         // // cek kode barangnya ada ga
         if ($this->aBarangRepository->getBarangbyId($request->ProductCode)->count() < 1) {
-            return $this->sendError('Product Not Found !', []);
+            return $this->sendError('Kode Barang tidak ditemukan !', []);
         } 
         // cek aktif engga
         $cekdodetil = $this->aSalesRepository->getSalesDetailbyIDandProductCode($request)->count();
@@ -395,16 +389,16 @@ class aSalesService extends Controller
             // Db Transaction
             DB::beginTransaction(); 
 
-            $dtlDo = $this->aSalesRepository->getSalesDetailbyIDandProductCode($request)->first();
-            $Konversi_QtyTotal = $dtlDo->Qty;
+            // $dtlDo = $this->aSalesRepository->getSalesDetailbyIDandProductCode($request)->first();
+            // $Konversi_QtyTotal = $dtlDo->Qty;
 
-            $cekqtystok = $this->sStokRepository->cekStokbyIDBarangOnly($request->ProductCode,$request);
+            // $cekqtystok = $this->sStokRepository->cekStokbyIDBarangOnly($request->ProductCode,$request);
              
-            foreach ($cekqtystok as $valueStok) {
-                $datastok = $valueStok->Qty;
-            } 
-            $sisaStok = $datastok + $Konversi_QtyTotal;
-            $this->sStokRepository->updateStokPerItemBarang($request, $request->ProductCode, $sisaStok);
+            // foreach ($cekqtystok as $valueStok) {
+            //     $datastok = $valueStok->Qty;
+            // } 
+            // $sisaStok = $datastok + $Konversi_QtyTotal;
+            // $this->sStokRepository->updateStokPerItemBarang($request, $request->ProductCode, $sisaStok);
 
             // buku 
             $cekBuku = $this->sStokRepository->cekBukuByTransactionandCodeProduct($request->ProductCode,$request,'TPR');
@@ -412,11 +406,12 @@ class aSalesService extends Controller
                $asd = $data;
             } 
             $this->sStokRepository->addBukuStokInVoidFromSelect($asd,'TPR_V',$request);
+            $this->sStokRepository->addDataStoksInVoidFromSelect($asd,'TPR_V',$request);
 
             $this->aSalesRepository->voidSalesbyItem($request);
 
             DB::commit();
-            return $this->sendResponse([], 'Transaction Sales Detil Void Successfully !');
+            return $this->sendResponse([], 'Transaksi Penjualan berhasil ditambahkan !');
         }catch (Exception $e) {
             DB::rollBack();
             Log::info($e->getMessage());
@@ -442,7 +437,11 @@ class aSalesService extends Controller
 
         // // cek ada gak datanya
         if ($this->aSalesRepository->getSalesbyID($request->TransactionCode)->count() < 1) {
+<<<<<<< HEAD
             return $this->sendError('Sales Number Not Found !', []);
+=======
+            return $this->sendError('Transaksi Penjualan tidak ditemukan !', []);
+>>>>>>> 280f35c7aa45b5e95ac163ef071ad7d6bbfcbefa
         }
 
         // if ($request->TotalRow < 1) {
@@ -455,12 +454,14 @@ class aSalesService extends Controller
         try {
             // Db Transaction
             DB::beginTransaction(); 
-
             $this->aSalesRepository->editSales($request);
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 280f35c7aa45b5e95ac163ef071ad7d6bbfcbefa
             DB::commit();
-            return $this->sendResponse([], 'Transaction Sales Finish !');
+            return $this->sendResponse([], 'Transaksi Penjualan Selesai disimpan !');
         }catch (Exception $e) {
             DB::rollBack();
             Log::info($e->getMessage());

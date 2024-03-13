@@ -19,4 +19,34 @@ class StokController extends Controller
         $execute =  $aMutasiService->getStokBarangbyUnitNameLike($request);
         return $execute;
     }
+    public function getStokBarangbyUnit(Request $request)
+    {
+         
+        $aStokRepository = new aStokRepositoryImpl(); 
+        $aMutasiService = new aStokService( 
+            $aStokRepository 
+        );
+        $execute =  $aMutasiService->getStokBarangbyUnit($request);
+        return $execute;
+    }
+    public function getBukuStokBarangbyUnit(Request $request)
+    {
+         
+        $aStokRepository = new aStokRepositoryImpl(); 
+        $aMutasiService = new aStokService( 
+            $aStokRepository 
+        );
+        $execute =  $aMutasiService->getBukuStokBarangbyUnit($request);
+        return $execute;
+    }
+    public function getBukuStokBarangBeforebyUnit(Request $request)
+    {
+         
+        $aStokRepository = new aStokRepositoryImpl(); 
+        $aMutasiService = new aStokService( 
+            $aStokRepository 
+        );
+        $execute =  $aMutasiService->getBukuStokBarangBeforebyUnit($request);
+        return $execute;
+    }
 }

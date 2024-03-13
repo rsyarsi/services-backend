@@ -16,9 +16,11 @@ use App\Http\Repository\bVisitRepositoryImpl;
 use App\Http\Repository\aDoctorRepositoryImpl;
 use App\Http\Repository\bTarifRepositoryImpl; 
 use App\Http\Repository\aTrsResepRepositoryImpl;
+use App\Traits\HargaJualTrait;
 
 class bTrsResepService extends Controller {
     use AutoNumberTrait; 
+    use HargaJualTrait;
     private $visitRepository;
     private $trsResep;
     private $doctorRepository;
@@ -130,12 +132,20 @@ class bTrsResepService extends Controller {
                     $harga = 0;
                 }else{
                     $datahna = $hna->first()->first();
+<<<<<<< HEAD
                     $hargadasar = $datahna->NominalHna;
                     $hargaprofit = $hargadasar*1.4; 
                     $hargauangr = $hargaprofit*1.1;
                     $harga = $hargauangr+400;
                 }
                 $pasing['Harga'] = round($harga);
+=======
+                    $harga = $this->HargaJual($request->GroupJaminan,$request->NoRegistrasi,$datahna->NominalHna,$key2->Category,$request->Kelas);
+                }
+                $pasing['Harga'] = round($harga);
+                $pasing['UangR'] = 400;
+                $pasing['Embalase'] = 400;
+>>>>>>> 280f35c7aa45b5e95ac163ef071ad7d6bbfcbefa
                 $pasing['ID'] = $key2->ID;
                 $pasing['IdOrderResep'] = $key2->IdOrderResep;
                 $pasing['KodeBarang'] = $key2->KodeBarang;

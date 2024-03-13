@@ -167,4 +167,13 @@ class bBillingRepositoryImpl implements bBillingRepositoryInterface
             ]);
         return $updatesatuan;
     }
+<<<<<<< HEAD
+=======
+
+    public function getBillingFo($request){
+        return  DB::connection('sqlsrv11')->table("FO_T_BILLING")
+        ->where('NO_TRS_BILLING', $request->TransactionCode) 
+        ->get();
+    }
+>>>>>>> 280f35c7aa45b5e95ac163ef071ad7d6bbfcbefa
 }

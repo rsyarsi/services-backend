@@ -33,7 +33,11 @@ class aSalesRepositoryImpl implements aSalesRepositoryInterface
             'NoRegistrasi' => $request->NoRegistrasi, 
             'TransactionDateFirst' => Carbon::now(),
             'UserCreateFirst' => $request->UserCreate,
-            'ReffDateTrs' => date("dmY", strtotime($request->TransactionDate))
+            'ReffDateTrs' => date("dmY", strtotime($request->TransactionDate)),
+            'NamaPembeli' => $request->NamaPembeli,
+            'GenderPembeli' => $request->GenderPembeli,
+            'AlamatPembeli' => $request->AlamatPembeli,
+            'TglLahirPembeli' => $request->TglLahirPembeli
         ]);
     }
     public function getSalesbyID($id)
@@ -54,6 +58,14 @@ class aSalesRepositoryImpl implements aSalesRepositoryInterface
         return  DB::connection('sqlsrv')->table("SalesDetails")
         ->where('TransactionCode', $request->TransactionCode)
             ->where('ProductCode', $key['ProductCode'])
+            ->where('Void', '0')
+            ->get();
+    }
+    public function getSalesDetailbyIDBarangFix($idTrs, $kodeBarang)
+    {
+        return  DB::connection('sqlsrv')->table("SalesDetails")
+        ->where('TransactionCode', $idTrs)
+            ->where('ProductCode', $kodeBarang)
             ->where('Void', '0')
             ->get();
     }
@@ -86,6 +98,8 @@ class aSalesRepositoryImpl implements aSalesRepositoryInterface
             'Subtotal' => $key['Subtotal'],  
             'Tax' => $key['Tax'],  
             'Grandtotal' => $key['Grandtotal'],  
+            'UangR' => $key['UangR'],  
+            'Embalase' => $key['Embalase'],  
             'Hpp' =>  $xhpp,   
             'UserVoid' => '',
             'DateAdd' => Carbon::now(),
@@ -188,4 +202,19 @@ class aSalesRepositoryImpl implements aSalesRepositoryInterface
             ->where('NoResep', $request->NoResep)
             ->get();
     }
+<<<<<<< HEAD
+=======
+    public function updateQtRemainSalesDetail($TransactionCode, $ProductCode, $qtyRemain)
+    {
+        $updatesatuan =  DB::connection('sqlsrv')->table('SalesDetails')
+        ->where('TransactionCode', $TransactionCode)
+            ->where('ProductCode', $ProductCode)
+            ->where('Void', '0')
+            ->update([
+                'QtySalesRemain' => $qtyRemain
+            ]);
+        return $updatesatuan;
+    }
+    
+>>>>>>> 280f35c7aa45b5e95ac163ef071ad7d6bbfcbefa
 }
