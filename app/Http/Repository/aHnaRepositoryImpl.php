@@ -24,6 +24,7 @@ class aHnaRepositoryImpl implements aHnaRepositoryInterface
         $dateStart = date('Y-m-d', strtotime($request->TransactionDate . ' + 1 days'));
         return DB::connection('sqlsrv')->table('Hnas')
         ->where('DeliveryCode', $request->TransactionCode)
+        ->where('Batal','0')
         ->where('ProductCode', $key['ProductCode'])
             ->update(['DeliveryDate' => $request->TransactionDate,
             'ProductCode' => $key['ProductCode'],
@@ -50,6 +51,7 @@ class aHnaRepositoryImpl implements aHnaRepositoryInterface
     public function getHpp($key,$request){
         return  DB::connection('sqlsrv')->table("hpps") 
         ->select('NominalHpp')
+        ->where('Batal','0')
         ->where('ProductCode', $key['ProductCode'])
         ->where('DeliveryCode','<>', $request->TransactionCode)
         ->orderBy('id','desc')
@@ -59,6 +61,7 @@ class aHnaRepositoryImpl implements aHnaRepositoryInterface
         return  DB::connection('sqlsrv')->table("Hnas") 
         ->where('ProductCode', $key['ProductCode'])
         ->where('DeliveryCode','<>', $request->TransactionCode)
+        ->where('Batal','0')
         ->orderBy('NominalHna','desc')
         ->get()->chunk(1);
     }
@@ -66,6 +69,7 @@ class aHnaRepositoryImpl implements aHnaRepositoryInterface
     {
         return  DB::connection('sqlsrv')->table("Hnas") 
         ->where('ProductCode',$ProductCode) 
+        ->where('Batal','0')
         ->whereRaw("'$tgl' BETWEEN StartDate AND ExpiredDate")
         ->orderBy('NominalHna','desc')
         ->get()->chunk(1);
@@ -73,6 +77,7 @@ class aHnaRepositoryImpl implements aHnaRepositoryInterface
     public function getHppAverage($key){
         return  DB::connection('sqlsrv')->table("hpps") 
         ->select('NominalHpp')
+        ->where('Batal','0')
         ->where('ProductCode', $key['ProductCode'])
         ->orderBy('id','desc')
         ->get()->chunk(1);

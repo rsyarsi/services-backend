@@ -17,6 +17,7 @@ class aPurchaseOrderRepositoryImpl implements aPurchaseOrderRepositoryInterface
             'SupplierCode' => $request->SupplierCode,
             'Notes' => $request->Notes, 
             'PurchaseReqCode' => $request->PurchaseReqCode,
+            'TipePO' => $request->TipePO,
             'PurchaseCode' => $autoNumber,
             'DateCreateReal' => Carbon::now(),
             'UseCreateReal' => $request->UserCreate,
@@ -145,7 +146,7 @@ class aPurchaseOrderRepositoryImpl implements aPurchaseOrderRepositoryInterface
     }
     public function getPurchaseOrderDetailbyID($id)
     {
-        return  DB::connection('sqlsrv')->table("PurchaseOrderDetails")
+        return  DB::connection('sqlsrv')->table("v_transaksi_po_dtl")
             ->where('PurchaseCode', $id)
             ->where('Void', '0')
             ->get();
@@ -182,7 +183,7 @@ class aPurchaseOrderRepositoryImpl implements aPurchaseOrderRepositoryInterface
     }
     public function getPurchaseOrderDetailbyIDBrgForDo($request,$key)
     {
-        return  DB::connection('sqlsrv')->table("PurchaseOrderDetails")
+        return  DB::connection('sqlsrv')->table("v_transaksi_po_dtl")
         ->where('PurchaseCode', $request->PurchaseCode)
         ->where('ProductCode', $key['ProductCode'])
             ->where('Void', '0')
@@ -190,10 +191,41 @@ class aPurchaseOrderRepositoryImpl implements aPurchaseOrderRepositoryInterface
     }
     public function getPurchaseOrderDetailbyIDBrgForDo2($request, $key)
     {
-        return  DB::connection('sqlsrv')->table("PurchaseOrderDetails")
+        return  DB::connection('sqlsrv')->table("v_transaksi_po_dtl")
         ->where('PurchaseCode', $request->PurchaseCode)
             ->where('ProductCode', $key)
             ->where('Void', '0')
             ->get();
     }
+    public function approvalFirst($request)
+    {
+        $updatesatuan =  DB::connection('sqlsrv')->table('PurchaseOrders')
+        ->where('PurchaseCode', $request->PurchaseCode)  
+            ->update([ 
+                'UserApproved_1' => $request->UserApprove,
+                'DateApproved_1' => $request->DateApprove
+            ]);
+        return $updatesatuan;
+    }
+    public function approvalSecond($request)
+    {
+        $updatesatuan =  DB::connection('sqlsrv')->table('PurchaseOrders')
+        ->where('PurchaseCode', $request->PurchaseCode)  
+            ->update([ 
+                'UserApproved_2' => $request->UserApprove,
+                'DateApproved_2' => $request->DateApprove
+            ]);
+        return $updatesatuan;
+    }
+    public function approvalThirth($request)
+    {
+        $updatesatuan =  DB::connection('sqlsrv')->table('PurchaseOrders')
+        ->where('PurchaseCode', $request->PurchaseCode)  
+            ->update([ 
+                'UserApproved_3' => $request->UserApprove,
+                'DateApproved_3' => $request->DateApprove
+            ]);
+        return $updatesatuan;
+    }
 }
+

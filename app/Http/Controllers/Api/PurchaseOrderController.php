@@ -145,4 +145,49 @@ class PurchaseOrderController extends Controller
         $edit =  $aPurchaseOrderService->getPurchaseOrderbyPeriode($request);
         return $edit;
     }
+    public function approvalFirst(Request $request)
+    {
+        $aPurchaseOrderRepository = new aPurchaseOrderRepositoryImpl();
+        $aBarangRepository = new aBarangRepositoryImpl();
+        $asupplierRepository = new aSupplierRepositoryImpl();
+        $aPurchaseRequestRepository = new aPurchaseRequisitionRepositoryImpl();
+        $aPurchaseOrderService = new aPurchaseOrderService(
+            $aPurchaseOrderRepository,
+            $aBarangRepository,
+            $asupplierRepository,
+            $aPurchaseRequestRepository
+        );
+        $edit =  $aPurchaseOrderService->approvalFirst($request);
+        return $edit;
+    }
+    public function approvalSecond(Request $request)
+    {
+        $aPurchaseOrderRepository = new aPurchaseOrderRepositoryImpl();
+        $aBarangRepository = new aBarangRepositoryImpl();
+        $asupplierRepository = new aSupplierRepositoryImpl();
+        $aPurchaseRequestRepository = new aPurchaseRequisitionRepositoryImpl();
+        $aPurchaseOrderService = new aPurchaseOrderService(
+            $aPurchaseOrderRepository,
+            $aBarangRepository,
+            $asupplierRepository,
+            $aPurchaseRequestRepository
+        );
+        $edit =  $aPurchaseOrderService->approvalSecond($request);
+        return $edit;
+    }
+    public function approvalThirth(Request $request)
+    {
+        $aPurchaseOrderRepository = new aPurchaseOrderRepositoryImpl();
+        $aBarangRepository = new aBarangRepositoryImpl();
+        $asupplierRepository = new aSupplierRepositoryImpl();
+        $aPurchaseRequestRepository = new aPurchaseRequisitionRepositoryImpl();
+        $aPurchaseOrderService = new aPurchaseOrderService(
+            $aPurchaseOrderRepository,
+            $aBarangRepository,
+            $asupplierRepository,
+            $aPurchaseRequestRepository
+        );
+        $edit =  $aPurchaseOrderService->approvalThirth($request);
+        return $edit;
+    }
 }

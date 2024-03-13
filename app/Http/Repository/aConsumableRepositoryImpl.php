@@ -78,11 +78,8 @@ class aConsumableRepositoryImpl implements aConsumableRepositoryInterface
             'ProductName' => $key['ProductName'],
             'Qty' => $key['Qty'],  
             'Konversi_QtyTotal' => $key['Konversi_QtyTotal'],  
-<<<<<<< HEAD
-=======
             'Satuan_Konversi' =>  $key['Satuan_Konversi'],
             'KonversiQty ' =>  $key['KonversiQty'],
->>>>>>> 280f35c7aa45b5e95ac163ef071ad7d6bbfcbefa
             'Hpp' => '0',//ini emang nol atau gimana
             'Total' => '0',//ini emang nol atau gimana
             'Satuan ' =>  $key['ProductSatuan'],

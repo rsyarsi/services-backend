@@ -244,4 +244,29 @@ class aBarangRepositoryImpl implements aBarangRepositoryInterface
             ]);
         return $updateBarang;
     }
+    public function updateBatalHppbyDo($request)
+    {
+
+        $updateBarang =  DB::connection('sqlsrv')->table('Hpps')
+        ->where('DeliveryCode', $request->TransactionCode)
+            ->update([
+                'Batal' => $request->Void,
+                'UserBatal' => $request->UserVoid,
+                'TglBatal' => $request->DateVoid
+            ]);
+        return $updateBarang;
+    }
+    public function updateBatalHnabyDo($request)
+    {
+
+        $updateBarang =  DB::connection('sqlsrv')->table('Hnas')
+        ->where('DeliveryCode', $request->TransactionCode)
+            ->update([
+                'Batal' => $request->Void,
+                'ExpiredDate' => $request->DateVoid,
+                'UserBatal' => $request->UserVoid,
+                'TglBatal' => $request->DateVoid
+            ]);
+        return $updateBarang;
+    }
 }

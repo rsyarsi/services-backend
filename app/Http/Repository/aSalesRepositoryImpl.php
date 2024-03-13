@@ -202,8 +202,6 @@ class aSalesRepositoryImpl implements aSalesRepositoryInterface
             ->where('NoResep', $request->NoResep)
             ->get();
     }
-<<<<<<< HEAD
-=======
     public function updateQtRemainSalesDetail($TransactionCode, $ProductCode, $qtyRemain)
     {
         $updatesatuan =  DB::connection('sqlsrv')->table('SalesDetails')
@@ -216,5 +214,4 @@ class aSalesRepositoryImpl implements aSalesRepositoryInterface
         return $updatesatuan;
     }
     
->>>>>>> 280f35c7aa45b5e95ac163ef071ad7d6bbfcbefa
 }

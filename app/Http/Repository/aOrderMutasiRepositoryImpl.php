@@ -132,6 +132,7 @@ class aOrderMutasiRepositoryImpl implements aOrderMutasiRepositoryInterface
         return  DB::connection('sqlsrv')->table("OrderMutasiDetails")
             ->where('TransactionCode', $id)
             ->where('Void', '0')
+            ->where('QtySisaMutasi','<>', '0')
             ->get();
     }
     public function getOrderMutasiDetailbyIDBarang($request, $key)
@@ -139,6 +140,14 @@ class aOrderMutasiRepositoryImpl implements aOrderMutasiRepositoryInterface
         return  DB::connection('sqlsrv')->table("OrderMutasiDetails")
             ->where('TransactionCode', $request->TransactionCode)
             ->where('ProductCode', $key['ProductCode'])
+            ->where('Void', '0')
+            ->get();
+    }
+    public function getOrderMutasiDetailbyIDBarangMutasi($TransactionCode, $ProductCode)
+    {
+        return  DB::connection('sqlsrv')->table("OrderMutasiDetails")
+            ->where('TransactionCode', $TransactionCode)
+            ->where('ProductCode', $ProductCode)
             ->where('Void', '0')
             ->get();
     }
@@ -164,6 +173,17 @@ class aOrderMutasiRepositoryImpl implements aOrderMutasiRepositoryInterface
             ]);
         return $updatesatuan;
     }
+    public function updateQtyOrderMutasi3($request, $Productcode, $qtyRemain)
+    {
+        $updatesatuan =  DB::connection('sqlsrv')->table('OrderMutasiDetails')
+        ->where('TransactionCode', $request->TransactionOrderCode)
+            ->where('ProductCode', $Productcode)
+            ->where('Void', '0')
+            ->update([
+                'QtySisaMutasi' => $qtyRemain
+            ]);
+        return $updatesatuan;
+    }
     public function getOrderMutasibyDateUser($request)
     {
         return  DB::connection('sqlsrv')->table("v_transaksi_order_mutasi_hdr")
@@ -177,5 +197,16 @@ class aOrderMutasiRepositoryImpl implements aOrderMutasiRepositoryInterface
             ->whereBetween('TglPeriode', [$request->StartPeriode, $request->EndPeriode])
             ->where('Void', '0')
             ->get();
+    }
+    public function approval($request)
+    {
+        $updatesatuan =  DB::connection('sqlsrv')->table('OrderMutasis')
+        ->where('TransactionCode', $request->TransactionCode)  
+            ->update([ 
+                'Approved' => '1',
+                'UserApproved' => $request->UserApprove,
+                'DateApproved' => $request->DateApprove
+            ]);
+        return $updatesatuan;
     }
 }
