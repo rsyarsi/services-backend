@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AdjusmentController;
 use App\Http\Controllers\Api\Wilayah;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
@@ -43,6 +44,8 @@ use App\Http\Controllers\Api\AntrianPoliklinikController;
 use App\Http\Controllers\Api\EDocumentController;
 use App\Http\Controllers\Api\HasilMcuPDFController;
 use App\Http\Controllers\Api\PurchaseRequisitionController;
+use App\Http\Controllers\Api\ReturBeliController;
+use App\Http\Controllers\Api\ReturJualController;
 use App\Http\Controllers\Api\SalesController;
 use App\Http\Controllers\Api\StokController;
 use App\Http\Controllers\ResepV2Controller;
@@ -165,6 +168,7 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("getPurchaseRequisitionDetailbyID/", [PurchaseRequisitionController::class, "getPurchaseRequisitionDetailbyID"]);
         Route::post("getPurchaseRequisitionbyDateUser/", [PurchaseRequisitionController::class, "getPurchaseRequisitionbyDateUser"]);
         Route::post("getPurchaseRequisitionbyPeriode/", [PurchaseRequisitionController::class, "getPurchaseRequisitionbyPeriode"]);
+        Route::post("approval/", [PurchaseRequisitionController::class, "approval"]);
        
     });
 
@@ -178,6 +182,9 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("getPurchaseOrderDetailbyID/", [PurchaseOrderController::class, "getPurchaseOrderDetailbyID"]);
         Route::post("getPurchaseOrderbyDateUser/", [PurchaseOrderController::class, "getPurchaseOrderbyDateUser"]);
         Route::post("getPurchaseOrderbyPeriode/", [PurchaseOrderController::class, "getPurchaseOrderbyPeriode"]);
+        Route::post("approvalFirst/", [PurchaseOrderController::class, "approvalFirst"]);
+        Route::post("approvalSecond/", [PurchaseOrderController::class, "approvalSecond"]);
+        Route::post("approvalThirth/", [PurchaseOrderController::class, "approvalThirth"]);
     });
 
     Route::group(['prefix' => 'transaction/deliveryorder'], function () {
@@ -201,8 +208,10 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("voidOrderMutasiDetailbyItem", [OrderMutasiController::class, "voidOrderMutasiDetailbyItem"]);
         Route::post("getOrderMutasibyID", [OrderMutasiController::class, "getOrderMutasibyID"]);
         Route::post("getOrderMutasiDetailbyID/", [OrderMutasiController::class, "getOrderMutasiDetailbyID"]);
+        Route::post("getOrderMutasiDetailRemainbyID/", [OrderMutasiController::class, "getOrderMutasiDetailRemainbyID"]);
         Route::post("getOrderMutasibyDateUser/", [OrderMutasiController::class, "getOrderMutasibyDateUser"]);
         Route::post("getOrderMutasibyPeriode/", [OrderMutasiController::class, "getOrderMutasibyPeriode"]);
+        Route::post("approval/", [OrderMutasiController::class, "approval"]);
     });
 
     Route::group(['prefix' => 'transaction/mutasi'], function () {
@@ -215,6 +224,11 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("getMutasiDetailbyID/", [MutasiController::class, "getMutasiDetailbyID"]);
         Route::post("getMutasibyDateUser/", [MutasiController::class, "getMutasibyDateUser"]);
         Route::post("getMutasibyPeriode/", [MutasiController::class, "getMutasibyPeriode"]);
+        
+        Route::post("voidMutasi/", [MutasiController::class, "voidMutasi"]);
+        Route::post("voidMutasiDetailbyItem/", [MutasiController::class, "voidMutasiDetailbyItem"]);
+
+
     });
     
     Route::group(['prefix' => 'transaction/faktur'], function () {
@@ -238,7 +252,7 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("getConsumablebyDateUser/", [ConsumableController::class, "getConsumablebyDateUser"]);
         Route::post("getConsumablebyPeriode/", [ConsumableController::class, "getConsumablebyPeriode"]);
     });
-
+    
     Route::group(['prefix' => 'transaction/sales'], function () {
         Route::post("addSalesHeader", [SalesController::class, "addSalesHeader"]);
         Route::post("addSalesDetail", [SalesController::class, "addSalesDetail"]);
@@ -250,10 +264,44 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("getSalesbyDateUser", [SalesController::class, "getSalesbyDateUser"]);
         Route::post("getSalesbyPeriode", [SalesController::class, "getSalesbyPeriode"]);
     });
-    
+
+    Route::group(['prefix' => 'transaction/returbeli'], function () {
+        Route::post("addReturBeliHeader", [ReturBeliController::class, "addReturBeliHeader"]);
+        Route::post("addReturBeliFinish", [ReturBeliController::class, "addReturBeliFinish"]);
+        Route::post("voidReturBeliDetailbyItem", [ReturBeliController::class, "voidReturBeliDetailbyItem"]);
+        Route::post("voidReturBeli", [ReturBeliController::class, "voidReturBeli"]);
+        Route::post("getReturBelibyID", [ReturBeliController::class, "getReturBelibyID"]);
+        Route::post("getReturBeliDetailbyID", [ReturBeliController::class, "getReturBeliDetailbyID"]);
+        Route::post("getReturBelibyDateUser", [ReturBeliController::class, "getReturBelibyDateUser"]);
+        Route::post("getReturBelibyPeriode", [ReturBeliController::class, "getReturBelibyPeriode"]);
+    });
+
+    Route::group(['prefix' => 'transaction/returjual'], function () {
+        Route::post("addReturJualHeader", [ReturJualController::class, "addReturJualHeader"]);
+        Route::post("addReturJualFinish", [ReturJualController::class, "addReturJualFinish"]);
+        Route::post("voidReturJualDetailbyItem", [ReturJualController::class, "voidReturJualDetailbyItem"]);
+        Route::post("voidReturJual", [ReturJualController::class, "voidReturJual"]);
+        Route::post("getReturJualbyID", [ReturJualController::class, "getReturJualbyID"]);
+        Route::post("getReturJualDetailbyID", [ReturJualController::class, "getReturJualDetailbyID"]);
+        Route::post("getReturJualbyDateUser", [ReturJualController::class, "getReturJualbyDateUser"]);
+        Route::post("getReturJualbyPeriode", [ReturJualController::class, "getReturJualbyPeriode"]);
+    });  
+
+    Route::group(['prefix' => 'transaction/adjusment'], function () {
+        Route::post("addAdjusmentHeader", [AdjusmentController::class, "addAdjusmentHeader"]);
+        Route::post("addAdjusmentFinish", [AdjusmentController::class, "addAdjusmentFinish"]); 
+        Route::post("getAdjusmentbyID", [AdjusmentController::class, "getAdjusmentbyID"]);
+        Route::post("getAdjusmentDetailbyID", [AdjusmentController::class, "getAdjusmentDetailbyID"]);
+        Route::post("getAdjusmentbyDateUser", [AdjusmentController::class, "getAdjusmentbyDateUser"]);
+        Route::post("getAdjusmentbyPeriode", [AdjusmentController::class, "getAdjusmentbyPeriode"]);
+    });
+
     Route::group(['prefix' => 'information/inventory'], function () {
         Route::group(['prefix' => 'stok/'], function () { 
             Route::post("getStokBarangbyUnitNameLike", [StokController::class, "getStokBarangbyUnitNameLike"]);  
+            Route::post("getStokBarangbyUnit", [StokController::class, "getStokBarangbyUnit"]);  
+            Route::post("getBukuStokBarangbyUnit", [StokController::class, "getBukuStokBarangbyUnit"]);  
+            Route::post("getBukuStokBarangBeforebyUnit", [StokController::class, "getBukuStokBarangBeforebyUnit"]);  
         });
     });
     // REGIS
@@ -312,7 +360,7 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("SisaStatusAntrian", [BPJSKesehatanController::class, "SisaStatusAntrian"]);
         Route::post("StatusAntrian", [BPJSKesehatanController::class, "StatusAntrian"]);  
     });  
-
+ 
     // For registration
     Route::group(['prefix' => 'registrations/'], function () {
         // unit  
@@ -334,7 +382,7 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::post("getRegistrationRajalActiveCoas", [VisitController::class, "getRegistrationRajalActiveCoas"]); 
         Route::post("getRegistrationRajalHistoryCoas", [VisitController::class, "getRegistrationRajalHistoryCoas"]);
 
-    });  
+    });    
     Route::group(['prefix' => 'medicalrecords/'], function () {
         Route::post("create", [MedicalRecord::class, "createNonWalkin"]);
         Route::post("create/walkin", [MedicalRecord::class, "createwalkin"]);
@@ -404,6 +452,12 @@ Route::group(["middleware"=>["auth:api"]], function(){
             Route::post("viewOrderResepbyTrs", [ResepV2Controller::class, "viewOrderResepbyTrs"]); 
             Route::post("viewOrderResepbyID", [ResepV2Controller::class, "viewOrderResepbyID"]); 
             Route::post("viewOrderResepDetailbyID", [ResepV2Controller::class, "viewOrderResepDetailbyID"]); 
+            Route::post("viewOrderResepbyOrderIDV2", [ResepV2Controller::class, "viewOrderResepbyOrderIDV2"]); 
+            Route::post("viewOrderResepDetailbyOrderIDV2", [ResepV2Controller::class, "viewOrderResepDetailbyOrderIDV2"]); 
+            Route::post("editSignaTerjemahanbyID", [ResepV2Controller::class, "editSignaTerjemahanbyID"]); 
+            Route::post("viewprintLabelbyID", [ResepV2Controller::class, "viewprintLabelbyID"]);
+            Route::post("getPrinterLabel", [ResepV2Controller::class, "getPrinterLabel"]);
+            Route::post("editReviewbyIDResep", [ResepV2Controller::class, "editReviewbyIDResep"]);
             
         });
     });
@@ -529,55 +583,26 @@ Route::group(["middleware"=>["auth:api"]], function(){
             Route::post("registrasi", [EDocumentController::class, "getResumeMedisdocregistrasi"]);
         });
 
+        //Tambahan 25-12-2023
+        Route::group(['prefix' => 'PersetujuanTindakan/'], function () {
+            Route::post("byId", [EDocumentController::class, "getPersetujuanTindakanbyId"]);
+            Route::post("registrasi", [EDocumentController::class, "getPersetujuanTindakandocregistrasi"]);
+        });
+        Route::group(['prefix' => 'SuketSakit/'], function () {
+            Route::post("byId", [EDocumentController::class, "getSuketSakitbyId"]);
+            Route::post("registrasi", [EDocumentController::class, "getSuketSakitdocregistrasi"]);
+        });
+        Route::group(['prefix' => 'SuketSehat/'], function () {
+            Route::post("byId", [EDocumentController::class, "getSuketSehatbyId"]);
+            Route::post("registrasi", [EDocumentController::class, "getSuketSehatdocregistrasi"]);
+        });
+
         Route::group(['prefix' => 'OTP/'], function () {
             Route::post("insert", [EDocumentController::class, "insertOTP"]);
             Route::post("verify", [EDocumentController::class, "verifyOTP"]);
         });
     }); 
 
-    // DISCLAIMER
-    // INI UNTUK MODUL HRD
-    // SILAHKAN TAMBAHKAN ROUTENYA DISINI
-    // KONFIRMASI DAHULU YA KALO ADA NAMBAH ROUTE
-    Route::group(['prefix' => 'Hrd/'], function () {
-        Route::group(['prefix' => 'MasterData/'], function () {
-            Route::group(['prefix' => 'Pegawai/'], function () {
-            
-            });
-            Route::group(['prefix' => 'UnitKerja/'], function () {
-            
-            });
-            Route::group(['prefix' => 'GroupShift/'], function () {
-            
-            });
-            Route::group(['prefix' => 'ShiftKerja/'], function () {
-            
-            });
-        });
-        Route::group(['prefix' => 'Transaksi/'], function () {
-            Route::group(['prefix' => 'Absensi/'], function () {
-                Route::post("insertlog", [BPJSKesehatanController::class, "insertlog"]);
-                Route::post("upload", [BPJSKesehatanController::class, "upload"]);
-                Route::post("insertjadwal", [BPJSKesehatanController::class, "insertjadwal"]);
-            });
-            Route::group(['prefix' => 'sic/'], function () {
-                Route::post("insert", [BPJSKesehatanController::class, "insert"]);
-                Route::post("approve", [BPJSKesehatanController::class, "approve"]);
-            });
-            Route::group(['prefix' => 'lembur/'], function () {
-                Route::post("insert", [BPJSKesehatanController::class, "insert"]);
-                Route::post("approve", [BPJSKesehatanController::class, "approve"]);
-            });
-            Route::group(['prefix' => 'Payroll/'], function () {
-                Route::post("insert", [BPJSKesehatanController::class, "insert"]);
-                Route::post("uploadpph", [BPJSKesehatanController::class, "uploadpph"]);
-                Route::post("approval", [BPJSKesehatanController::class, "approval"]);
-            });
-            Route::group(['prefix' => 'KontrakPegawai/'], function () {
-                Route::post("insert", [HrdKontrakkerjaController::class, "insert"]); 
-            });
-        });     
-    });
 });
  
 //semua route API yang membutuhkan authentication sekarang didaftarkan dalam grup middleware sesuai dengan nama yang sudah dibuat di kernel

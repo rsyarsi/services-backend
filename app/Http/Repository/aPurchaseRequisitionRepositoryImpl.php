@@ -196,4 +196,15 @@ class aPurchaseRequisitionRepositoryImpl implements aPurchaseRequisitionReposito
             ->where('Void', '0')
             ->get();
     }
+    public function approvalPR($request)
+    {
+        $updatesatuan =  DB::connection('sqlsrv')->table('PurchaseRequisitions')
+        ->where('TransactionCode', $request->PurchaseRequisitonCode)  
+            ->update([
+                'Approved' => '1',
+                'UserApproved' => $request->UserApprove,
+                'DateApproved' => $request->DateApprove
+            ]);
+        return $updatesatuan;
+    }
 }

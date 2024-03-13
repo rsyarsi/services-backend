@@ -203,6 +203,11 @@ class aPurchaseRequisitionService extends Controller
             if ($this->aPurchaseRequisitionRepository->getPurchaseRequisitionbyID($request->TransasctionCode)->count() < 1) {
                 return $this->sendError('Transaction Number Not Found !', []);
             }
+
+            // cek sudah di approved belum 
+            if ($this->aPurchaseRequisitionRepository->getPurchaseRequisitionApprovedbyID($request->TransasctionCode)->count() > 0) {
+                return $this->sendError('Transaction Number Has Been Approved !', []);
+            }
             
             $this->aPurchaseRequisitionRepository->voidPurchaseRequisitionDetailbyItem($request);
 
@@ -308,5 +313,25 @@ class aPurchaseRequisitionService extends Controller
             Log::info($e->getMessage());
             return $this->sendError('Purchase Requisition Data Not Found !', $e->getMessage());
         }
+    }
+    public function approval($request){
+        // validate 
+        $request->validate([
+            "UserApprove" => "required",
+            "DateApprove" => "required"
+        ]);
+
+        try {
+            // Db Transaction
+            DB::beginTransaction();
+            $this->aPurchaseRequisitionRepository->approvalPR($request);
+            DB::commit();
+            return $this->sendResponse([], 'Approval Purchase Requisition berhasil !');
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info($e->getMessage());
+            return $this->sendError('Transaksi Gagal di Proses !', $e->getMessage());
+        } 
+        
     }
 }

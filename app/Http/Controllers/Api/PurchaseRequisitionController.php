@@ -83,4 +83,12 @@ class PurchaseRequisitionController extends Controller
         $addGroup =  $aPurchaseRequisitionService->getPurchaseRequisitionbyPeriode($request);
         return $addGroup;
     }
+    public function approval(Request $request)
+    {
+        $aPurchaseRequisitionRepository = new aPurchaseRequisitionRepositoryImpl();
+        $aBarangRepository = new aBarangRepositoryImpl();
+        $aPurchaseRequisitionService = new aPurchaseRequisitionService($aPurchaseRequisitionRepository, $aBarangRepository);
+        $addGroup =  $aPurchaseRequisitionService->approval($request);
+        return $addGroup;
+    }
 }
