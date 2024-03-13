@@ -237,24 +237,6 @@ class aSalesService extends Controller
                                 $this->trsResepRepository->editSignaTerjemahanbyID($key['IDResepDetail'],$key['AturanPakai']);
                             }
                         }
-<<<<<<< HEAD
-
-                        if ($qtynew < $key['Qty']) {
-                            $key['Qty'] = $key['Qty'] - $qtynew;
-                            goto first;
-                        }
-                        // QUERY PENGURANGAN STOK METODE FIFO
-
-                        //UPDATE SIGNA TERJEMAHAN
-                        if ($key['Racik'] <> 0 ){
-                            if ($key['RacikHeader'] == 1){
-                                $this->trsResepRepository->editSignaTerjemahanbyID($key['IDResepDetail'],$key['AturanPakai']);
-                            }
-                        }else{
-                            $this->trsResepRepository->editSignaTerjemahanbyID($key['IDResepDetail'],$key['AturanPakai']);
-                        }
-=======
->>>>>>> 280f35c7aa45b5e95ac163ef071ad7d6bbfcbefa
                 
                     // insert billing detail
                     $this->billingRepository->insertDetail($request->TransactionCode,$request->TransactionDate,$request->UserCreate,
@@ -437,11 +419,7 @@ class aSalesService extends Controller
 
         // // cek ada gak datanya
         if ($this->aSalesRepository->getSalesbyID($request->TransactionCode)->count() < 1) {
-<<<<<<< HEAD
-            return $this->sendError('Sales Number Not Found !', []);
-=======
             return $this->sendError('Transaksi Penjualan tidak ditemukan !', []);
->>>>>>> 280f35c7aa45b5e95ac163ef071ad7d6bbfcbefa
         }
 
         // if ($request->TotalRow < 1) {
@@ -455,11 +433,6 @@ class aSalesService extends Controller
             // Db Transaction
             DB::beginTransaction(); 
             $this->aSalesRepository->editSales($request);
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 280f35c7aa45b5e95ac163ef071ad7d6bbfcbefa
             DB::commit();
             return $this->sendResponse([], 'Transaksi Penjualan Selesai disimpan !');
         }catch (Exception $e) {

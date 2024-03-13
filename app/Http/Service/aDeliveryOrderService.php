@@ -67,12 +67,12 @@ class aDeliveryOrderService extends Controller
 
             // cek supplier kode 
             if ($this->aSupplierRepository->getSupplierbyId($request->SupplierCode)->count() < 1) {
-                return $this->sendError('Supplier Code Not Found !', []);
+                return $this->sendError('kode Supplier tidak ditemukan !', []);
             }
 
             // cek kode PR udah ada belom
             if ($this->aPurchaseOrderRepository->getPurchaseOrderbyID($request->PurchaseOrderCode)->count() < 1) {
-                return $this->sendError('Purchase Order Code Not Found !', []);
+                return $this->sendError('No. Transaksi Purchase Order tidak ditemukan !', []);
             }
 
             $getmax = $this->aDeliveryOrder->getMaxCode($request);
@@ -87,7 +87,7 @@ class aDeliveryOrderService extends Controller
 
             $this->aDeliveryOrder->addDeliveryOrder($request, $autonumber);
             DB::commit();
-            return $this->sendResponse($autonumber, 'Create Delivery Order Successfully !');
+            return $this->sendResponse($autonumber, 'Transaksi Delivery Order berhasil di buat, Silahkan masukan data Obat !');
         } catch (Exception $e) {
             DB::rollBack();
             Log::info($e->getMessage());
@@ -112,13 +112,19 @@ class aDeliveryOrderService extends Controller
             // if ($this->aDeliveryOrder->getDeliveryOrderbyID($request->TransactionCode)->count() < 1) {
             //     return $this->sendError('Purchase Order Number Not Found !', []);
             // }
-
+            
+            // cek udh di faktur belum  
+            $cekfaktur = $this->aDeliveryOrder->getFakturbyIDDo($request->TransactionCode);
+            if ($cekfaktur->count() > 0) {
+                $datafaktur = $cekfaktur->first();
+                return $this->sendError('Delivery Order Number Sudah Di Faktur dengan Nomor : ' . $datafaktur->TransactionCode . '!', []);
+            }
             // validasi Kode
             foreach ($request->Items as $key) {
                 # code...
                 // // cek kode barangnya ada ga
                 if ($this->aBarangRepository->getBarangbyId($key['ProductCode'])->count() < 1) {
-                    return $this->sendError('Product Not Found !', []);
+                    return $this->sendError('Kode Barang tidak ditemukan !', []);
                 } 
             }
        
@@ -149,7 +155,7 @@ class aDeliveryOrderService extends Controller
 
                     // INSERT BUKU STOK
                     $this->aStok->addBukuStok($request, $key,$nilaiHppFix);
-
+                    $this->aStok->addDataStoks($request, $key,$nilaiHppFix);
                     // UPDATE PURCHASE ORDER DETL QTY PURCAHSE REMAIN
                     $getPoData = $this->aPurchaseOrderRepository->getPurchaseOrderDetailbyIDBrgForDo($request,$key);
                     foreach ($getPoData as $valPo) {
@@ -163,46 +169,44 @@ class aDeliveryOrderService extends Controller
                     // update hpp
                     $this->aBarangRepository->editHPPBarang($key,$nilaiHppFix);
                     
-                    // INSERT TABEL STOK
-                    // cek stok ada ga di tabel 
-                    if ($this->aStok->cekStokbyIDBarang($key, $request->UnitCode)->count() < 1) {
-                        // kalo g ada insert
-                        $this->aStok->addStok($request, $key);
-                    }else{
-                        // kallo ada ya update
-                        $sumstok = $this->aStok->cekStokbyIDBarang($key, $request->UnitCode);
-                        foreach ($sumstok as $value2 => $value) { 
-                            $QtyCurrent = $value->Qty; 
-                        }
-                        $QtyTotal = $QtyCurrent + $key['Konversi_QtyTotal'];
-                        $this->aStok->updateStok($request, $key, $QtyTotal); 
-                    }
+                    // // INSERT TABEL STOK
+                    // // cek stok ada ga di tabel 
+                    // if ($this->aStok->cekStokbyIDBarang($key, $request->UnitCode)->count() < 1) {
+                    //     // kalo g ada insert
+                    //     $this->aStok->addStok($request, $key);
+                    // }else{
+                    //     // kallo ada ya update
+                    //     $sumstok = $this->aStok->cekStokbyIDBarang($key, $request->UnitCode);
+                    //     foreach ($sumstok as $value2 => $value) { 
+                    //         $QtyCurrent = $value->Qty; 
+                    //     }
+                    //     $QtyTotal = $QtyCurrent + $key['Konversi_QtyTotal'];
+                    //     $this->aStok->updateStok($request, $key, $QtyTotal); 
+                    // }
                     
                     // Update Hna Penjualan
-                   
-                    $hnaHigh = $this->aHna->getHnaHigh($key,$request);
-                
-                    $hna = ($key['Price'] / $key['Konversi_QtyTotal']);
-                    $nilaiHnaBaru = $hna + ($key['TaxRp']/$key['Konversi_QtyTotal']);
-                    $hnaTaxDiskon = (($hna - $key['DiscountRp']) + $key['TaxRp']);
-
-                    if($hnaHigh->count() < 1 ){ 
-                        $nilaiHnaFix = $nilaiHnaBaru;
-                    }else{
-                    
-                         
-                            $NilaiHnaTertingi = $hnaHigh->first()->first()->NominalHna; 
-                         
-                        if($NilaiHnaTertingi < $nilaiHnaBaru){
-                            $nilaiHnaFix = $nilaiHnaBaru;
-                        }else{
-                            $nilaiHnaFix = $NilaiHnaTertingi;
-                        }
-                        
-                    } 
-                    $this->aHna->addHna($request, $key,$nilaiHnaFix,$hnaTaxDiskon);
-
-
+                    if($request->JenisPurchase == "1"){
+                        if($request->JenisDeliveryOrder <> "LUAR"){
+                            $hnaHigh = $this->aHna->getHnaHigh($key,$request);
+                            $hna = ($key['Price'] / $key['Konversi_QtyTotal']);
+                            $taxconert = $key['TaxRp']/$key['Konversi_QtyTotal'];
+                            $nilaiHnaBaru = $hna + $taxconert;
+                            $discountConvert =  $key['DiscountRp']/$key['Konversi_QtyTotal'];
+                            $hnaTaxDiskon = (($hna - $discountConvert) + $taxconert );
+                            if($hnaHigh->count() < 1 ){ 
+                                $nilaiHnaFix = $nilaiHnaBaru;
+                            }else{
+                                    $NilaiHnaTertingi = $hnaHigh->first()->first()->NominalHna; 
+                                
+                                if($NilaiHnaTertingi < $nilaiHnaBaru){
+                                    $nilaiHnaFix = $nilaiHnaBaru;
+                                }else{
+                                    $nilaiHnaFix = $NilaiHnaTertingi;
+                                }
+                            } 
+                            $this->aHna->addHna($request, $key,$nilaiHnaFix,$hnaTaxDiskon);
+                        } 
+                    }
                 }else{
                     // Jika Tidak Kosong
                         // cek hpp dulu ada gak
@@ -222,28 +226,30 @@ class aDeliveryOrderService extends Controller
                     // INSERT BUKU STOK
                     $tipetrs = "DO";
                     $this->aStok->deleteBukuStok($request,$key, $tipetrs,$request->UnitCode);
+                    $this->aStok->deleteDataStoks($request,$key, $tipetrs,$request->UnitCode);
                     $this->aStok->addBukuStok($request, $key,$nilaiHppFix);
+                    $this->aStok->addDataStoks($request, $key,$nilaiHppFix);
                     
                     // INSERT TABEL STOK
                     // cek stok ada ga di tabel 
-                    if ($this->aStok->cekStokbyIDBarang($key, $request->UnitCode)->count() < 1) {
+                    // if ($this->aStok->cekStokbyIDBarang($key, $request->UnitCode)->count() < 1) {
                         // kalo g ada insert
-                        $this->aStok->addStok($request, $key);
-                    } else {
+                        // $this->aStok->addStok($request, $key);
+                    // } else {
                         // kallo ada ya update
-                        $sumstok = $this->aStok->cekStokbyIDBarang($key, $request->UnitCode);
-                        foreach ($sumstok as   $value) { 
-                            $QtyCurrentStok = $value->Qty; 
-                        }
+                        // $sumstok = $this->aStok->cekStokbyIDBarang($key, $request->UnitCode);
+                        // foreach ($sumstok as   $value) { 
+                        //     $QtyCurrentStok = $value->Qty; 
+                        // }
 
                         $sumdo = $this->aDeliveryOrder->getDeliveryOrderDetailByBarang($key['ProductCode'], $request->TransactionCode);
                         foreach ($sumdo as  $valDO) { 
                             $QtyDeliveryCurrebt = $valDO->QtyDelivery; 
                         }
-                        $QtyStokBeforeStok = $QtyCurrentStok - $QtyDeliveryCurrebt;
-                        $qtyStokCurrents = $QtyStokBeforeStok + $key['Konversi_QtyTotal'];
-                        $this->aStok->updateStok($request, $key, $qtyStokCurrents); 
-                    }
+                        // $QtyStokBeforeStok = $QtyCurrentStok - $QtyDeliveryCurrebt;
+                        // $qtyStokCurrents = $QtyStokBeforeStok + $key['Konversi_QtyTotal'];
+                        // $this->aStok->updateStok($request, $key, $qtyStokCurrents); 
+                    // }
 
                     // UPDATE PURCHASE ORDER DETL QTY PURCAHSE REMAIN
                     $getPoData = $this->aPurchaseOrderRepository->getPurchaseOrderDetailbyIDBrgForDo($request, $key);
@@ -262,30 +268,36 @@ class aDeliveryOrderService extends Controller
                     // update do detil
                     $this->aDeliveryOrder->updateDeliveryOrdeDetails($request, $key,$nilaiHppFix);
 
+
                     // update hna 
                      // Update Hna Penjualan
-                     $hnaHigh = $this->aHna->getHnaHigh($key,$request);
-                     $hna = ($key['Price'] / $key['Konversi_QtyTotal']);
-                     $nilaiHnaBaru = $hna + ($key['TaxRp']/$key['Konversi_QtyTotal']);
-                     $hnaTaxDiskon = (($hna - $key['DiscountRp']) + $key['TaxRp']);
-                    
-                     if($hnaHigh->count() < 1 ){
-                        $nilaiHnaFix = $nilaiHnaBaru;
-                     }else{ 
-                        $NilaiHnaTertingi = $hnaHigh->first()->first()->NominalHna; 
-                         if($NilaiHnaTertingi < $nilaiHnaBaru){
-                             $nilaiHnaFix = $nilaiHnaBaru;
-                         }else{
-                             $nilaiHnaFix = $NilaiHnaTertingi;
-                         }
-                         
+                     if($request->JenisPurchase == "1"){
+                        if($request->JenisDeliveryOrder <> "LUAR"){
+                            $hnaHigh = $this->aHna->getHnaHigh($key,$request);
+                            $hna = ($key['Price'] / $key['Konversi_QtyTotal']);
+                            $taxconert = $key['TaxRp']/$key['Konversi_QtyTotal'];
+                            $nilaiHnaBaru = $hna + $taxconert;
+                            $discountConvert =  $key['DiscountRp']/$key['Konversi_QtyTotal'];
+                            $hnaTaxDiskon = (($hna - $discountConvert) + $taxconert);
+                            
+                            if($hnaHigh->count() < 1 ){
+                                $nilaiHnaFix = $nilaiHnaBaru;
+                            }else{ 
+                                $NilaiHnaTertingi = $hnaHigh->first()->first()->NominalHna; 
+                                if($NilaiHnaTertingi < $nilaiHnaBaru){
+                                    $nilaiHnaFix = $nilaiHnaBaru;
+                                }else{
+                                    $nilaiHnaFix = $NilaiHnaTertingi;
+                                }
+                            } 
+                            $this->aHna->updateHna($request, $key,$nilaiHnaFix,$hnaTaxDiskon);
+                        }
                      } 
-                    $this->aHna->updateHna($request, $key,$nilaiHnaFix,$hnaTaxDiskon);
                 }
                 
             }
             DB::commit();
-           return $this->sendResponse([], 'Items Purchase Requisition Add Successfully !');
+           return $this->sendResponse([], 'Barang Delivery Order berhasil ditambahkan !');
         } catch (Exception $e) {
             DB::rollBack();
             Log::info($e->getMessage());
@@ -323,7 +335,7 @@ class aDeliveryOrderService extends Controller
                 return $this->sendError('Rekening Hutang Barang Kosong, Silahkan Maping Dahulu !', []);
             } 
             if ($this->aDeliveryOrder->getDeliveryOrderbyID($request->TransactionCode)->count() < 1) {
-                return $this->sendError('Delivery Order Number Not Found !', []);
+                return $this->sendError('No. Transaksi Delivery Order tidak ditemukan !', []);
             } 
            
             $cekDodetil = $this->aDeliveryOrder->getDeliveryOrderDetailbyID($request->TransactionCode);
@@ -342,11 +354,12 @@ class aDeliveryOrderService extends Controller
             $this->aJurnal->addJurnalHeader($request, $notes);
             $this->aDeliveryOrder->editDeliveryOrder($request);
             DB::commit();
-            return $this->sendResponse([], 'Delivery Order Edited Successfully !');
+            return $this->sendResponse([], 'Transaksi Delivery Order Berhasil di Simpan !');
+
         } catch (Exception $e) {
             DB::rollBack();
             Log::info($e->getMessage());
-            return $this->sendError('Transaction Edited Failed !', $e->getMessage());
+            return $this->sendError('Transaksi Gagal di Proses!', $e->getMessage());
         }
     }
     public function voidDeliveryOrder(Request $request)
@@ -375,46 +388,46 @@ class aDeliveryOrderService extends Controller
 
             // // // cek ada gak datanya
             if ($this->aDeliveryOrder->getDeliveryOrderbyID($request->TransactionCode)->count() < 1) {
-                return $this->sendError('Delivery Order Number Not Found !', []);
+                return $this->sendError('No. Transaksi Delivery Order tidak ditemukan !', []);
             }
 
             // Validasi Stok
             $dtlDo = $this->aDeliveryOrder->getDeliveryOrderDetailbyID($request->TransactionCode);
-         
+           
             foreach ($dtlDo as $value) {
                 $Konversi_QtyTotal = $value->Konversi_QtyTotal;
                 $cekqtystok = $this->aStok->cekStokbyIDBarangOnly($value->ProductCode, $request);
-                
+               
                 foreach ($cekqtystok as $valueStok) {
                     $datastok = $valueStok->Qty;
                 }
+               
                 $sisaStok = $datastok - $Konversi_QtyTotal;
+            
                 if($sisaStok < 0 ){
                     return $this->sendError('Barang ' . $valueStok->NamaBarang . ' Stok Invalid, Void Delivery Order Dibatalkan !', []);
                 }
-
-                
             }
 
             // Load Data All Do Detil Untuk Di Looping 
             $dtlDo2 = $this->aDeliveryOrder->getDeliveryOrderDetailbyID($request->TransactionCode);
             $reff_void = 'DO_V';
+          
             foreach ($dtlDo2 as $key2) {
 
                 $QtyDelivery = $key2->QtyDelivery;
                 $Konversi_QtyTotal = $key2->Konversi_QtyTotal;
-                $cekqtystok = $this->aStok->cekStokbyIDBarangOnly($key2->ProductCode,$request);
-                
-                    foreach ($cekqtystok as $valueStok) {
-                        $datastok = $valueStok->Qty;
-                    }
-                $sisaStok = $datastok - $Konversi_QtyTotal;
-                $this->aStok->updateStokPerItemBarang($request, $key2->ProductCode, $sisaStok);
+                // $cekqtystok = $this->aStok->cekStokbyIDBarangOnly($key2->ProductCode,$request);
+                    // foreach ($cekqtystok as $valueStok) {
+                    //     $datastok = $valueStok->Qty;
+                    // }
+                // $sisaStok = $datastok - $Konversi_QtyTotal;
+                // $this->aStok->updateStokPerItemBarang($request, $key2->ProductCode, $sisaStok);
                 $this->aStok->addBukuStokVoid($request, $key2,$reff_void);
-
+                $this->aStok->addDataStoksVoid($request, $key2,$reff_void);
                 // update nilai Hpp ke No. Trs Do Sebelumnya
                 $cekDoTerakhirHna = $this->aDeliveryOrder->getDeliveryOrderDetailbyIDnotIdTrsNow($key2, $request);
-              
+               
                 if( $cekDoTerakhirHna->count() < 1){
                     $hna = "0";
                     // jika tidak di temukan do terakhir update hpp jadi 0
@@ -431,7 +444,8 @@ class aDeliveryOrderService extends Controller
                 }
 
                 $qtyremainPO = $QtyPurchaseRemain + $key2->QtyDelivery;
-
+                $this->aBarangRepository->updateBatalHnabyDo($request);
+                $this->aBarangRepository->updateBatalHppbyDo($request);
                 $this->aPurchaseOrderRepository->editQtyPurchaseRemain($request, $qtyremainPO, $key2->ProductCode);
 
             }
@@ -440,11 +454,11 @@ class aDeliveryOrderService extends Controller
             $this->aDeliveryOrder->voidDeliveryOrder($request);
 
             DB::commit();
-            return $this->sendResponse([], 'Delivery Order Void Successfully !');
+            return $this->sendResponse([], 'Transaksi Delivery Order berhasil dibatalkan !');
         } catch (Exception $e) {
             DB::rollBack();
             Log::info($e->getMessage());
-            return $this->sendError('Delivery Void Failed !', $e->getMessage());
+            return $this->sendError('Transaksi tidak dapat di Proses !', $e->getMessage());
         }
     }
     public function voidDeliveryOrderDetailbyItem(Request $request)
@@ -479,7 +493,7 @@ class aDeliveryOrderService extends Controller
             if ($cekdodetil < 1) {
                 return $this->sendError('Kode Barang Sudah di Batalkan !', []);
             }
-            // Validasi Stok
+            // Validasi Stok - cek stok dulu
                 $dtlDo = $this->aDeliveryOrder->getDeliveryOrderDetailbyIDandProductCode($request)->first();
                 $QtyDelivery = $dtlDo->Konversi_QtyTotal;
                 $cekqtystok = $this->aStok->cekStokbyIDBarangOnly($dtlDo->ProductCode, $request)->first();
@@ -489,9 +503,9 @@ class aDeliveryOrderService extends Controller
                     return $this->sendError('Barang ' . $cekqtystok->NamaBarang . ' Stok Invalid, Void Delivery Order Dibatalkan !', []);
                 }
                
-                $this->aStok->updateStokPerItemBarang($request, $dtlDo->ProductCode, $sisaStok);
+                // $this->aStok->updateStokPerItemBarang($request, $dtlDo->ProductCode, $sisaStok);
                 $this->aStok->addBukuStokVoidbyIdProduct($request, $dtlDo);
-
+                $this->aStok->addDataStokVoidbyIdProduct($request, $dtlDo);
                 // update nilai Hpp ke No. Trs Do Sebelumnya
                 $cekDoTerakhirHna = $this->aDeliveryOrder->getDeliveryOrderDetailbyIDnotIdTrsNow($dtlDo, $request);
 
@@ -519,11 +533,11 @@ class aDeliveryOrderService extends Controller
 
             DB::commit();
 
-            return $this->sendResponse([], 'Delivery Order Detail Void Successfully !');
+            return $this->sendResponse([], 'Transaksi Delivery Order Detail Berhasil dibatalkan !');
         } catch (Exception $e) {
             DB::rollBack();
             Log::info($e->getMessage());
-            return $this->sendError('Transaction Void Failed !', $e->getMessage());
+            return $this->sendError('Transaksi tidak dapat diproses !', $e->getMessage());
         }
     }
     public function getDeliveryOrderbyID($request)
@@ -532,24 +546,16 @@ class aDeliveryOrderService extends Controller
         $request->validate([
             "TransactionCode" => "required"
         ]);
-
         try {
-            // Db Transaction
-            DB::beginTransaction();
-
             // cek ada gak datanya
             if ($this->aDeliveryOrder->getDeliveryOrderbyID($request->TransactionCode)->count() < 1) {
-                return $this->sendError('Delivery Order Number Not Found !', []);
+                return $this->sendError('No. Transaksi Delivery Order tidak di ditemukan !', []);
             } 
-
             $data = $this->aDeliveryOrder->getDeliveryOrderbyID($request->TransactionCode);
-
-            DB::commit();
-            return $this->sendResponse($data, 'Delivery Order Data Found !');
-        } catch (Exception $e) {
-            DB::rollBack();
+            return $this->sendResponse($data, 'No. Transaksi Delivery Order di ditemukan !');
+        } catch (Exception $e) { 
             Log::info($e->getMessage());
-            return $this->sendError('Delivery Order Data Not Found !', $e->getMessage());
+            return $this->sendError('Transaksi tidak dapat di proses !', $e->getMessage());
         }
     }
     public function getDeliveryOrderDetailbyID($request)
@@ -559,23 +565,16 @@ class aDeliveryOrderService extends Controller
             "TransactionCode" => "required"
         ]);
 
-        try {
-            // Db Transaction
-            DB::beginTransaction();
-
+        try { 
             // cek ada gak datanya
             if ($this->aDeliveryOrder->getDeliveryOrderDetailbyID($request->TransactionCode)->count() < 1) {
-                return $this->sendError('Delivery Order Not Found !', []);
+                return $this->sendError('No. Transaksi Delivery Order tidak di ditemukan ! !', []);
             }
-
             $data = $this->aDeliveryOrder->getDeliveryOrderDetailbyID($request->TransactionCode);
-
-            DB::commit();
-            return $this->sendResponse($data, 'Delivery Order Data Found !');
-        } catch (Exception $e) {
-            DB::rollBack();
+            return $this->sendResponse($data, 'No. Transaksi Delivery Order di ditemukan !');
+        } catch (Exception $e) { 
             Log::info($e->getMessage());
-            return $this->sendError('Delivery Order Data Not Found !', $e->getMessage());
+            return $this->sendError('Transaksi tidak dapat di proses !', $e->getMessage());
         }
     }
     public function getDeliveryOrderbyDateUser($request)
@@ -585,18 +584,12 @@ class aDeliveryOrderService extends Controller
             "UserCreate" => "required"
         ]);
 
-        try {
-            // Db Transaction
-            DB::beginTransaction();
-
+        try { 
             $data = $this->aDeliveryOrder->getDeliveryOrderbyDateUser($request);
-
-            DB::commit();
-            return $this->sendResponse($data, 'Delivery Order Data Found !');
-        } catch (Exception $e) {
-            DB::rollBack();
+            return $this->sendResponse($data, 'No. Transaksi Delivery Order di ditemukan !');
+        } catch (Exception $e) { 
             Log::info($e->getMessage());
-            return $this->sendError('Delivery Order Data Not Found !', $e->getMessage());
+            return $this->sendError('Transaksi tidak dapat di proses !', $e->getMessage());
         }
     }
     public function getDeliveryOrderbyPeriode($request)
@@ -608,15 +601,9 @@ class aDeliveryOrderService extends Controller
         ]);
 
         try {
-            // Db Transaction
-            DB::beginTransaction();
-
             $data = $this->aDeliveryOrder->getDeliveryOrderbyPeriode($request);
-
-            DB::commit();
-            return $this->sendResponse($data, 'Delivery Order Data Found !');
-        } catch (Exception $e) {
-            DB::rollBack();
+            return $this->sendResponse($data, 'No. Transaksi Delivery Order di ditemukan !');
+        } catch (Exception $e) { 
             Log::info($e->getMessage());
             return $this->sendError('Delivery Order Data Not Found !', $e->getMessage());
         }

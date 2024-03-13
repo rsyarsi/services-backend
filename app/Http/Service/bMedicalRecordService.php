@@ -235,7 +235,6 @@ class bMedicalRecordService extends Controller {
             $DOB = date('Ymd', strtotime($request->tanggallahir));
             $noMRRad = $this->MedrecRadiologiNumber($NoMrfix);
             $TRIGGER_DTTM = Carbon::now()->format('YmdHis'); 
-
             //cek jika sudah ada di patientwl
             if ($this->medrecRepository->getpatientwlRadiologibyPatientID($request->NoResep)->count() < 1) {
                 $event_type = 'ADT^A04';

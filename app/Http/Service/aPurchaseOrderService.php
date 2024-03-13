@@ -44,6 +44,7 @@ class aPurchaseOrderService extends Controller
             "UserCreate" => "required",
             "SupplierCode" => "required",
             "Notes" => "required",
+            "TipePO" => "required",
             "PurchaseReqCode" => "required" 
         ]);
         try {
@@ -211,9 +212,13 @@ class aPurchaseOrderService extends Controller
             if ($this->aPurchaseOrder->getPurchaseOrderDetailbyID($request->PurchaseCode)->count() < 1) {
                 return $this->sendError('Purchase Order Detail Number Not Found !', []);
             }
-            if ($this->aPurchaseOrder->getPurchaseOrderDetailbyID($request->PurchaseCode)->count() < 1) {
-                return $this->sendError('Purchase Order Detail Number Not Found !', []);
+            // // cek sudah di approved belum 
+            if ($this->aPurchaseOrder->getPurchaseOrderApprovedbyID($request->PurchaseCode)->count() > 0) {
+                return $this->sendError('Purchase Order Number Has Been Approved !', []);
             }
+            // if ($this->aPurchaseOrder->getPurchaseOrderDetailbyID($request->PurchaseCode)->count() < 1) {
+            //     return $this->sendError('Purchase Order Detail Number Not Found !', []);
+            // }
 
             
             // void detail pr - reset qty order
@@ -383,5 +388,65 @@ class aPurchaseOrderService extends Controller
             Log::info($e->getMessage());
             return $this->sendError('Purchase Order Data Not Found !', $e->getMessage());
         }
+    }
+    public function approvalFirst($request){
+        // validate 
+        $request->validate([
+            "UserApprove" => "required",
+            "DateApprove" => "required"
+        ]);
+
+        try {
+            // Db Transaction
+            DB::beginTransaction();
+            $this->aPurchaseOrder->approvalFirst($request);
+            DB::commit();
+            return $this->sendResponse([], 'Approval Pertama Purchase Order !');
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info($e->getMessage());
+            return $this->sendError('Transaksi Gagal di Proses !', $e->getMessage());
+        } 
+        
+    }
+    public function approvalSecond($request){
+        // validate 
+        $request->validate([
+            "UserApprove" => "required",
+            "DateApprove" => "required"
+        ]);
+
+        try {
+            // Db Transaction
+            DB::beginTransaction();
+            $this->aPurchaseOrder->approvalSecond($request);
+            DB::commit();
+            return $this->sendResponse([], 'Approval Ke dua Purchase Order !');
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info($e->getMessage());
+            return $this->sendError('Transaksi Gagal di Proses !', $e->getMessage());
+        } 
+        
+    }
+    public function approvalThirth($request){
+        // validate 
+        $request->validate([
+            "UserApprove" => "required",
+            "DateApprove" => "required"
+        ]);
+
+        try {
+            // Db Transaction
+            DB::beginTransaction();
+            $this->aPurchaseOrder->approvalThirth($request);
+            DB::commit();
+            return $this->sendResponse([], 'Approval Ke tiga Purchase Order !');
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info($e->getMessage());
+            return $this->sendError('Transaksi Gagal di Proses !', $e->getMessage());
+        } 
+        
     }
 }
