@@ -102,4 +102,37 @@ class BarangController extends Controller
     $addBarang =  $aBarangService->getBarangbyNameLike($request);
     return $addBarang;
   }
+  public function addPrinterLabel(Request $request)
+  {
+      $aBarangRepository = new aBarangRepositoryImpl();
+      $aSupplierRepository = new aSupplierRepositoryImpl();
+      $aBarangService = new aBarangService($aBarangRepository, $aSupplierRepository);
+      $addBarang =  $aBarangService->addPrinterLabel($request);
+      return $addBarang;
+  }
+  
+  public function editPrinterLabel(Request $request)
+  {
+    $aBarangRepository = new aBarangRepositoryImpl();
+      $aSupplierRepository = new aSupplierRepositoryImpl();
+      $aBarangService = new aBarangService($aBarangRepository, $aSupplierRepository);
+      $addBarang =  $aBarangService->editPrinterLabel($request);
+      return $addBarang;
+  }
+  public function getPrinterLabelAll()
+  {
+    $aBarangRepository = new aBarangRepositoryImpl();
+      $aSupplierRepository = new aSupplierRepositoryImpl();
+      $aBarangService = new aBarangService($aBarangRepository, $aSupplierRepository);
+      $getAllBarang =  $aBarangService->getPrinterLabelAll();
+      return $getAllBarang;
+  }
+  public function getPrinterLabelbyId($id)
+  {
+    $aBarangRepository = new aBarangRepositoryImpl();
+      $aSupplierRepository = new aSupplierRepositoryImpl();
+      $aBarangService = new aBarangService($aBarangRepository, $aSupplierRepository);
+      $getAllBarang =  $aBarangService->getPrinterLabelbyId($id);
+      return $getAllBarang;
+  }
 }

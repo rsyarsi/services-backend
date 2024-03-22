@@ -21,6 +21,8 @@ use App\Http\Repository\aMasterUnitRepositoryImpl;
 use App\Http\Repository\aDeliveryOrderRepositoryImpl; 
 use App\Http\Repository\aPurchaseOrderRepositoryImpl;
 use App\Traits\FifoTrait;
+use App\Http\Repository\bBillingRepositoryImpl;
+use App\Http\Repository\bVisitRepositoryImpl;
 
 class aConsumableService extends Controller
 {
@@ -37,6 +39,8 @@ class aConsumableService extends Controller
     private $aConsumableRepository;
     private $aMasterUnitRepository;
     private $ahnaRepository;
+    private $billingRepository;
+    private $visitRepository;
 
     public function __construct(
         aDeliveryOrderRepositoryImpl $aDeliveryOrder,
@@ -48,7 +52,9 @@ class aConsumableService extends Controller
         aJurnalRepositoryImpl $aJurnal,
         aConsumableRepositoryImpl $aConsumableRepository,
         aMasterUnitRepositoryImpl $aMasterUnitRepository,
-        aHnaRepositoryImpl $ahnaRepository
+        aHnaRepositoryImpl $ahnaRepository,
+        bBillingRepositoryImpl $billingRepository,
+        bVisitRepositoryImpl $visitRepository
     ) {
         $this->aDeliveryOrder = $aDeliveryOrder;
         $this->aBarangRepository = $aBarangRepository;
@@ -60,6 +66,8 @@ class aConsumableService extends Controller
         $this->aConsumableRepository = $aConsumableRepository;
         $this->aMasterUnitRepository = $aMasterUnitRepository;
         $this->ahnaRepository = $ahnaRepository;
+        $this->billingRepository = $billingRepository;
+        $this->visitRepository = $visitRepository;
     }
 
     public function addConsumableHeader(Request $request)
@@ -108,11 +116,12 @@ class aConsumableService extends Controller
             "UnitTujuan" => "required",  
             "Notes" => "required",
             "TotalQtyOrder" => "required",
-            "NoRegistrasi" => "required",
             "TotalRow" => "required",
             "TransactionDate" => "required",
             "UserCreate" => "required"
         ]);
+
+        
 
         // validasi 
         // // cek ada gak datanya
@@ -163,7 +172,41 @@ class aConsumableService extends Controller
         }
         try {
             // Db Transaction
-            DB::beginTransaction(); 
+            DB::beginTransaction();
+
+            //insert billingnya jika memakai nomor registrasi
+            if ($request->NoRegistrasi != ''){
+                $tipereg = substr($request->NoRegistrasi, 0, 2);
+                if ($tipereg == 'RJ'){
+                    $getdataregpasien = $this->visitRepository->getRegistrationRajalbyNoreg($request->NoRegistrasi)->first();
+                }elseif($tipereg == 'RI'){
+                    $getdataregpasien = $this->visitRepository->getRegistrationRanapbyNoreg($request->NoRegistrasi)->first();
+                    $request['KodeKelas'] = $getdataregpasien->KelasID_Akhir;
+                }else{
+                    return  $this->sendError('Nomor Registrasi Tidak Valid ! ' , []);
+                }
+                $request['TotalSales'] = 0;
+                $request['SubtotalQtyPrice'] = 0;
+                $request['Discount_Prosen'] = 0;
+                $request['Discount'] = 0;
+                $request['Subtotal'] = 0;
+                $request['Grandtotal'] = 0;
+                $request['NoMr'] = $getdataregpasien->NoMR;
+                $request['NoEpisode'] = $getdataregpasien->NoEpisode;
+                $request['GroupJaminan'] = $getdataregpasien->TipePasien;
+                $request['KodeJaminan'] = $getdataregpasien->KodeJaminan;
+                $request['IdUnit'] = $getdataregpasien->IdUnit;
+                // // billinga
+                $cekbill = $this->billingRepository->getBillingFo($request)->count(); 
+                //cek jika sudah ada di table
+                if ( $cekbill > 0) {
+                    //update
+                }else{
+                    //insert
+                    $this->billingRepository->insertHeader($request,$request->TransactionCode);
+                }
+            }
+
 
             foreach ($request->Items as $key) {
                 $getdatadetilmutasi = $this->aConsumableRepository->getConsumableDetailbyIDBarang($request,$key);
@@ -198,7 +241,25 @@ class aConsumableService extends Controller
                         $this->fifoConsumable($request,$key,$xhpp);
                    }  
                 } 
+
+                // insert billing detail
+                if ($request->NoRegistrasi != ''){
+                    $this->billingRepository->insertDetail($request->TransactionCode,$request->TransactionDate,$request->UserCreate,
+                    $request->NoMr,$request->NoEpisode,$request->NoRegistrasi,$key['ProductCode'],
+                    $request->UnitTujuan,$request->GroupJaminan,$request->KodeJaminan,$key['ProductName'],
+                    'Farmasi',$request->KodeKelas,$key['Qty'],0,0,
+                    0,0,0,0,'','','','FARMASI');
+                }
             }
+
+            //insert billing pdp
+            if ($request->NoRegistrasi != ''){
+                $dataBilling1 = $this->billingRepository->getBillingFo1($request);
+                foreach ($dataBilling1 as $dataBilling1) {
+                    $this->billingRepository->insertDetailPdp($dataBilling1);
+                } 
+            }
+
             // update tabel header
             $this->aConsumableRepository->editConsumable($request);
             DB::commit();
@@ -330,6 +391,11 @@ class aConsumableService extends Controller
                     $this->aStok->addBukuStokInVoidFromSelect($asd,'CM_V',$request);
                     $this->aStok->addDataStoksInVoidFromSelect($asd,'CM_V',$request);
             }
+            
+            // void billing transaction
+            $this->billingRepository->voidBillingPasien($request);
+            $this->billingRepository->voidBillingPasienOne($request);
+            $this->billingRepository->voidBillingPasienTwo($request);
         
             $this->aConsumableRepository->voidConsumableDetailAllOrder($request);
             $this->aConsumableRepository->voidConsumable($request);
@@ -396,6 +462,10 @@ class aConsumableService extends Controller
             } 
             $this->aStok->addBukuStokInVoidFromSelect($asd,'CM_V',$request);
             $this->aStok->addDataStoksInVoidFromSelect($asd,'CM_V',$request);
+            
+            //void billing
+            $this->billingRepository->voidBillingPasienOneByProductCode($request);
+            $this->billingRepository->voidBillingPasienTwoByProductCode($request);
 
             $this->aConsumableRepository->voidConsumablebyItem($request);
 

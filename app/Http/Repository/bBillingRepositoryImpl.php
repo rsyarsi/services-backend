@@ -20,7 +20,7 @@ class bBillingRepositoryImpl implements bBillingRepositoryInterface
             'KODE_JAMINAN' =>  $request->KodeJaminan,
             'TOTAL_TARIF' =>$request->TotalSales,
             'TOTAL_QTY' => $request->TotalQtyOrder, 
-            'SUBTOTAL' => $request->SubtotalQtyPrice, 
+            'SUBTOTAL' => $request->Subtotal, 
             'TOTAL_DISCOUNT' => $request->Discount_Prosen, 
             'TOTAL_DISCOUNT_RP' => $request->Discount, 
             'SUBTOTAL_2' => $request->Subtotal, 
@@ -64,6 +64,7 @@ class bBillingRepositoryImpl implements bBillingRepositoryInterface
             'BATAL' => '0',
             'PETUGAS_BATAL' => '',
             'GROUP_ENTRI' => $GROUP_ENTRI,
+            'KEKURANGAN' => $GRANDTOTAL
         ]);
     }
     public function getBillingFo1($request){
@@ -172,5 +173,57 @@ class bBillingRepositoryImpl implements bBillingRepositoryInterface
         return  DB::connection('sqlsrv11')->table("FO_T_BILLING")
         ->where('NO_TRS_BILLING', $request->TransactionCode) 
         ->get();
+    }
+
+    public function voidBillingPasienOneByProductCode($request)
+    {
+        $updatesatuan =  DB::connection('sqlsrv11')->table('FO_T_BILLING_1')
+            ->where('NO_TRS_BILLING', $request->TransactionCode)
+            ->where('KODE_TARIF', $request->ProductCode)
+            ->where('Batal', "0")
+            ->update([
+                'Batal' => $request->Void,
+                'JAM_BATAL' => Carbon::now(),
+                'PETUGAS_BATAL' => $request->UserVoid,
+            ]);
+        return $updatesatuan;
+    }
+    public function voidBillingPasienTwoByProductCode($request)
+    {
+        $updatesatuan =  DB::connection('sqlsrv11')->table('FO_T_BILLING_2')
+            ->where('NO_TRS_BILLING', $request->TransactionCode)
+            ->where('KODE_TARIF', $request->ProductCode)
+            ->where('Batal', "0")
+            ->update([
+                'Batal' => $request->Void,
+                'JAM_BATAL' => Carbon::now(),
+                'PETUGAS_BATAL' => $request->UserVoid,
+            ]);
+        return $updatesatuan;
+    }
+
+    public function getSumBillingFo1($request){
+        return  DB::connection('sqlsrv11')->table("v_sumbill1")
+        ->where('NO_TRS_BILLING', $request->TransactionCode) 
+        ->get();
+    }
+
+    public function updateSumBillingHeader($TransactionCode,$request)
+    {
+        $updatesatuan =  DB::connection('sqlsrv11')->table('FO_T_BILLING')
+            ->where('NO_TRS_BILLING', $TransactionCode)
+            ->where('Batal', "0")
+            ->update([
+                'TOTAL_TARIF' =>$request->TOTAL_TARIF,
+                'TOTAL_QTY' => $request->TOTAL_QTY, 
+                'SUBTOTAL' => $request->SUBTOTAL, 
+                'TOTAL_DISCOUNT' => $request->TOTAL_DISCOUNT, 
+                'TOTAL_DISCOUNT_RP' => $request->TOTAL_DISCOUNT_RP, 
+                'SUBTOTAL_2' => $request->SUBTOTAL_2, 
+                'GRANDTOTAL' => $request->GRANDTOTAL, 
+                'FB_CLOSE_KEUANGAN' => '0', 
+                'FB_VERIF_JURNAL' => '1'
+            ]);
+        return $updatesatuan;
     }
 }

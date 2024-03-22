@@ -68,7 +68,7 @@ class aSalesService extends Controller
             "UserCreate" => "required",
             "UnitOrder" => "required", 
             "UnitTujuan" => "required", 
-            "NoRegistrasi" => "required", 
+            //"NoRegistrasi" => "required", 
             "Group_Transaksi" => "required", 
             "Notes" => "required" ,
         ]);
@@ -102,6 +102,7 @@ class aSalesService extends Controller
                 $TransactionCode = 0;
             }
             $autonumber = $this->SalesResepNumber($request, $TransactionCode);
+            
 
             $this->aSalesRepository->addSalesHeader($request, $autonumber);
             DB::commit();
@@ -123,6 +124,7 @@ class aSalesService extends Controller
             "TransactionDate" => "required",
             "UserCreate" => "required"
         ]);
+
          
         // // cek ada gak datanya
         if ($this->aSalesRepository->getSalesbyID($request->TransactionCode)->count() < 1) {

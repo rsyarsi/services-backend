@@ -269,4 +269,53 @@ class aBarangRepositoryImpl implements aBarangRepositoryInterface
             ]);
         return $updateBarang;
     }
+
+    public function getPrinterLabelAll()
+    {
+        return  DB::connection('sqlsrv2')
+            ->table("SharingPrinter")
+            ->select(
+            'ID',
+            'IP_Komputer',
+            'Jenis',
+            'IPPrinterSharing',
+            'NamaPrinterSharing'
+            )
+            ->get();
+    }
+    public function getPrinterLabelbyId($id)
+    {
+        return  DB::connection('sqlsrv2')
+            ->table("SharingPrinter")
+            ->select(
+                'ID',
+                'IP_Komputer',
+                'Jenis',
+                'IPPrinterSharing',
+                'NamaPrinterSharing'
+            )
+            ->where('ID', $id)
+            ->get();
+    }
+    public function addPrinterLabel($request)
+    {
+        return  DB::connection('sqlsrv2')->table("SharingPrinter")->insert([
+                'IP_Komputer' => $request->IP_Komputer,
+                'Jenis' => $request->Jenis,
+                'IPPrinterSharing' => $request->IPPrinterSharing,
+                'NamaPrinterSharing' => $request->NamaPrinterSharing,
+        ]);
+    }
+
+    public function editPrinterLabel($request)
+    {
+        return  DB::connection('sqlsrv2')->table("SharingPrinter")
+        ->where('ID', $request->ID)
+        ->update([
+                'IP_Komputer' => $request->IP_Komputer,
+                'Jenis' => $request->Jenis,
+                'IPPrinterSharing' => $request->IPPrinterSharing,
+                'NamaPrinterSharing' => $request->NamaPrinterSharing,
+        ]);
+    }
 }

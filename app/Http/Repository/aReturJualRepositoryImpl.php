@@ -22,7 +22,7 @@ class aReturJualRepositoryImpl implements aReturJualRepositoryInterface
             'TransactionDate' => $request->TransactionDate,
             'UserCreate' => $request->UserCreate,
             'UnitCode' => $request->UnitCode,  
-            'UunitSales' => $request->UunitSales,  
+            'UunitSales' => $request->UnitSales,  
             'Notes' => $request->Notes, 
             'TotalQtyReturJual' => '0',
             'TotalRow' => '0', 

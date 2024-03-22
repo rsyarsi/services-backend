@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
 use App\Http\Repository\aBarangRepositoryImpl;
 use App\Http\Repository\aSupplierRepositoryImpl;
+use Exception;
+use Illuminate\Support\Facades\Log;
 
 class aBarangService extends Controller
 {
@@ -323,4 +325,77 @@ class aBarangService extends Controller
 
        
     }
+    public function getPrinterLabelAll()
+    {
+        // validator 
+        $count = $this->aBarangRepository->getPrinterLabelAll()->count();
+        if ($count > 0) {
+            $data = $this->aBarangRepository->getPrinterLabelAll();
+            return $this->sendResponse($data, "Data Barang ditemukan.");
+        } else {
+            return $this->sendError("Data Product Not Found.", [], 400);
+        }
+    }
+
+    public function getPrinterLabelbyId($id)
+    {
+        // validator 
+        $count = $this->aBarangRepository->getPrinterLabelbyId($id)->count();
+
+        if ($count > 0) {
+            $data = $this->aBarangRepository->getPrinterLabelbyId($id);
+            return $this->sendResponse($data, "Data Product ditemukan.");
+        } else {
+            return $this->sendError("Data Product Found.", [], 400);
+        }
+    }
+
+    public function addPrinterLabel(Request $request)
+    {
+        $request->validate([
+            "IP_Komputer" => "required",
+            "Jenis" => "required",
+            "IPPrinterSharing" => "required",
+            "NamaPrinterSharing" => "required",
+        ]);
+        
+        try {
+            // // Db Transaction
+            // $data = $this->aBarangRepository->getPrinterLabelbyId($request->ID);
+            // // // cek ada gak datanya
+            // if ($data->count() < 1) {
+            //     return $this->sendError('Data Not Found !', []);
+            // }
+            $createBarang = $this->aBarangRepository->addPrinterLabel($request);
+            return $this->sendResponse($createBarang, 'Sharing Printer Label Berhasil Dibuat !');
+        } catch (Exception $e) { 
+            Log::info($e->getMessage());
+            return $this->sendError('Data Not Found !', $e->getMessage());
+        }
+    } 
+
+    public function editPrinterLabel(Request $request)
+    {
+        $request->validate([
+            "ID" => "required",
+            "IP_Komputer" => "required",
+            "Jenis" => "required",
+            "IPPrinterSharing" => "required",
+            "NamaPrinterSharing" => "required",
+        ]);
+        
+        try {
+            // Db Transaction
+            $data = $this->aBarangRepository->getPrinterLabelbyId($request->ID);
+            // // cek ada gak datanya
+            if ($data->count() < 1) {
+                return $this->sendError('Data Not Found !', []);
+            }
+            $updateBarang = $this->aBarangRepository->editPrinterLabel($request);
+            return $this->sendResponse($updateBarang, 'Sharing Printer Label Berhasil Diperbarui !');
+        } catch (Exception $e) { 
+            Log::info($e->getMessage());
+            return $this->sendError('Data Not Found !', $e->getMessage());
+        }
+    } 
 }

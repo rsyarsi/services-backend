@@ -155,6 +155,11 @@ Route::group(["middleware"=>["auth:api"]], function(){
         Route::delete("deleteBarangFormularium", [BarangController::class, "deleteBarangFormularium"]);
         Route::get("getBarangbyFormulariums/{id}", [BarangController::class, "getBarangbyFormulariums"]);
         
+        // Printer
+        Route::post("addPrinterLabel", [BarangController::class, "addPrinterLabel"]);
+        Route::post("editPrinterLabel", [BarangController::class, "editPrinterLabel"]);
+        Route::get("getPrinterLabelAll", [BarangController::class, "getPrinterLabelAll"]);
+        Route::get("getPrinterLabelbyId/{id}", [BarangController::class, "getPrinterLabelbyId"]);
     });
 
     //inventory

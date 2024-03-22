@@ -105,7 +105,8 @@ class aSalesRepositoryImpl implements aSalesRepositoryInterface
             'DateAdd' => Carbon::now(),
             'UserAdd' =>  $request->UserCreate,
             'Konversi_QtyTotal' => $key['Konversi_QtyTotal'],//tambahan
-            'AturanPakai' => $key['AturanPakai']  //tambahan
+            'AturanPakai' => $key['AturanPakai'],  //tambahan
+            'QtySalesRemain' => $key['QtyResep']  //tambahan
         ]);
     }
     public function editSalesDetailbyIdBarang($request, $key,$xhpp)

@@ -70,7 +70,7 @@ class aReturJualService extends Controller
             "TransactionDate" => "required",
             "UserCreate" => "required",
             "UnitCode" => "required", 
-            "UunitSales" => "required", 
+            "UnitSales" => "required", 
             "SalesCode" => "required", 
             "NoResep" => "required", 
             "Group_Transaksi" => "required",  
@@ -173,6 +173,7 @@ class aReturJualService extends Controller
                 return $this->sendError('Kode Transaksi Penjualan tidak ditemukan !', []);
             }
 
+
             // validasi Kode
             foreach ($request->Items as $key) {
                 # code...
@@ -181,18 +182,21 @@ class aReturJualService extends Controller
                     return $this->sendError('Kode Barang tidak ditemukan !', []);
                 }
             }
+            
 
             foreach ($request->Items as $key) {
                 // Update Purchase Order Qty Remain 
                 $getDetailData = $this->returJualRepository->getReturJualDetailbyIDBarang($request, $key);
                 $datasalesDetails = $this->aSalesRepository->getSalesDetailbyIDBarangFix($request->SalesCode,$key['ProductCode'])->first();
+
+                
               
                 if($getDetailData->count() < 1){ 
                     if ($key['QtyReturJual'] > 0) {
                         $this->returJualRepository->addReturJualDetail($request,$key);
                         $QtyRemain = $datasalesDetails->QtySalesRemain; 
                         $QtyAfter = $QtyRemain - $key['QtyReturJual'];
-                        $this->aSalesRepository->updateQtRemainSalesDetail($request->TransactionCode,$key['ProductCode'], $QtyAfter);
+                        $this->aSalesRepository->updateQtRemainSalesDetail($request->SalesCode,$key['ProductCode'], $QtyAfter);
                         
                         $this->fifoReturJual($request,$key,'TRJ');
                     }
@@ -207,7 +211,7 @@ class aReturJualService extends Controller
                         $SalesRemain = $datasalesDetails->QtySalesRemain;  
                         $QtyRemain = $SalesRemain+$QtyReturNew;
                         $doqtyAfter = $QtyRemain - $key['QtyReturJual'];
-                        $this->aSalesRepository->updateQtRemainSalesDetail($request,$key, $doqtyAfter);
+                        $this->aSalesRepository->updateQtRemainSalesDetail($request->SalesCode,$key['ProductCode'], $doqtyAfter);
                         $this->aStok->deleteBukuStok($request,$key,"TRJ",$request->UnitCode);  
                         $this->aStok->deleteDataStoks($request,$key,"TRJ",$request->UnitCode); 
                         $this->fifoReturJual($request,$key,'TRJ');
@@ -220,6 +224,60 @@ class aReturJualService extends Controller
 
             // update tabel header
             $this->returJualRepository->editReturJualHeader($request);
+
+            // BILLING
+            $tipereg = substr($request->NoRegistrasi, 0, 2);
+                if ($tipereg == 'RJ'){
+                    $getdataregpasien = $this->visitRepository->getRegistrationRajalbyNoreg($request->NoRegistrasi)->first();
+                }elseif($tipereg == 'RI'){
+                    $getdataregpasien = $this->visitRepository->getRegistrationRanapbyNoreg($request->NoRegistrasi)->first();
+                    $request['KodeKelas'] = $getdataregpasien->KelasID_Akhir;
+                }else{
+                    return  $this->sendError('Nomor Registrasi Tidak Valid ! ' , []);
+                }
+                $getdatasaleshdr = $this->aSalesRepository->getSalesbyID($request->SalesCode)->first();
+                $request['TotalSales'] = $request->TotalReturJualRp*-1;
+                $request['SubtotalQtyPrice'] = $request->TotalQtyReturJual*-1;
+                $request['Discount_Prosen'] = $getdatasaleshdr->Discount;
+                $request['Discount'] = 0;
+                $request['Subtotal'] = $request->TotalReturJualRp*-1;
+                $request['Grandtotal'] = $getdatasaleshdr->GrandTotal*-1;
+                $request['NoMr'] = $getdataregpasien->NoMR;
+                $request['NoEpisode'] = $getdataregpasien->NoEpisode;
+                $request['GroupJaminan'] = $getdataregpasien->TipePasien;
+                $request['KodeJaminan'] = $getdataregpasien->KodeJaminan;
+                $request['IdUnit'] = $getdataregpasien->IdUnit;
+                $request['UnitTujuan'] = $request->UnitSales;
+                $request['TotalQtyOrder'] = $request->TotalQtysales*-1;
+                
+            // // insert ke billing header
+            $cekbill = $this->billingRepository->getBillingFo($request)->count(); 
+            //cek jika sudah ada di table
+            if ( $cekbill > 0) {
+                //update
+            }else{
+                //insert
+                $this->billingRepository->insertHeader($request,$request->TransactionCode);
+            }
+
+            foreach ($request->Items as $key) {
+                $qtyretur = $key['QtyReturJual']*-1;
+                $hargaretur = $key['ReturPrice']*-1;
+                $totalretur = $key['TotalReturJual']*-1;
+                 // insert billing detail
+                $this->billingRepository->insertDetail($request->TransactionCode,$request->TransactionDate,$request->UserCreate,
+                $request->NoMr,$request->NoEpisode,$request->NoRegistrasi,$key['ProductCode'],
+                $request->UnitTujuan,$request->GroupJaminan,$request->KodeJaminan,$key['ProductName'],
+                'Farmasi',$request->KodeKelas,$qtyretur,$hargaretur,$totalretur,
+                0,0,$totalretur,$totalretur,'','','','FARMASI');
+            }
+
+            //inser billing pdp
+            $dataBilling1 = $this->billingRepository->getBillingFo1($request);
+            foreach ($dataBilling1 as $dataBilling1) {
+                $this->billingRepository->insertDetailPdp($dataBilling1);
+            } 
+            //#END BILLING
 
             DB::commit();
             return $this->sendResponse([], 'Retur Jual berhasil di Simpan !');
@@ -244,6 +302,7 @@ class aReturJualService extends Controller
         try {
             // Db Transaction
             DB::beginTransaction();
+
 
             // validasi 
             // // cek ada gak datanya
@@ -300,10 +359,12 @@ class aReturJualService extends Controller
             // TRANSAKSI DISINI
             $dtlReturJual = $this->returJualRepository->getReturJualDetailbyIDandProductCode($request)->first();
             $Konversi_QtyTotal = $dtlReturJual->Konversi_Qty_Total;
+            $QtyReturJual = $dtlReturJual->QtyReturJual;
 
             $datasalesDetails = $this->aSalesRepository->getSalesDetailbyIDBarangFix($request->SalesCode,$request->ProductCode)->first();
             $QtyRemain = $datasalesDetails->QtySalesRemain; 
-            $this->aSalesRepository->updateQtRemainSalesDetail($request->TransactionCode,$request->ProductCode, $QtyRemain+$Konversi_QtyTotal);
+            $QtyRemainFinal = $QtyReturJual + $QtyRemain;
+            $this->aSalesRepository->updateQtRemainSalesDetail($request->SalesCode,$request->ProductCode, $QtyRemainFinal);
             
             $cekBuku = $this->aStok->cekBukuByTransactionandCodeProduct($request->ProductCode,$request,'TRJ');
                 foreach ($cekBuku as $data) {
@@ -311,9 +372,18 @@ class aReturJualService extends Controller
                 } 
                 $this->aStok->addBukuStokInVoidFromSelectMutasi($asd,'TRJ_V',$request,$Konversi_QtyTotal,$request->UnitCode);
                 $this->aStok->addDataStoksInVoidFromSelectMutasi($asd,'TRJ_V',$request,$Konversi_QtyTotal,$request->UnitCode);
+                
+            $this->returJualRepository->voidReturJualDetailbyItemAll($request,$request->ProductCode);
             
-            $sumReturjualdetil = $this->returJualRepository->getSumReturJualDetil($request->TransactionCode)->first(); 
+            //void billing
+            $this->billingRepository->voidBillingPasienOneByProductCode($request);
+            $this->billingRepository->voidBillingPasienTwoByProductCode($request);
+            //update billing header
+            $getDataSumBill1 = $this->billingRepository->getSumBillingFo1($request)->first();
+            $this->billingRepository->updateSumBillingHeader($request->TransactionCode,$getDataSumBill1);
 
+
+            $sumReturjualdetil = $this->returJualRepository->getSumReturJualDetil($request->TransactionCode)->first(); 
 
             $dtlReturJual = $this->returJualRepository->updateSumReturHeader($request->TransactionCode,$sumReturjualdetil->QtyReturJual,
                                                     $sumReturjualdetil->QtySales,$sumReturjualdetil->TotalRow,
@@ -390,6 +460,7 @@ class aReturJualService extends Controller
             $dtlReturjual = $this->returJualRepository->getReturJualDetailbyID($request->TransactionCode);
             foreach ($dtlReturjual as $key2) {
                 $Konversi_QtyTotal = $key2->Konversi_Qty_Total;
+                $QtyReturJual = $key2->QtyReturJual;
                 $cekBuku = $this->aStok->cekBukuByTransactionandCodeProduct($key2->ProductCode,$key2,'TRJ');
                 foreach ($cekBuku as $data) {
                     $asd = $data;
@@ -399,9 +470,18 @@ class aReturJualService extends Controller
                 
                 $datasalesDetails = $this->aSalesRepository->getSalesDetailbyIDBarangFix($request->SalesCode,$key2->ProductCode)->first();
                 $QtyRemain = $datasalesDetails->QtySalesRemain; 
-                $this->aSalesRepository->updateQtRemainSalesDetail($request->TransactionCode,$request->ProductCode, $QtyRemain+$Konversi_QtyTotal);
+                $QtyRemainFinal = $QtyReturJual + $QtyRemain;
+                $this->aSalesRepository->updateQtRemainSalesDetail($request->SalesCode,$key2->ProductCode, $QtyRemainFinal);
                 $this->returJualRepository->voidReturJualDetailbyItemAll($request,$key2->ProductCode);
             }
+
+            
+            
+            // void billing transaction
+            $this->billingRepository->voidBillingPasien($request);
+            $this->billingRepository->voidBillingPasienOne($request);
+            $this->billingRepository->voidBillingPasienTwo($request);
+            
             $this->returJualRepository->voidReturJual($request);
             DB::commit();
             return $this->sendResponse([], 'Retur Jual berhasil di Hapus !');
