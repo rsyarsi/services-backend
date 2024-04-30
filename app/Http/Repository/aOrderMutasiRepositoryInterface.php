@@ -5,7 +5,7 @@ namespace App\Http\Repository;
 interface aOrderMutasiRepositoryInterface
 {
     public function addOrderMutasi($request, $autoNumber);
-    public function addOrderMutasiDetail($request);
+    public function addOrderMutasiDetail($request,$Hpp);
     public function editOrderMutasi($request);
     public function voidOrderMutasi($request);
     public function voidOrderMutasiDetailbyItem($request);

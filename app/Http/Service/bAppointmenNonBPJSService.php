@@ -825,7 +825,10 @@ class bAppointmenNonBPJSService extends Controller {
                 }                                          
                 //  UPDATE DATANG RESERVASI
                 $this->appointmenRepository->updateDatangAppointment($kodebooking,$nofixReg); 
-
+                
+                // UPDATE TABEL ANTRIAN KODE REGISTRASI
+                $this->antrianRepository->updateNoregAntrianCheckin($kodebooking,$nofixReg);
+                
                 $response = array(
                     'NoEpisode' => $NoEpisode, // Set array status dengan success     
                     'NoRegistrasi' => $nofixReg, // Set array status dengan success     

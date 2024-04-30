@@ -18,7 +18,6 @@ use App\Http\Repository\aPurchaseOrderRepositoryImpl;
 use App\Http\Repository\bBillingRepositoryImpl;
 use App\Http\Repository\bVisitRepositoryImpl;
 
-
 class ConsumableController extends Controller
 {
     //a

@@ -11,6 +11,7 @@ use App\Http\Repository\aMasterUnitRepositoryImpl;
 use App\Http\Repository\aOrderMutasiRepositoryImpl; 
 use App\Http\Repository\aPurchaseRequisitionRepositoryImpl;
 use App\Http\Repository\aStokRepositoryImpl;
+use App\Http\Repository\aHnaRepositoryImpl;
 use App\Http\Repository\aSupplierRepositoryImpl;
 use Exception;
 use App\Traits\AutoNumberTrait;
@@ -26,6 +27,7 @@ class aOrderMutasiService extends Controller
     private $aStokRepository;
     private $aOrderMutasiRepository;
     private $aMasterUnitRepository;
+    private $ahnaRepository;
 
     public function __construct(
         aBarangRepositoryImpl $aBarangRepository,
@@ -33,7 +35,8 @@ class aOrderMutasiService extends Controller
         aPurchaseRequisitionRepositoryImpl $aPurchaseRequestRepository,
         aStokRepositoryImpl $aStokRepository,
         aOrderMutasiRepositoryImpl $aOrderMutasiRepository,
-        aMasterUnitRepositoryImpl $aMasterUnitRepository
+        aMasterUnitRepositoryImpl $aMasterUnitRepository,
+        aHnaRepositoryImpl $ahnaRepository
 
     ) {
         $this->aBarangRepository = $aBarangRepository;
@@ -42,6 +45,7 @@ class aOrderMutasiService extends Controller
         $this->aStokRepository = $aStokRepository;
         $this->aOrderMutasiRepository = $aOrderMutasiRepository;
         $this->aMasterUnitRepository = $aMasterUnitRepository;
+        $this->ahnaRepository = $ahnaRepository;
     }
     public function addOrderMutasi(Request $request)
     {
@@ -122,7 +126,11 @@ class aOrderMutasiService extends Controller
                 if ($this->aOrderMutasiRepository->getOrderMutasiApprovedbyID($request->TransactionCode)->count() > 0) {
                     return $this->sendError('Transaksi Order Mutasi sudah di Approve !', []);
                 }
-                $this->aOrderMutasiRepository->addOrderMutasiDetail($request);
+
+                    $getHppBarang = $this->ahnaRepository->getHppAveragebyCode($request->ProductCode)->first()->first();
+                    $xhpp = $getHppBarang->NominalHpp;
+                    $this->aOrderMutasiRepository->addOrderMutasiDetail($request, $xhpp);
+                
             DB::commit();
             return $this->sendResponse([], 'Order Mutasi Detail berhasil di tambahkan !');
         } catch (Exception $e) {

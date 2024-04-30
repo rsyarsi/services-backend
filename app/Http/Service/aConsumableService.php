@@ -174,6 +174,9 @@ class aConsumableService extends Controller
             // Db Transaction
             DB::beginTransaction();
 
+            $this->aJurnal->delJurnalHdr($request);
+            $this->aJurnal->delJurnalDtl($request);
+
             //insert billingnya jika memakai nomor registrasi
             if ($request->NoRegistrasi != ''){
                 $tipereg = substr($request->NoRegistrasi, 0, 2);
@@ -250,6 +253,27 @@ class aConsumableService extends Controller
                     'Farmasi',$request->KodeKelas,$key['Qty'],0,0,
                     0,0,0,0,'','','','FARMASI');
                 }
+
+                // INSERT JURNAL 
+                    $note = 'Persediaan Pemakaian Barang '. $key['ProductName'].' No. Pemakaian : ' . $request->TransactionCode . ' Qty : ' . $key['Qty'];
+                    $noteHpp = 'Hpp Persediaan Pemakaian Barang '. $key['ProductName'].' No. Pemakaian : ' . $request->TransactionCode . ' Qty : ' . $key['Qty'];
+                    $cekrek = $this->aJurnal->getRekeningPersediaaan($key['ProductCode']);  
+                  
+                    $this->aJurnal->addJurnalDetailKreditPersediaanGlobal(
+                        $note, $cekrek->first()->RekPersediaan,
+                        $request->TransactionCode,
+                        $key['Qty'],$xhpp,
+                        $key['ProductCode'],$key['ProductName'],$request->UnitTujuan
+                    );  
+
+                    $this->aJurnal->addJurnalDetailDebetHppGlobal(
+                        $noteHpp, $cekrek->first()->RekHpp,
+                        $request->TransactionCode,
+                        $key['Qty'],$xhpp,
+                        $key['ProductCode'],$key['ProductName'],$request->UnitTujuan
+                    ); 
+
+                // INSERT JURNAL
             }
 
             //insert billing pdp

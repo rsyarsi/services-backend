@@ -89,7 +89,10 @@ class aFakturRepositoryImpl implements aFakturRepositoryInterface
             'KET3' => '',
             'TGL_TEMPO' => $request->TglJatuhTempo,
             'TGL_FAKTUR' => $request->DateFakturPBF,
-            'NO_FAKTUR' => $request->NoFakturPBF
+            'NO_FAKTUR' => $request->NoFakturPBF,
+            'FS_TGL_VOID' => '1900-01-01',
+            'FS_KD_PETUGAS_VOID' => '',
+            'KD_ORDER' => '',
         ]);
     }
     public function VoidHutangHdr($request)

@@ -318,4 +318,52 @@ class aBarangRepositoryImpl implements aBarangRepositoryInterface
                 'NamaPrinterSharing' => $request->NamaPrinterSharing,
         ]);
     }
+
+    //Master Unit Farmasi
+    public function getIPUnitFarmasiAll()
+    {
+        return  DB::connection('sqlsrv')
+            ->table("MasterIPUnit")
+            ->select(
+            'ID',
+            'IPAddress',
+            'UnitCode'
+            )
+            ->get();
+    }
+    public function getIPUnitFarmasibyId($id)
+    {
+        return  DB::connection('sqlsrv')
+            ->table("MasterIPUnit")
+            ->select(
+                'ID',
+                'IPAddress',
+                'UnitCode'
+            )
+            ->where('ID', $id)
+            ->get();
+    }
+    public function addIPUnitFarmasi($request)
+    {
+        return  DB::connection('sqlsrv')->table("MasterIPUnit")->insert([
+                'IPAddress' => $request->IPAddress,
+                'UnitCode' => $request->UnitCode,
+        ]);
+    }
+
+    public function editIPUnitFarmasi($request)
+    {
+        return  DB::connection('sqlsrv')->table("MasterIPUnit")
+        ->where('ID', $request->ID)
+        ->update([
+                'IPAddress' => $request->IPAddress,
+                'UnitCode' => $request->UnitCode,
+        ]);
+    }
+    public function getIPUnitFarmasibyIP($request)
+    {
+        return  DB::connection('sqlsrv')->table("MasterIPUnit")
+            ->where('IPAddress', $request)
+            ->get();
+    }
 }

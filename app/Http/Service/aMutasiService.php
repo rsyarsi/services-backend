@@ -17,6 +17,7 @@ use App\Http\Repository\aSupplierRepositoryImpl;
 use App\Http\Repository\aMasterUnitRepositoryImpl;
 use App\Http\Repository\aOrderMutasiRepositoryImpl; 
 use App\Http\Repository\aPurchaseRequisitionRepositoryImpl;
+use App\Http\Repository\aJurnalRepositoryImpl;
 use App\Traits\FifoTrait;
 
 class aMutasiService extends Controller
@@ -31,7 +32,7 @@ class aMutasiService extends Controller
     private $aMasterUnitRepository;
     private $aMutasiRepository;
     private $ahnaRepository;
-
+    private $aJurnal;
 
     public function __construct(
         aBarangRepositoryImpl $aBarangRepository,
@@ -41,7 +42,8 @@ class aMutasiService extends Controller
         aOrderMutasiRepositoryImpl $aOrderMutasiRepository,
         aMasterUnitRepositoryImpl $aMasterUnitRepository,
         aMutasiRepositoryImpl $aMutasiRepository,
-        aHnaRepositoryImpl $ahnaRepository
+        aHnaRepositoryImpl $ahnaRepository,
+        aJurnalRepositoryImpl $aJurnal
     ) {
         $this->aBarangRepository = $aBarangRepository;
         $this->asupplierRepository = $asupplierRepository;
@@ -51,6 +53,7 @@ class aMutasiService extends Controller
         $this->aMasterUnitRepository = $aMasterUnitRepository;
         $this->aMutasiRepository = $aMutasiRepository;
         $this->ahnaRepository = $ahnaRepository;
+        $this->aJurnal = $aJurnal;
     }
     public function addMutasi(Request $request)
     {
@@ -172,6 +175,10 @@ class aMutasiService extends Controller
         try {
             // Db Transaction
             DB::beginTransaction(); 
+
+            $this->aJurnal->delJurnalHdr($request);
+            $this->aJurnal->delJurnalDtl($request);
+
             foreach ($request->Items as $key) {
                 $getdatadetilmutasi = $this->aMutasiRepository->getMutasiDetailbyIDBarang($request,$key);
                 $dataorderMutasidetail = $this->aOrderMutasiRepository->getOrderMutasiDetailbyIDBarangMutasi($request->TransactionOrderCode,$key['ProductCode'])->first();
@@ -224,6 +231,57 @@ class aMutasiService extends Controller
                     }  
                 }
                $this->aMutasiRepository->editMutasiDetailbyIdBarang($request,$key,$xhpp);
+
+                // jurnal
+                $note = 'Persediaan Mutasi Barang '. $key['ProductName'].' No. Pemakaian : ' . $request->TransactionCode . ' Konversi_QtyTotal : ' . $key['Konversi_QtyTotal'];
+                $noteHpp = 'Hpp Persediaan Mutasi Barang '. $key['ProductName'].' No. Pemakaian : ' . $request->TransactionCode . ' Konversi_QtyTotal : ' . $key['Konversi_QtyTotal'];
+                $cekrek = $this->aJurnal->getRekeningPersediaaan($key['ProductCode']);  
+
+                if ($request->JenisStok == "STOK") {
+
+                    $this->aJurnal->addJurnalDetailDebetPersediaanGlobal(
+                        $note, $cekrek->first()->RekPersediaan,
+                        $request->TransactionCode,
+                        $key['Konversi_QtyTotal'],$xhpp,
+                        $key['ProductCode'],$key['ProductName'],$request->UnitOrder
+                    );  
+
+                    $this->aJurnal->addJurnalDetailKreditPersediaanGlobal(
+                        $note, $cekrek->first()->RekPersediaan,
+                        $request->TransactionCode,
+                        $key['Konversi_QtyTotal'],$xhpp,
+                        $key['ProductCode'],$key['ProductName'],$request->UnitTujuan
+                    );  
+
+                }else{
+                    $this->aJurnal->addJurnalDetailDebetPersediaanGlobal(
+                        $note, $cekrek->first()->RekPersediaan,
+                        $request->TransactionCode,
+                        $key['Konversi_QtyTotal'],$xhpp,
+                        $key['ProductCode'],$key['ProductName'],$request->UnitOrder
+                    );  
+
+                    $this->aJurnal->addJurnalDetailKreditPersediaanGlobal(
+                        $note, $cekrek->first()->RekPersediaan,
+                        $request->TransactionCode,
+                        $key['Konversi_QtyTotal'],$xhpp,
+                        $key['ProductCode'],$key['ProductName'],$request->UnitTujuan
+                    );  
+                    $this->aJurnal->addJurnalDetailKreditPersediaanGlobal(
+                        $note, $cekrek->first()->RekPersediaan,
+                        $request->TransactionCode,
+                        $key['Konversi_QtyTotal'],$xhpp,
+                        $key['ProductCode'],$key['ProductName'],$request->UnitOrder
+                    );  
+
+                    $this->aJurnal->addJurnalDetailDebetHppGlobal(
+                        $note, $cekrek->first()->RekHpp,
+                        $request->TransactionCode,
+                        $key['Konversi_QtyTotal'],$noteHpp,
+                        $key['ProductCode'],$key['ProductName'],$request->UnitOrder
+                    ); 
+                }
+                // jurnal
             }
 
               // edit mutasi

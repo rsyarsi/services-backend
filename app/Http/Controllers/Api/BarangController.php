@@ -102,37 +102,81 @@ class BarangController extends Controller
     $addBarang =  $aBarangService->getBarangbyNameLike($request);
     return $addBarang;
   }
-  public function addPrinterLabel(Request $request)
-  {
-      $aBarangRepository = new aBarangRepositoryImpl();
-      $aSupplierRepository = new aSupplierRepositoryImpl();
-      $aBarangService = new aBarangService($aBarangRepository, $aSupplierRepository);
-      $addBarang =  $aBarangService->addPrinterLabel($request);
-      return $addBarang;
-  }
   
-  public function editPrinterLabel(Request $request)
-  {
-    $aBarangRepository = new aBarangRepositoryImpl();
-      $aSupplierRepository = new aSupplierRepositoryImpl();
-      $aBarangService = new aBarangService($aBarangRepository, $aSupplierRepository);
-      $addBarang =  $aBarangService->editPrinterLabel($request);
-      return $addBarang;
-  }
-  public function getPrinterLabelAll()
-  {
-    $aBarangRepository = new aBarangRepositoryImpl();
-      $aSupplierRepository = new aSupplierRepositoryImpl();
-      $aBarangService = new aBarangService($aBarangRepository, $aSupplierRepository);
-      $getAllBarang =  $aBarangService->getPrinterLabelAll();
-      return $getAllBarang;
-  }
-  public function getPrinterLabelbyId($id)
-  {
-    $aBarangRepository = new aBarangRepositoryImpl();
-      $aSupplierRepository = new aSupplierRepositoryImpl();
-      $aBarangService = new aBarangService($aBarangRepository, $aSupplierRepository);
-      $getAllBarang =  $aBarangService->getPrinterLabelbyId($id);
-      return $getAllBarang;
-  }
+  public function addPrinterLabel(Request $request)
+    {
+        $aBarangRepository = new aBarangRepositoryImpl();
+        $aSupplierRepository = new aSupplierRepositoryImpl();
+        $aBarangService = new aBarangService($aBarangRepository, $aSupplierRepository);
+        $addBarang =  $aBarangService->addPrinterLabel($request);
+        return $addBarang;
+    }
+    
+    public function editPrinterLabel(Request $request)
+    {
+      $aBarangRepository = new aBarangRepositoryImpl();
+        $aSupplierRepository = new aSupplierRepositoryImpl();
+        $aBarangService = new aBarangService($aBarangRepository, $aSupplierRepository);
+        $addBarang =  $aBarangService->editPrinterLabel($request);
+        return $addBarang;
+    }
+    public function getPrinterLabelAll()
+    {
+      $aBarangRepository = new aBarangRepositoryImpl();
+        $aSupplierRepository = new aSupplierRepositoryImpl();
+        $aBarangService = new aBarangService($aBarangRepository, $aSupplierRepository);
+        $getAllBarang =  $aBarangService->getPrinterLabelAll();
+        return $getAllBarang;
+    }
+    public function getPrinterLabelbyId($id)
+    {
+      $aBarangRepository = new aBarangRepositoryImpl();
+        $aSupplierRepository = new aSupplierRepositoryImpl();
+        $aBarangService = new aBarangService($aBarangRepository, $aSupplierRepository);
+        $getAllBarang =  $aBarangService->getPrinterLabelbyId($id);
+        return $getAllBarang;
+    }
+
+    //Unit Farmasi
+    public function addIPUnitFarmasi(Request $request)
+    {
+        $aBarangRepository = new aBarangRepositoryImpl();
+        $aSupplierRepository = new aSupplierRepositoryImpl();
+        $aBarangService = new aBarangService($aBarangRepository, $aSupplierRepository);
+        $addBarang =  $aBarangService->addIPUnitFarmasi($request);
+        return $addBarang;
+    }
+    
+    public function editIPUnitFarmasi(Request $request)
+    {
+      $aBarangRepository = new aBarangRepositoryImpl();
+        $aSupplierRepository = new aSupplierRepositoryImpl();
+        $aBarangService = new aBarangService($aBarangRepository, $aSupplierRepository);
+        $addBarang =  $aBarangService->editIPUnitFarmasi($request);
+        return $addBarang;
+    }
+    public function getIPUnitFarmasiAll()
+    {
+      $aBarangRepository = new aBarangRepositoryImpl();
+        $aSupplierRepository = new aSupplierRepositoryImpl();
+        $aBarangService = new aBarangService($aBarangRepository, $aSupplierRepository);
+        $getAllBarang =  $aBarangService->getIPUnitFarmasiAll();
+        return $getAllBarang;
+    }
+    public function getIPUnitFarmasibyId($id)
+    {
+      $aBarangRepository = new aBarangRepositoryImpl();
+        $aSupplierRepository = new aSupplierRepositoryImpl();
+        $aBarangService = new aBarangService($aBarangRepository, $aSupplierRepository);
+        $getAllBarang =  $aBarangService->getIPUnitFarmasibyId($id);
+        return $getAllBarang;
+    }
+    public function getIPUnitFarmasibyIP($ip)
+    {
+      $aBarangRepository = new aBarangRepositoryImpl();
+        $aSupplierRepository = new aSupplierRepositoryImpl();
+        $aBarangService = new aBarangService($aBarangRepository, $aSupplierRepository);
+        $getAllBarang =  $aBarangService->getIPUnitFarmasibyIP($ip);
+        return $getAllBarang;
+    }
 }

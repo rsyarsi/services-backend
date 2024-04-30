@@ -325,6 +325,7 @@ class aBarangService extends Controller
 
        
     }
+
     public function getPrinterLabelAll()
     {
         // validator 
@@ -341,7 +342,7 @@ class aBarangService extends Controller
     {
         // validator 
         $count = $this->aBarangRepository->getPrinterLabelbyId($id)->count();
-
+        
         if ($count > 0) {
             $data = $this->aBarangRepository->getPrinterLabelbyId($id);
             return $this->sendResponse($data, "Data Product ditemukan.");
@@ -398,4 +399,85 @@ class aBarangService extends Controller
             return $this->sendError('Data Not Found !', $e->getMessage());
         }
     } 
+
+    public function getIPUnitFarmasiAll()
+    {
+        // validator 
+        $count = $this->aBarangRepository->getIPUnitFarmasiAll()->count();
+        if ($count > 0) {
+            $data = $this->aBarangRepository->getIPUnitFarmasiAll();
+            return $this->sendResponse($data, "Data Barang ditemukan.");
+        } else {
+            return $this->sendError("Data Product Not Found.", [], 400);
+        }
+    }
+
+    public function getIPUnitFarmasibyId($id)
+    {
+        // validator 
+        $count = $this->aBarangRepository->getIPUnitFarmasibyId($id)->count();
+
+        if ($count > 0) {
+            $data = $this->aBarangRepository->getIPUnitFarmasibyId($id);
+            return $this->sendResponse($data, "Data Product ditemukan.");
+        } else {
+            return $this->sendError("Data Product Found.", [], 400);
+        }
+    }
+
+    public function addIPUnitFarmasi(Request $request)
+    {
+        $request->validate([
+            "IPAddress" => "required",
+            "UnitCode" => "required",
+        ]);
+        
+        try {
+            $cek = $this->aBarangRepository->getIPUnitFarmasibyIP($request->IPAddress)->count();
+            if ($cek > 0){
+                return $this->sendError('IP ini sudah pernah digunakan ! Edit IP ini untuk mengubahnya !', []);
+            }
+            $createBarang = $this->aBarangRepository->addIPUnitFarmasi($request);
+            return $this->sendResponse($createBarang, 'Data Berhasil Dibuat !');
+        } catch (Exception $e) { 
+            Log::info($e->getMessage());
+            return $this->sendError('Data Not Found !', $e->getMessage());
+        }
+    } 
+
+    public function editIPUnitFarmasi(Request $request)
+    {
+        $request->validate([
+            "ID" => "required",
+            "IPAddress" => "required",
+            "UnitCode" => "required",
+        ]);
+        
+        try {
+            // Db Transaction
+            $data = $this->aBarangRepository->getIPUnitFarmasibyId($request->ID);
+            // // cek ada gak datanya
+            if ($data->count() < 1) {
+                return $this->sendError('Data Not Found !', []);
+            }
+            $updateBarang = $this->aBarangRepository->editIPUnitFarmasi($request);
+            return $this->sendResponse($updateBarang, 'Data Berhasil Diperbarui !');
+        } catch (Exception $e) { 
+            Log::info($e->getMessage());
+            return $this->sendError('Data Not Found !', $e->getMessage());
+        }
+    } 
+
+    public function getIPUnitFarmasibyIP($ip)
+    {
+        // validator 
+        $count = $this->aBarangRepository->getIPUnitFarmasibyIP($ip)->count();
+
+        if ($count > 0) {
+            $data = $this->aBarangRepository->getIPUnitFarmasibyIP($ip);
+            return $this->sendResponse($data, "Data ditemukan.");
+        } else {
+            return $this->sendError("Data Not Found.", [], 400);
+        }
+    }
 }

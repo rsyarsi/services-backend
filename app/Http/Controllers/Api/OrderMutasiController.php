@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Repository\aBarangRepositoryImpl;
+use App\Http\Repository\aHnaRepositoryImpl;
 use App\Http\Repository\aMasterUnitRepositoryImpl;
 use App\Http\Repository\aOrderMutasiRepositoryImpl;
 use App\Http\Repository\aSupplierRepositoryImpl;
@@ -23,13 +24,15 @@ class OrderMutasiController extends Controller
         $aStokRepository = new aStokRepositoryImpl();
         $aOrderMutasiRepository = new aOrderMutasiRepositoryImpl();
         $aMasterUnitRepository = new aMasterUnitRepositoryImpl();
+        $aHnaRepository = new aHnaRepositoryImpl();
         $aOrderMutasiService = new aOrderMutasiService(
             $aBarangRepository,
             $asupplierRepository,
             $aPurchaseRequestRepository,
             $aStokRepository,
             $aOrderMutasiRepository,
-            $aMasterUnitRepository
+            $aMasterUnitRepository,
+            $aHnaRepository 
         );
         $execute =  $aOrderMutasiService->addOrderMutasi($request);
         return $execute;
@@ -42,13 +45,15 @@ class OrderMutasiController extends Controller
         $aStokRepository = new aStokRepositoryImpl();
         $aOrderMutasiRepository = new aOrderMutasiRepositoryImpl();
         $aMasterUnitRepository = new aMasterUnitRepositoryImpl();
+        $aHnaRepository = new aHnaRepositoryImpl();
         $aOrderMutasiService = new aOrderMutasiService(
             $aBarangRepository,
             $asupplierRepository,
             $aPurchaseRequestRepository,
             $aStokRepository,
             $aOrderMutasiRepository,
-            $aMasterUnitRepository
+            $aMasterUnitRepository,
+            $aHnaRepository 
         );
         $execute =  $aOrderMutasiService->addOrderMutasiDetail($request);
         return $execute;
@@ -61,13 +66,15 @@ class OrderMutasiController extends Controller
         $aStokRepository = new aStokRepositoryImpl();
         $aOrderMutasiRepository = new aOrderMutasiRepositoryImpl();
         $aMasterUnitRepository = new aMasterUnitRepositoryImpl();
+        $aHnaRepository = new aHnaRepositoryImpl();
         $aOrderMutasiService = new aOrderMutasiService(
             $aBarangRepository,
             $asupplierRepository,
             $aPurchaseRequestRepository,
             $aStokRepository,
             $aOrderMutasiRepository,
-            $aMasterUnitRepository
+            $aMasterUnitRepository,
+            $aHnaRepository 
         );
         $execute =  $aOrderMutasiService->editOrderMutasi($request);
         return $execute;
@@ -81,13 +88,15 @@ class OrderMutasiController extends Controller
         $aStokRepository = new aStokRepositoryImpl();
         $aOrderMutasiRepository = new aOrderMutasiRepositoryImpl();
         $aMasterUnitRepository = new aMasterUnitRepositoryImpl();
+        $aHnaRepository = new aHnaRepositoryImpl();
         $aOrderMutasiService = new aOrderMutasiService(
             $aBarangRepository,
             $asupplierRepository,
             $aPurchaseRequestRepository,
             $aStokRepository,
             $aOrderMutasiRepository,
-            $aMasterUnitRepository
+            $aMasterUnitRepository,
+            $aHnaRepository 
         );
         $execute =  $aOrderMutasiService->voidOrderMutasi($request);
         return $execute;
@@ -101,13 +110,15 @@ class OrderMutasiController extends Controller
         $aStokRepository = new aStokRepositoryImpl();
         $aOrderMutasiRepository = new aOrderMutasiRepositoryImpl();
         $aMasterUnitRepository = new aMasterUnitRepositoryImpl();
+        $aHnaRepository = new aHnaRepositoryImpl();
         $aOrderMutasiService = new aOrderMutasiService(
             $aBarangRepository,
             $asupplierRepository,
             $aPurchaseRequestRepository,
             $aStokRepository,
             $aOrderMutasiRepository,
-            $aMasterUnitRepository
+            $aMasterUnitRepository,
+            $aHnaRepository 
         );
         $execute =  $aOrderMutasiService->voidOrderMutasiDetailbyItem($request);
         return $execute;
@@ -120,13 +131,15 @@ class OrderMutasiController extends Controller
         $aStokRepository = new aStokRepositoryImpl();
         $aOrderMutasiRepository = new aOrderMutasiRepositoryImpl();
         $aMasterUnitRepository = new aMasterUnitRepositoryImpl();
+        $aHnaRepository = new aHnaRepositoryImpl();
         $aOrderMutasiService = new aOrderMutasiService(
             $aBarangRepository,
             $asupplierRepository,
             $aPurchaseRequestRepository,
             $aStokRepository,
             $aOrderMutasiRepository,
-            $aMasterUnitRepository
+            $aMasterUnitRepository,
+            $aHnaRepository 
         );
         $execute =  $aOrderMutasiService->getOrderMutasibyID($request);
         return $execute;
@@ -139,13 +152,15 @@ class OrderMutasiController extends Controller
         $aStokRepository = new aStokRepositoryImpl();
         $aOrderMutasiRepository = new aOrderMutasiRepositoryImpl();
         $aMasterUnitRepository = new aMasterUnitRepositoryImpl();
+        $aHnaRepository = new aHnaRepositoryImpl();
         $aOrderMutasiService = new aOrderMutasiService(
             $aBarangRepository,
             $asupplierRepository,
             $aPurchaseRequestRepository,
             $aStokRepository,
             $aOrderMutasiRepository,
-            $aMasterUnitRepository
+            $aMasterUnitRepository,
+            $aHnaRepository 
         );
         $execute =  $aOrderMutasiService->getOrderMutasiDetailbyID($request);
         return $execute;
@@ -158,13 +173,15 @@ class OrderMutasiController extends Controller
         $aStokRepository = new aStokRepositoryImpl();
         $aOrderMutasiRepository = new aOrderMutasiRepositoryImpl();
         $aMasterUnitRepository = new aMasterUnitRepositoryImpl();
+        $aHnaRepository = new aHnaRepositoryImpl();
         $aOrderMutasiService = new aOrderMutasiService(
             $aBarangRepository,
             $asupplierRepository,
             $aPurchaseRequestRepository,
             $aStokRepository,
             $aOrderMutasiRepository,
-            $aMasterUnitRepository
+            $aMasterUnitRepository,
+            $aHnaRepository 
         );
         $execute =  $aOrderMutasiService->getOrderMutasiDetailRemainbyID($request);
         return $execute;
@@ -177,13 +194,15 @@ class OrderMutasiController extends Controller
         $aStokRepository = new aStokRepositoryImpl();
         $aOrderMutasiRepository = new aOrderMutasiRepositoryImpl();
         $aMasterUnitRepository = new aMasterUnitRepositoryImpl();
+        $aHnaRepository = new aHnaRepositoryImpl();
         $aOrderMutasiService = new aOrderMutasiService(
             $aBarangRepository,
             $asupplierRepository,
             $aPurchaseRequestRepository,
             $aStokRepository,
             $aOrderMutasiRepository,
-            $aMasterUnitRepository
+            $aMasterUnitRepository,
+            $aHnaRepository 
         );
         $execute =  $aOrderMutasiService->getOrderMutasibyDateUser($request);
         return $execute;
@@ -196,13 +215,15 @@ class OrderMutasiController extends Controller
         $aStokRepository = new aStokRepositoryImpl();
         $aOrderMutasiRepository = new aOrderMutasiRepositoryImpl();
         $aMasterUnitRepository = new aMasterUnitRepositoryImpl();
+        $aHnaRepository = new aHnaRepositoryImpl();
         $aOrderMutasiService = new aOrderMutasiService(
             $aBarangRepository,
             $asupplierRepository,
             $aPurchaseRequestRepository,
             $aStokRepository,
             $aOrderMutasiRepository,
-            $aMasterUnitRepository
+            $aMasterUnitRepository,
+            $aHnaRepository 
         );
         $execute =  $aOrderMutasiService->getOrderMutasibyPeriode($request);
         return $execute;
@@ -215,13 +236,15 @@ class OrderMutasiController extends Controller
         $aStokRepository = new aStokRepositoryImpl();
         $aOrderMutasiRepository = new aOrderMutasiRepositoryImpl();
         $aMasterUnitRepository = new aMasterUnitRepositoryImpl();
+        $aHnaRepository = new aHnaRepositoryImpl();
         $aOrderMutasiService = new aOrderMutasiService(
             $aBarangRepository,
             $asupplierRepository,
             $aPurchaseRequestRepository,
             $aStokRepository,
             $aOrderMutasiRepository,
-            $aMasterUnitRepository
+            $aMasterUnitRepository,
+            $aHnaRepository 
         );
         $execute =  $aOrderMutasiService->approval($request);
         return $execute;

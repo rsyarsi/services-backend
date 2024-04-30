@@ -876,6 +876,11 @@ class bAppointmentService extends Controller {
                 // //  UPDATE DATANG RESERVASI
                 $this->appointmenRepository->updateDatangAppointment($kodebooking,$nofixReg); 
 
+
+                // UPDATE TABEL ANTRIAN KODE REGISTRASI
+                $this->antrianRepository->updateNoregAntrianCheckin($kodebooking,$nofixReg);
+
+
                 // INSERT KE DASHBAORD
 
                 

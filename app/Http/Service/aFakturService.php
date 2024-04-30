@@ -209,8 +209,8 @@ class aFakturService extends Controller
                 $this->aJurnal->addJurnalHeaderFaktur($request, $notes);
                 $this->aJurnal->addJurnalDetailKreditHutangFaktur($request, $rekeningHutang, $autonumberHtg);
                 $this->aJurnal->addJurnalDetailDebetHutangBarang($request, $rekHutangbarang->rekening, $autonumberHtg);
-                $this->aJurnal->addJurnalDetailDebetPPNMasukan($request, $rekPPN->rekening, $autonumberHtg);
-                $this->aJurnal->addJurnalDetailDebetDiskonDetil($request, $rekdiskondetil->rekening, $autonumberHtg);
+                //$this->aJurnal->addJurnalDetailDebetPPNMasukan($request, $rekPPN->rekening, $autonumberHtg);
+               // $this->aJurnal->addJurnalDetailDebetDiskonDetil($request, $rekdiskondetil->rekening, $autonumberHtg);
                 $this->aJurnal->addJurnalDetailDebetDiskonPembelianLain($request, $rekdiskonpembelianLain->rekening, $autonumberHtg);
                 $this->aJurnal->addJurnalDetailDebetBiayaPembelianLain($request, $rekbiayalain->rekening, $autonumberHtg);
             }else{
@@ -219,8 +219,8 @@ class aFakturService extends Controller
                 $this->aJurnal->addJurnalHeaderFaktur($request, $notes);
                 $this->aJurnal->addJurnalDetailKreditHutangFaktur($request, $rekeningHutang, $getHutang->first()->KD_HUTANG);
                 $this->aJurnal->addJurnalDetailDebetHutangBarang($request, $rekHutangbarang->rekening, $getHutang->first()->KD_HUTANG);
-                $this->aJurnal->addJurnalDetailDebetPPNMasukan($request, $rekPPN->rekening, $getHutang->first()->KD_HUTANG);
-                $this->aJurnal->addJurnalDetailDebetDiskonDetil($request, $rekdiskondetil->rekening, $getHutang->first()->KD_HUTANG);
+                //$this->aJurnal->addJurnalDetailDebetPPNMasukan($request, $rekPPN->rekening, $getHutang->first()->KD_HUTANG);
+                //$this->aJurnal->addJurnalDetailDebetDiskonDetil($request, $rekdiskondetil->rekening, $getHutang->first()->KD_HUTANG);
                 $this->aJurnal->addJurnalDetailDebetDiskonPembelianLain($request, $rekdiskonpembelianLain->rekening, $getHutang->first()->KD_HUTANG);
                 $this->aJurnal->addJurnalDetailDebetBiayaPembelianLain($request, $rekbiayalain->rekening, $getHutang->first()->KD_HUTANG);
             }
@@ -236,6 +236,60 @@ class aFakturService extends Controller
    
     public function voidFakturDetailbyItem(Request $request)
     {
+        // {
+        //     // validate 
+        //     $request->validate([
+        //         "TransactionCode" => "required",
+        //         "DateVoid" => "required",
+        //         "UserVoid" => "required",
+        //         "ReasonVoid" => "required",
+        //         "UnitCode" => "required",
+        //         "Void" => "required"
+        //     ]);
+    
+        //     try {
+        //         // Db Transaction
+        //         DB::beginTransaction();
+    
+        //         // // cek ada gak datanya
+        //         if ($this->aFakturRepository->getFakturbyID($request->TransactionCode)->count() < 1) {
+        //             return $this->sendError('Faktur Number Not Found !', []);
+        //         }
+
+        //         if ($this->aMasterUnitRepository->getUnitById($request->UnitCode)->count() < 1) {
+        //             return $this->sendError('Kode Unit tidak ditemukan !', []);
+        //         }
+    
+        //         // BARANG - cek kode barangnya ada ga
+        //         if ($this->aBarangRepository->getBarangbyId($request->ProductCode)->count() < 1) {
+        //             return $this->sendError('Kode Barang tidak ditemukan !', []);
+        //         } 
+    
+        //         // Load Data All Do Detil Untuk Di Looping 
+        //         //$dtlDo = $this->aFakturRepository->getFakturDetailbyID($request->TransactionCode);
+        //         $dtlDo= $this->aFakturRepository->getFakturDetailbyIDandProductCode->first();
+     
+        //         //foreach ($dtlDo as $key) {
+        //             $QtyFaktur = $dtlDo->QtyFaktur;
+        //             $valueStok = $this->aDeliveryOrder->getDeliveryOrderDetailByBarang($request->ProductCode, $request->DeliveryCode)->first();
+    
+        //             $QtyDeliveryRemain = $valueStok->QtyDeliveryRemain; 
+        //             $rollbackdo = $QtyDeliveryRemain + $QtyFaktur;
+        //             $this->aFakturRepository->editQtyDeliveryOrderRemain($request, $rollbackdo, $request->ProductCode);
+        //         //}   
+
+        //         $this->aJurnal->VoidJurnalDtl($request);
+        //         //$this->aFakturRepository->VoidHutangHdr($request);
+        //         $this->aFakturRepository->voidFakturDetailbyItem($request);
+    
+        //         DB::commit();
+        //         return $this->sendResponse([], 'Faktur Void Detail Successfully !');
+        //     } catch (Exception $e) {
+        //         DB::rollBack();
+        //         Log::info($e->getMessage());
+        //         return $this->sendError('Faktur Void Detail Failed !', $e->getMessage());
+        //     }
+        // }
 
     }
     public function voidFaktur(Request $request)

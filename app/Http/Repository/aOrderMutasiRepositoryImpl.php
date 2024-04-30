@@ -25,7 +25,7 @@ class aOrderMutasiRepositoryImpl implements aOrderMutasiRepositoryInterface
             'ReffDateTrs' => date("dmY", strtotime($request->TransactionDate))
         ]);
     }
-    public function addOrderMutasiDetail($request)
+    public function addOrderMutasiDetail($request,$Hpp)
     {
         return  DB::connection('sqlsrv')->table("OrderMutasiDetails")->insert([
             'TransactionCode' => $request->TransactionCode,
@@ -38,6 +38,7 @@ class aOrderMutasiRepositoryImpl implements aOrderMutasiRepositoryInterface
             'Satuan_Konversi' =>  $request->Satuan_Konversi,
             'KonversiQty' =>  $request->KonversiQty,
             'Konversi_QtyTotal' =>  $request->Konversi_QtyTotal,
+            'Hpp' =>  $Hpp,
             'DateAdd' => Carbon::now(),
             'UserAdd' =>  $request->UserAdd
         ]);

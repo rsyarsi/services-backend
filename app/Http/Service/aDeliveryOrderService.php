@@ -334,21 +334,49 @@ class aDeliveryOrderService extends Controller
             if ($rekHutangbarang->count() < 1) {
                 return $this->sendError('Rekening Hutang Barang Kosong, Silahkan Maping Dahulu !', []);
             } 
+            // cek rek diskon pembelian detil
+            $rekDiskonPembelian = $this->aJurnal->getRekBiayaPembelianlain();
+            if ($rekDiskonPembelian->count() < 1) {
+                return $this->sendError('Rekening Diskon Pembelian Kosong, Silahkan Maping Dahulu !', []);
+            } 
+
+            // cek rek ppn masukan
+            $rekPPNMasukan = $this->aJurnal->getRekPPNMasukan();
+            if ($rekPPNMasukan->count() < 1) {
+                return $this->sendError('Rekening PPN Masukan Kosong, Silahkan Maping Dahulu !', []);
+            } 
+
             if ($this->aDeliveryOrder->getDeliveryOrderbyID($request->TransactionCode)->count() < 1) {
                 return $this->sendError('No. Transaksi Delivery Order tidak ditemukan !', []);
             } 
            
+            $this->aJurnal->delJurnalHdr($request);
+            $this->aJurnal->delJurnalDtl($request);
+
             $cekDodetil = $this->aDeliveryOrder->getDeliveryOrderDetailbyID($request->TransactionCode);
             foreach ($cekDodetil as $valueDo) { 
-                $cekrek = $this->aJurnal->getRekeningPersediaaan($valueDo); 
+                $cekrek = $this->aJurnal->getRekeningPersediaaan($valueDo->ProductCode); 
                 if($cekrek->count() < 1) {
                     return $this->sendError('Rekening Persediaan Kosong, Silahkan Cek Master Kelompok dan Barang Anda !', []);
                 } 
-                $this->aJurnal->delJurnalHdr($request);
-                $this->aJurnal->delJurnalDtl($request);
-                $this->aJurnal->addJurnalDetailDebetPersediaan($valueDo, $cekrek->first()->RekPersediaan); 
+                 
             }
             
+            foreach ($cekDodetil as $valueDo) { 
+
+                $cekrek = $this->aJurnal->getRekeningPersediaaan($valueDo->ProductCode); 
+                $this->aJurnal->addJurnalDetailDebetPersediaan($valueDo, $cekrek->first()->RekPersediaan); 
+
+                if($valueDo->DiscountRpTTL > 0 ){
+                    $this->aJurnal->addJurnalDetailDiskonDetilDO($valueDo,$rekDiskonPembelian->first()->rekening );
+                }
+
+                if($valueDo->TaxRpTTL > 0 ){
+                    $this->aJurnal->addJurnalDetailDebetPPNMasukanDO($valueDo,$rekPPNMasukan->first()->rekening );
+                }
+                
+            }
+
             $this->aJurnal->addJurnalDetailKreditHutangBarang($request, $rekHutangbarang->first()->rekening);
             $notes = 'Pembelian Barang No. Penerimaan : ' . $request->TransactionCode;
             $this->aJurnal->addJurnalHeader($request, $notes);

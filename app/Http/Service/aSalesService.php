@@ -71,6 +71,7 @@ class aSalesService extends Controller
             //"NoRegistrasi" => "required", 
             "Group_Transaksi" => "required", 
             "Notes" => "required" ,
+            //"JenisPasien" => "required" ,
         ]);
 
         
@@ -83,6 +84,14 @@ class aSalesService extends Controller
             }
             if ($this->aMasterUnitRepository->getUnitById($request->UnitTujuan)->count() < 1) {
                 return $this->sendError('Unit Order Sales Not Found !', []);
+            }
+
+            if ($request->JenisPasien == 'Karyawan'){
+                if ($request->NIP_Karyawan == null || $request->NIP_Karyawan == ''){
+                    return $this->sendError('NIP Karyawan Kosong !', []);
+                }
+            }else{
+                $request['NIP_Karyawan'] = null;
             }
 
 

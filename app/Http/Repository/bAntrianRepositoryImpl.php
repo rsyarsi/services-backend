@@ -18,6 +18,7 @@ class bAntrianRepositoryImpl implements bAntrianRepositoryInterface
     {
         return  DB::connection('sqlsrv3')->table("AntrianPasien")->insert([
             'no_transaksi' => $nobokingreal, 
+            'no_transaksi_reff' => $nobokingreal, 
             'Doctor_1' => $IdDokter,
             'JamPraktek' => $NamaSesion, 
             'Antrian' => $idno_urutantrian, 
@@ -25,6 +26,13 @@ class bAntrianRepositoryImpl implements bAntrianRepositoryInterface
             'TglKunjungan' => $tglbookingfix, 
             'Company' => $Company
         ]);
+    }
+    public function updateNoregAntrianCheckin($nobokingreal,$noreg){
+        return DB::connection('sqlsrv3')->table('AntrianPasien')
+            ->where('no_transaksi', $nobokingreal)
+            ->update([
+            'no_transaksi_reff' => $noreg
+        ]); 
     }
     public function getAntrianPoliByDateDoctor($tglbookingfix,$NamaSesion,$IdDokter){
         return  DB::connection('sqlsrv3')->table("AntrianPasien")
