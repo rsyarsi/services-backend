@@ -247,6 +247,21 @@ return [
             'trust_server_certificate' => true,
         ],
         
+        'service_finance' => [
+
+            'driver' => 'sqlsrv',
+            'url' => env('DB_URL_SERVICE_FINANCE'),
+            'host' => env('DB_HOST_SERVICE_FINANCE', '127.0.0.1'),
+            'port' => env('DB_PORT_SERVICE_FINANCE', '1433'),
+            'database' => env('DB_DATABASE_SERVICE_FINANCE', 'forge'),
+            'username' => env('DB_USERNAME_SERVICE_FINANCE', 'forge'),
+            'password' => env('DB_PASSWORD_SERVICE_FINANCE', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'encrypt' => 'yes',
+            'trust_server_certificate' => true,
+        ],
+
     ],
 
     /*
